@@ -30,5 +30,5 @@ workflow:
     FIGURES: "../results/plots/"
   versioning:
     project_id: "EMB_ex03"
-    current_version: "v1.0-DEBUG"
+    current_version: "v2.0-DEBUG"
     researcher: "DK"

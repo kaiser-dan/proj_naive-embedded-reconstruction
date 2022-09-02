@@ -1,0 +1,34 @@
+network:
+  N: [500]
+  gamma: [2.0, 3.0]
+  kmin: [3]
+  prob: [0.0, 0.33, 0.67, 1.0]
+  sign: [-1, 1]
+  pfi: [0.33, 0.67, 0.95]
+  repetitions: [1]
+  largest_component: True
+
+embedding:
+  dimensions: 128
+  walk_length: 30
+  num_walks: 100
+  workers: 8
+  window: 10
+  min_count: 1
+  batch_words: 4
+
+workflow:
+  datafiles:
+    KEEP_EMBEDDINGS: True
+    TEMPLATE_DF: "{project_id}{current_version}_{researcher}_{date}.csv"
+    TEMPLATE_VECTORS: "{}/{}-vectors_N={}_gamma={}_kmin={}_prob={}_sign={}_pfi={}_repetition={}.mat"
+  pathing:  # must be relative to workflow scripts/notebooks
+    SRC: "../src/"
+    TMP: "../.tmp/"
+    RAW: "../results/raw/"
+    PROCESSED: "../results/processed/"
+    FIGURES: "../results/plots/"
+  versioning:
+    project_id: "EMB_ex02"
+    current_version: "v3.0"
+    researcher: "DK"

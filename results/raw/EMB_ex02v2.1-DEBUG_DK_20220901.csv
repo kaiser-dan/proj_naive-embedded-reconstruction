@@ -1,0 +1,2 @@
+,N,gamma,kmin,prob,sign,pfi,dimensions,walk_length,num_walks,workers,window,min_count,batch_words,repetition,largest_component,Accuracy,AUROC
+0,500,2.0,3,0.0,-1,0.7,128,30,100,8,10,1,4,1,True,0.5001591849729385,0.5105150275494938

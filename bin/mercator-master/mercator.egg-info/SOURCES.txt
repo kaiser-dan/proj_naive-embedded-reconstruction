@@ -1,0 +1,10 @@
+LICENSE
+README.md
+setup.py
+mercator.egg-info/PKG-INFO
+mercator.egg-info/SOURCES.txt
+mercator.egg-info/dependency_links.txt
+mercator.egg-info/not-zip-safe
+mercator.egg-info/requires.txt
+mercator.egg-info/top_level.txt
+src/python_bind.cpp

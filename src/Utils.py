@@ -188,3 +188,124 @@ def partial_information (G1, G2, frac):
 
 
     return rem_G1, rem_G2, Etest
+
+
+
+def LFR(n,t1,t2,mu,avg_k,max_k):
+    #function to generate LFR network as a networkx object and obtain community assignments
+    N,Mu,T1,T2,maxk,k=str(n),str(mu),str(t1),str(t2),str(max_k),str(avg_k)
+    s='../bin/LFR/benchmark -N '+N+' -mu '+Mu+ ' -maxk ' +maxk  + ' -k '+k  +' -t1 ' +T1+' -t2 ' +T2
+    os.system(s)
+
+    x=np.loadtxt('network.dat')
+    edges=[(int(x[i][0])-1,int(x[i][1])-1) for i in range(len(x))]
+    g=nx.Graph(edges)
+
+    x=np.loadtxt('community.dat')
+    coms={int(x[i][0])-1:int(x[i][1]) for i in range(len(x))}
+    #nx.set_node_attributes(g,coms,name='community')
+
+    return g, coms
+
+
+
+
+def lfr_multiplex (N, tau1, tau2, mu, average_degree, max_degree, min_community, prob_relabel):
+
+
+    #############################
+
+    H, comm = LFR(n=N, t1=tau1, t2=tau2, mu=mu, avg_k=average_degree, max_k = max_degree)
+    groups = {}
+    for n in comm:
+        c = comm[n]
+        if c not in groups:
+            groups[c] = []
+        groups[c].append(n)
+
+   #############################
+
+    sigma1 = {}
+    for n in comm:
+        sigma1[n] = comm[n]
+
+   #########
+
+
+    new_labels = {}
+    for C in groups:
+        tmp = groups[C].copy()
+        random.shuffle(tmp)
+        for i in range(0, len(groups[C])):
+            n = groups[C][i]
+            m = tmp[i]
+            new_labels[n] = m
+    ###########################################
+
+    tmp_sigma2 = {}
+    for n in sigma1:
+        m = new_labels[n]
+        tmp_sigma2[m] = sigma1[n]
+
+    ###########################################
+
+
+
+
+    G = {}
+    G[1] = H.copy()
+    G[2] = nx.Graph()
+    for n in G[1]:
+        G[2].add_node(n)
+    for e in G[1].edges():
+        n = new_labels[e[0]]
+        m = new_labels[e[1]]
+        G[2].add_edge(n, m)
+    ############################################
+
+
+
+
+
+
+    #############################################
+    ## break community correlation
+
+    list_nodes = list(G[2].nodes())
+    new_labels = {}
+    H = G[2].copy()
+    for n in G[2]:
+        new_labels[n] = n
+    for n in new_labels:
+        if random.random()<prob_relabel:
+            m = random.choice(list_nodes)
+            tmp = new_labels[n]
+            new_labels[n] = new_labels[m]
+            new_labels[m] = tmp
+
+    G[2] = nx.Graph()
+    for n in H:
+        m = new_labels[n]
+        G[2].add_node(m)
+    for e in H.edges():
+        n = new_labels[e[0]]
+        m = new_labels[e[1]]
+        G[2].add_edge(n, m)
+    ##############################################
+
+
+    sigma2 = {}
+    for n in tmp_sigma2:
+        m = new_labels[n]
+        sigma2[m] = tmp_sigma2[n]
+
+
+
+#     print(len(G[1].edges()))
+#     print(len(G[2].edges()))
+
+
+
+    return G, sigma1, sigma2, mu
+
+

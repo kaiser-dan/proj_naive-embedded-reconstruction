@@ -1,5 +1,5 @@
 network:
-  N: [100]
+  N: [1000]
   tau1: [2.1]
   tau2: [1.0]
   mu: [0.1]
@@ -12,7 +12,7 @@ experiment:
   params:
     repetitions: 1
     largest_component: True
-    distance: ["inverse", "negexp"]
+    distance: ["negexp"]
   embedding:
     dimensions: 128
     walk_length: 30

@@ -1,6 +1,6 @@
 network:
-  N: [500]
-  gamma: [2.0]
+  N: [10000]
+  gamma: [2.1]
   kmin: [3]
   prob: [0.0]
   sign: [-1]
@@ -20,8 +20,8 @@ embedding:
 workflow:
   datafiles:
     KEEP_EMBEDDINGS: True
-    TEMPLATE_DF: "{project_id}{current_version}_{researcher}_{date}.csv"
-    TEMPLATE_VECTORS: "{}/{}-vectors_N={}_gamma={}_kmin={}_prob={}_sign={}_pfi={}_repetition={}.mat"
+    TEMPLATE_DF: "{project_id}{current_version}_{researcher}_{date}"
+    TEMPLATE_VECTORS: "{}/{}-vectors_N={}_gamma={}_kmin={}_prob={}_sign={}_pfi={}_repetition={}"
   pathing:  # must be relative to workflow scripts/notebooks
     SRC: "../src/"
     TMP: "../.tmp/"
@@ -29,6 +29,6 @@ workflow:
     PROCESSED: "../results/processed/"
     FIGURES: "../results/plots/"
   versioning:
-    project_id: "EMB_ex02"
-    current_version: "v4.0-DEBUG"
+    project_id: "EMB_ex03"
+    current_version: "v2.1-DEBUG"
     researcher: "DK"

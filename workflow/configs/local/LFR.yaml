@@ -12,7 +12,7 @@ experiment:
   params:
     repetitions: 1
     largest_component: True
-    distance: ["negexp"]
+    distance: ["inverse", "negexp", "logistic"]
   embedding:
     dimensions: 128
     walk_length: 30
@@ -23,7 +23,7 @@ experiment:
     batch_words: 4
 
 workflow:
-  datafiles:
+  datafiles:  # templates should not include extensions
     KEEP_EMBEDDINGS: True
     KEEP_DATAFRAME: True
     TEMPLATE_DF: "{project_id}{current_version}_{researcher}_{date}"

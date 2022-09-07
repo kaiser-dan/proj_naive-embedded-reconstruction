@@ -35,6 +35,6 @@ workflow:
     PROCESSED: "../results/processed/"
     FIGURES: "../results/plots/"
   versioning:
-    project_id: "EMB_ex05"
-    current_version: "v1.5-DEBUG"
+    project_id: "EMB_ex04"
+    current_version: "v2.0-DEBUG"
     researcher: "DK"

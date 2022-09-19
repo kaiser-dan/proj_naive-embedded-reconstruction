@@ -1,2 +1,5 @@
 /.snakemake
 /.tmp
+
+notebooks/*.dat
+__pycache__/

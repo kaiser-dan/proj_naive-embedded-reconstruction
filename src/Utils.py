@@ -1,7 +1,10 @@
 # ============= SET-UP =================
 # --- Standard library ---
 import os  # for calling shell scripts
+import sys
+sys.path.append("../bin/LFR/")
 import random  # for random shufflings
+import subprocess
 
 # --- Scientific ---
 import numpy as np  # General computational tools
@@ -48,7 +51,10 @@ def LFR(n,t1,t2,mu,avg_k,max_k):
     #function to generate LFR network as a networkx object and obtain community assignments
     N,Mu,T1,T2,maxk,k=str(n),str(mu),str(t1),str(t2),str(max_k),str(avg_k)
     s='../bin/LFR/benchmark -N '+N+' -mu '+Mu+ ' -maxk ' +maxk  + ' -k '+k  +' -t1 ' +T1+' -t2 ' +T2
+
+    # ! Dangerous to use os.system
     os.system(s)
+    #subprocess.call(["../bin/LFR/bencmark", "-N", N, "-mu", Mu, "-maxk", maxk, "-k", k, "-t1", T1, "-t2", T2], shell=True)
 
     x=np.loadtxt('network.dat')
     edges=[(int(x[i][0])-1,int(x[i][1])-1) for i in range(len(x))]

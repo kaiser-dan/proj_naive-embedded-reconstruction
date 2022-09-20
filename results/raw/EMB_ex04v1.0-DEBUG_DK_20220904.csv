@@ -1,5 +1,0 @@
-,dimensions,walk_length,num_walks,workers,window,min_count,batch_words,largest_component,metric,N,tau1,tau2,mu,avg_k,min_community,prob,pfi,repetition,Accuracy,AUROC
-0,128,30,200,8,10,1,4,True,negexp,1000,2.1,1.0,0.1,5,1,1.0,0.05,0,0.5,0.5131188893866593
-1,128,30,200,8,10,1,4,True,negexp,1000,2.1,1.0,0.1,5,1,1.0,0.33,0,0.5002187226596675,0.5072154557889362
-2,128,30,200,8,10,1,4,True,negexp,1000,2.1,1.0,0.1,5,1,1.0,0.67,0,0.49936762225969644,0.5063221777966097
-3,128,30,200,8,10,1,4,True,negexp,1000,2.1,1.0,0.1,5,1,1.0,0.95,0,0.4978751957056587,0.5025819271105347

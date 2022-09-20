@@ -47,20 +47,32 @@ def generate_multiplex_configuration (N, gamma, kmin, kmax, prob, sign):
     return G
 
 # ~ Community model ~
+# * NOTE: I swapped out `os.system` for the safer, more controllable `subprocess.check_call`
+# * This also allows me to suppress that super annoying LFR generation logging to stdout
 def LFR(n,t1,t2,mu,avg_k,max_k):
     #function to generate LFR network as a networkx object and obtain community assignments
-    N,Mu,T1,T2,maxk,k=str(n),str(mu),str(t1),str(t2),str(max_k),str(avg_k)
-    s='../bin/LFR/benchmark -N '+N+' -mu '+Mu+ ' -maxk ' +maxk  + ' -k '+k  +' -t1 ' +T1+' -t2 ' +T2
 
-    # ! Dangerous to use os.system
-    os.system(s)
-    #subprocess.call(["../bin/LFR/bencmark", "-N", N, "-mu", Mu, "-maxk", maxk, "-k", k, "-t1", T1, "-t2", T2], shell=True)
+    # Call LFR generation, wait for completion, propogate bash exit codes
+    subprocess.call(
+        " ".join([
+            "../bin/LFR/benchmark",
+            "-N", f"{n}",
+            "-k", f"{avg_k}",
+            "-maxk", f"{max_k}",
+            "-t1", f"{t1}",
+            "-t2", f"{t2}",
+            "-mu", f"{mu}"
+        ]),
+        stdout=open(os.devnull, 'w'),
+        stderr=open("/tmp/LFR_log.log", "a"),
+        shell=True
+    )
 
-    x=np.loadtxt('network.dat')
+    x=np.loadtxt('../bin/LFR/network.dat')
     edges=[(int(x[i][0])-1,int(x[i][1])-1) for i in range(len(x))]
     g=nx.Graph(edges)
 
-    x=np.loadtxt('community.dat')
+    x=np.loadtxt('../bin/LFR/community.dat')
     coms={int(x[i][0])-1:int(x[i][1]) for i in range(len(x))}
     #nx.set_node_attributes(g,coms,name='community')
 

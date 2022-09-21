@@ -5,7 +5,7 @@ today = datetime.today
 DATE = today().strftime("%Y%m%d")
 
 # -- Config file --
-configfile: "config.yaml"  # Parameter config
+configfile: "configs/local/config.yaml"  # Parameter config
 
 # -- Network parameters --
 _network = config["network"]

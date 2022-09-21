@@ -27,7 +27,7 @@ workflow:
     KEEP_EMBEDDINGS: False
     KEEP_DATAFRAME: True
     TEMPLATE_DF: "{project_id}{current_version}_{researcher}_{date}"
-    TEMPLATE_VECTORS: "{tmp}/raw_N={N}_tau1={tau1}_tau2={tau2}_mu={mu}_avgk={avg_k}_prob={prob}_pfi={pfi}_repetition={repetition}_prob-model_{distance}.mat"
+    TEMPLATE_VECTORS: "{tmp}/record_N={N}_tau1={tau1}_tau2={tau2}_mu={mu}_avgk={avg_k}_prob={prob}_pfi={pfi}_repetition={repetition}_prob-model_{distance}.mat"
   pathing:  # must be relative to workflow scripts/notebooks
     SCRIPTS: "scripts/"
     TMP: "/tmp/EmbeddedNaive/"
@@ -36,5 +36,5 @@ workflow:
     FIGURES: "../results/plots/"
   versioning:
     project_id: "EMB_ex04"
-    current_version: "v4.2"
+    current_version: "v4.1"
     researcher: "DK"

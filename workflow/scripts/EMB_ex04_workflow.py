@@ -215,8 +215,8 @@ if __name__ == "__main__":
 
     # Save embedding to disk (if applicable)
     if snakemake.params["save_embeddings"]:
-        R_G_embedding.save_word2vec_format(snakemake.params["template_vector"].replace("raw", "embedding_original"))
-        R_H_embedding.save_word2vec_format(snakemake.params["template_vector"].replace("raw", "embedding_shuffled"))
+        R_G_embedding.save_word2vec_format(snakemake.params["template_vector"].replace("record", "embedding_original"))
+        R_H_embedding.save_word2vec_format(snakemake.params["template_vector"].replace("record", "embedding_shuffled"))
 
     # Save record to disk
     with open(snakemake.output[0], "wb") as _fh:

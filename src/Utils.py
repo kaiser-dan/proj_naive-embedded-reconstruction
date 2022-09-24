@@ -55,7 +55,7 @@ def LFR(n,t1,t2,mu,avg_k,max_k):
     # Call LFR generation, wait for completion, propogate bash exit codes
     subprocess.call(
         " ".join([
-            "../bin/LFR/benchmark",
+            "../bin/LFR/benchmark.sh",
             "-N", f"{n}",
             "-k", f"{avg_k}",
             "-maxk", f"{max_k}",

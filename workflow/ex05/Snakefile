@@ -1,0 +1,109 @@
+#snakemake --dag | dot -Tsvg > dag.svg
+# ======== WORKFLOW CONFIG =========
+from datetime import datetime
+today = datetime.today
+DATE = today().strftime("%Y%m%d")
+
+# -- Config file --
+configfile: "configs/local/config.yaml"  # Parameter config
+
+# -- Network parameters --
+_network = config["network"]
+N = _network["N"]
+T1, T2 = _network["tau1"], _network["tau2"]
+AVG_K = _network["avg_k"]
+MIN_COMMUNITY, MU = _network["min_community"], _network["mu"]
+PROB = _network["prob"]
+PFI = _network["pfi"]
+
+# -- Experiment parameters --
+# - Statistical configurations -
+_params = config["experiment"]["params"]
+
+# - Embedding Hyperparameters -
+_embeddings = config["experiment"]["embedding"]
+
+# -- Workflow parameters --
+# - Pathing -
+_path = config["workflow"]["pathing"]
+SCRIPTS = _path["SCRIPTS"]  # Project workflow code
+TMP = _path["TMP"]  # Temporary generated file storage
+RAW = _path["RAW"]  # Experiment results
+PROCESSED = _path["PROCESSED"]  # Post-processed experiment results
+FIGURES = _path["FIGURES"]  # Data visualization
+
+# - Datafiles -
+_path = config["workflow"]["datafiles"]
+KEEP_EMBEDDINGS = _path["KEEP_EMBEDDINGS"]  # Flag on saving embeddings to file
+TEMPLATE_VECTORS = _path["TEMPLATE_VECTORS"]  # Embedding coordinates naming template
+KEEP_DATAFRAME = _path["KEEP_DATAFRAME"]  # Flag on saving dataframe to file
+TEMPLATE_DF = _path["TEMPLATE_DF"]  # Dataframe naming template
+
+# - Versioning -
+_version = config["workflow"]["versioning"]
+PROJ_ID = _version["project_id"]
+VERSION = _version["current_version"]
+RESEARCHER = _version["researcher"]
+# =========== WORKFLOW ===========
+# ----- All rule ----
+rule all:
+    input:
+        expand(
+            "{tmp}" +
+                "raw"+
+                "_N={N}"+
+                "_tau1={tau1}"+
+                "_tau2={tau2}"+
+                "_min-community={min_community}"+
+                "_mu={mu}"+
+                "_avgk={avg_k}"+
+                "_prob={prob}"+
+                "_pfi={pfi}"+
+                "_prob-model={distance}"+
+                "_repetition={repetition}.pkl",
+            # Pathing params
+            tmp = TMP,
+            # Network params
+            N = N,
+            tau1 = T1,
+            tau2 = T2,
+            avg_k = AVG_K,
+            min_community = MIN_COMMUNITY,
+            mu = MU,
+            prob = PROB,
+            pfi = PFI,
+            # Experiment params
+            distance = _params["distance"],
+            repetition = _params["repetitions"]
+        )
+    output:
+    # {project_id}{current_version}_{researcher}_{date}
+        RAW + TEMPLATE_DF.format(project_id=PROJ_ID, current_version=VERSION, researcher=RESEARCHER, date=DATE) + ".csv"
+    shell:
+        "touch {output}"
+
+
+# ----- Computation rules -----
+rule embedded_reconstruction:
+    output:
+        "{tmp}" +
+            "raw"+
+            "_N={N}"+
+            "_tau1={tau1}"+
+            "_tau2={tau2}"+
+            "_min-community={min_community}"+
+            "_mu={mu}"+
+            "_avgk={avg_k}"+
+            "_prob={prob}"+
+            "_pfi={pfi}"+
+            "_prob-model={distance}"+
+            "_repetition={repetition}.pkl"
+    params:
+        # General config parameters
+        config_embedding = _embeddings,
+        largest_component = _params["largest_component"],  # not in sweep
+        # Pathing parameters
+        save_embeddings = KEEP_EMBEDDINGS,
+        template_vectors = TEMPLATE_VECTORS,
+    script:
+        SCRIPTS + "EMB_ex04_workflow.py"

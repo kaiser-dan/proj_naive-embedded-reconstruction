@@ -164,11 +164,9 @@ cython_debug/
 # Snakemake
 .snakemake
 
-# LFR files
-network.dat
-community.dat
-statistics.dat
-time_seed.dat
+# Data files
+data/
+*.dat
 
 # Cached modules
 *.pyc

@@ -1,18 +1,18 @@
 network:
-  N: [500]
+  N: [10000]
   tau1: [2.1]
   tau2: [1.0]
-  mu: [0.1, 0.3, 0.75]
+  mu: [0.1, 0.2, 0.3, 0.4, 0.5]
   avg_k: [5]
-  min_community: [10]
+  min_community: [5]
   prob: [1.0]
   pfi: [0.00, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95]
 
 experiment:
   params:
-    repetitions: [1,2,3]
+    repetitions: 100
     largest_component: True
-    distance: ["inverse"]
+    distance: ["inverse", "negexp"]
   embedding:
     dimensions: 128
     walk_length: 30
@@ -27,14 +27,13 @@ workflow:
     KEEP_EMBEDDINGS: False
     KEEP_DATAFRAME: True
     TEMPLATE_DF: "{project_id}{current_version}_{researcher}_{date}"
-    TEMPLATE_VECTORS: "{tmp}/raw_N={N}_tau1={tau1}_tau2={tau2}_mu={mu}_avgk={avg_k}_prob={prob}_pfi={pfi}_repetition={repetition}_prob-model_{distance}.mat"
+
   pathing:  # must be relative to workflow scripts/notebooks
-    SCRIPTS: "scripts/"
     TMP: "/tmp/EmbeddedNaive/"
-    RAW: "../results/raw/"
-    PROCESSED: "../results/processed/"
-    FIGURES: "../results/plots/"
+    RAW: "../../results/raw/"
+    PROCESSED: "../../results/processed/"
+    FIGURES: "../../results/plots/"
   versioning:
     project_id: "EMB_ex04"
-    current_version: "v4.2"
+    current_version: "v5.0"
     researcher: "DK"

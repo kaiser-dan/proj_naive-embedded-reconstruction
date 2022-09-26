@@ -54,7 +54,7 @@ def LFR(n,t1,t2,mu,avg_k,max_k):
     # Call LFR generation, wait for completion, propogate bash exit codes
     subprocess.call(
         " ".join([
-            "../../bin/LFR/benchmark.sh",
+            "../bin/LFR/benchmark.sh",
             "-N", f"{n}",
             "-k", f"{avg_k}",
             "-maxk", f"{max_k}",
@@ -67,11 +67,11 @@ def LFR(n,t1,t2,mu,avg_k,max_k):
         shell=True
     )
 
-    x=np.loadtxt('../../bin/LFR/network.dat')
+    x=np.loadtxt('../bin/LFR/network.dat')
     edges=[(int(x[i][0])-1,int(x[i][1])-1) for i in range(len(x))]
     g=nx.Graph(edges)
 
-    x=np.loadtxt('../../bin/LFR/community.dat')
+    x=np.loadtxt('../bin/LFR/community.dat')
     coms={int(x[i][0])-1:int(x[i][1]) for i in range(len(x))}
     #nx.set_node_attributes(g,coms,name='community')
 

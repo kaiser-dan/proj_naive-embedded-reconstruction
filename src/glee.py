@@ -14,7 +14,7 @@ import networkx as nx
 
 def laplacian_degrees(graph):
     """Return the Laplacian matrix and the diagonal degree matrix."""
-    adj = nx.to_scipy_sparse_matrix(graph, format='csr')
+    adj = nx.to_scipy_sparse_matrix(graph, format='csr', nodelist=sorted(graph.nodes()))
     degs = sparse.diags(adj.sum(axis=1).flatten(), [0], adj.shape, format='csr')
     return degs - adj, degs
 

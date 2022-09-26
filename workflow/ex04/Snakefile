@@ -2,7 +2,7 @@ from datetime import datetime  # Versioning help
 
 # ======== WORKFLOW CONFIG =========
 # -- Config file --
-configfile: "config_1.yaml"  # Parameter config
+configfile: "config.yaml"  # Parameter config
 
 # -- Workflow parameters --
 # - Pathing -

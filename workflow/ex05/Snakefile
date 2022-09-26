@@ -1,109 +1,110 @@
-#snakemake --dag | dot -Tsvg > dag.svg
+from datetime import datetime  # Versioning help
+
 # ======== WORKFLOW CONFIG =========
-from datetime import datetime
-today = datetime.today
-DATE = today().strftime("%Y%m%d")
-
 # -- Config file --
-configfile: "configs/local/config.yaml"  # Parameter config
-
-# -- Network parameters --
-_network = config["network"]
-N = _network["N"]
-T1, T2 = _network["tau1"], _network["tau2"]
-AVG_K = _network["avg_k"]
-MIN_COMMUNITY, MU = _network["min_community"], _network["mu"]
-PROB = _network["prob"]
-PFI = _network["pfi"]
-
-# -- Experiment parameters --
-# - Statistical configurations -
-_params = config["experiment"]["params"]
-
-# - Embedding Hyperparameters -
-_embeddings = config["experiment"]["embedding"]
+configfile: "test.yaml"  # Parameter config
 
 # -- Workflow parameters --
 # - Pathing -
 _path = config["workflow"]["pathing"]
-SCRIPTS = _path["SCRIPTS"]  # Project workflow code
-TMP = _path["TMP"]  # Temporary generated file storage
-RAW = _path["RAW"]  # Experiment results
-PROCESSED = _path["PROCESSED"]  # Post-processed experiment results
-FIGURES = _path["FIGURES"]  # Data visualization
+
+data_raw_ = _path["raw_data"]  # Network data
+data_preprocessed_ = _path["preprocessed_data"]  # Observed data
+temp_ = _path["temp"]  # Temporary generated file storage
+
+raw_ = _path["raw"]  # Experiment results
+processed_ = _path["processed"]  # Post-processed experiment results
+figures_ = _path["figures"]  # Data visualization
+reports_ = _path["reports"]  # Auto-generated reports
+
+scripts_ = _path["scripts"]  # Project workflow code
 
 # - Datafiles -
-_path = config["workflow"]["datafiles"]
-KEEP_EMBEDDINGS = _path["KEEP_EMBEDDINGS"]  # Flag on saving embeddings to file
-TEMPLATE_VECTORS = _path["TEMPLATE_VECTORS"]  # Embedding coordinates naming template
-KEEP_DATAFRAME = _path["KEEP_DATAFRAME"]  # Flag on saving dataframe to file
-TEMPLATE_DF = _path["TEMPLATE_DF"]  # Dataframe naming template
+_path = config["workflow"]["datafiles"]["output"]
+vectors_ = _path["vectors"]  # Embedding coordinates naming template
+df_ = _path["df"]  # Dataframe naming template
 
 # - Versioning -
 _version = config["workflow"]["versioning"]
-PROJ_ID = _version["project_id"]
-VERSION = _version["current_version"]
-RESEARCHER = _version["researcher"]
+project_id_ = _version["project_id"]
+current_version_ = _version["current_version"]
+researcher_ = _version["researcher"]
+date_ = datetime.today().strftime("%Y%m%d")
 # =========== WORKFLOW ===========
 # ----- All rule ----
 rule all:
     input:
+        f"{processed_}dataframe_{project_id_}{current_version_}_{researcher_}_{date_}.parquet",
+        f"{reports_}workflow-dag_{project_id_}{current_version_}_{researcher_}_{date_}.svg"
+
+# ----- Analysis rules -----
+rule aggregate_dataframe:
+    input:
         expand(
-            "{tmp}" +
-                "raw"+
-                "_N={N}"+
-                "_tau1={tau1}"+
-                "_tau2={tau2}"+
-                "_min-community={min_community}"+
-                "_mu={mu}"+
-                "_avgk={avg_k}"+
-                "_prob={prob}"+
-                "_pfi={pfi}"+
-                "_prob-model={distance}"+
-                "_repetition={repetition}.pkl",
-            # Pathing params
-            tmp = TMP,
-            # Network params
-            N = N,
-            tau1 = T1,
-            tau2 = T2,
-            avg_k = AVG_K,
-            min_community = MIN_COMMUNITY,
-            mu = MU,
-            prob = PROB,
-            pfi = PFI,
-            # Experiment params
-            distance = _params["distance"],
-            repetition = _params["repetitions"]
+            raw_ + "record_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}_metric={metric}.pkl",
+            N=10_000,
+            avgk=5,
+            mu=config["network"]["mu"],
+            gamma=config["network"]["gamma"],
+            tau=1.0,
+            rep=range(config["experiment"]["params"]["repetitions"]),
+            pfi=config["experiment"]["params"]["pfi"],
+            metric=config["experiment"]["params"]["metrics"]
         )
     output:
-    # {project_id}{current_version}_{researcher}_{date}
-        RAW + TEMPLATE_DF.format(project_id=PROJ_ID, current_version=VERSION, researcher=RESEARCHER, date=DATE) + ".csv"
-    shell:
-        "touch {output}"
+        f"{processed_}dataframe_{project_id_}{current_version_}_{researcher_}_{date_}.parquet"
+    script:
+        scripts_ + "get_aggregate_dataframe.py"
 
+rule measure_performance:
+    input:
+        raw_ + "reconstruction_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}_metric={metric}.pkl"
+    output:
+        temp(raw_ + "record_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}_metric={metric}.pkl")
+    script:
+        scripts_ + "get_performance.py"
+
+# rule generate_plots:
+
+rule generate_dag:
+    output:
+        f"{reports_}workflow-dag_{project_id_}{current_version_}_{researcher_}_{date_}.svg"
+    shell:
+        "snakemake --dag | dot -Tsvg > {output}"
 
 # ----- Computation rules -----
-rule embedded_reconstruction:
+# Input - Pickled duplex
+# Output - Pickled hashmap of duplex, subtensor, and test set
+rule observe_subtensor:
+    input:
+        data_raw_ + "LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}.pkl"
     output:
-        "{tmp}" +
-            "raw"+
-            "_N={N}"+
-            "_tau1={tau1}"+
-            "_tau2={tau2}"+
-            "_min-community={min_community}"+
-            "_mu={mu}"+
-            "_avgk={avg_k}"+
-            "_prob={prob}"+
-            "_pfi={pfi}"+
-            "_prob-model={distance}"+
-            "_repetition={repetition}.pkl"
+        temp(data_preprocessed_ + "observed_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}.pkl")
     params:
-        # General config parameters
-        config_embedding = _embeddings,
-        largest_component = _params["largest_component"],  # not in sweep
-        # Pathing parameters
-        save_embeddings = KEEP_EMBEDDINGS,
-        template_vectors = TEMPLATE_VECTORS,
+        pfi = "{pfi}",
+        largest_component = config["experiment"]["params"]["largest_component"]
     script:
-        SCRIPTS + "EMB_ex04_workflow.py"
+        scripts_ + "get_subtensor.py"
+
+# Input - Pickled hashmap of duplex, subtensor, and test set
+# Output - Compressed matrix
+rule node2vec:
+    input:
+        data_preprocessed_ + "observed_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}.pkl"
+    output:
+        temp(raw_ + "embeddings_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}.pkl")
+    params:
+        hyperparams = config["experiment"]["hyperparams"]["embedding"]
+    script:
+        scripts_ + "get_embeddings.py"
+
+# Input - Pickled hashmap of duplex, subtensor, and test set; compressed matrix
+# Output - Reconstruction df
+rule reconstruct_tensor:
+    input:
+        data_preprocessed_ + "observed_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}.pkl",
+        raw_ + "embeddings_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}.pkl"
+    output:
+        temp(raw_ + "reconstruction_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}_metric={metric}.pkl")
+    script:
+        scripts_ + "get_reconstruction.py"

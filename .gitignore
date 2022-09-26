@@ -167,6 +167,7 @@ cython_debug/
 # Data files
 data/
 *.dat
+results/raw/
 
 # Cached modules
 *.pyc

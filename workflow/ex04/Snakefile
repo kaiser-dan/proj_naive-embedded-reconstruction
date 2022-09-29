@@ -43,7 +43,7 @@ rule aggregate_dataframe:
         expand(
             raw_ + "record_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}_metric={metric}.pkl",
             N=10_000,
-            avgk=5,
+            avgk=20,
             mu=config["network"]["mu"],
             gamma=config["network"]["gamma"],
             tau=1.0,

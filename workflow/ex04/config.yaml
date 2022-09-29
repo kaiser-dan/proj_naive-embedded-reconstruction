@@ -7,15 +7,15 @@ experiment:
   params:
     pfi: [0.00, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95]
     metrics: ["inverse", "negexp"]
-    largest_component: True
-    repetitions: 10
+    largest_component: False
+    repetitions: 5
 
   hyperparams:
     embedding:
       dimensions: 128
       walk_length: 30
       num_walks: 100
-      workers: 8
+      workers: 4
       window: 10
       min_count: 1
       batch_words: 4
@@ -35,7 +35,7 @@ workflow:
 
   # Paths must be relative to Snakefile
   pathing:
-    raw_data: "../../data/input/raw/"
+    raw_data: "../../data/input/preprocessed/synthetic/"
     preprocessed_data: "../../data/input/preprocessed/"
     temp: "../.tmp/"
 
@@ -48,5 +48,5 @@ workflow:
 
   versioning:
     project_id: "EMB_ex04"
-    current_version: "v5.1-mu"
+    current_version: "v6.0-mu"
     researcher: "DK"

@@ -1,0 +1,110 @@
+from datetime import datetime  # Versioning help
+
+# ======== WORKFLOW CONFIG =========
+# -- Config file --
+configfile: "config.yaml"  # Parameter config
+
+# -- Workflow parameters --
+# - Pathing -
+_path = config["workflow"]["pathing"]
+
+data_raw_ = _path["raw_data"]  # Network data
+data_preprocessed_ = _path["preprocessed_data"]  # Observed data
+temp_ = _path["temp"]  # Temporary generated file storage
+
+raw_ = _path["raw"]  # Experiment results
+processed_ = _path["processed"]  # Post-processed experiment results
+figures_ = _path["figures"]  # Data visualization
+reports_ = _path["reports"]  # Auto-generated reports
+
+scripts_ = _path["scripts"]  # Project workflow code
+
+# - Datafiles -
+_path = config["workflow"]["datafiles"]["output"]
+vectors_ = _path["vectors"]  # Embedding coordinates naming template
+df_ = _path["df"]  # Dataframe naming template
+
+# - Versioning -
+_version = config["workflow"]["versioning"]
+project_id_ = _version["project_id"]
+current_version_ = _version["current_version"]
+researcher_ = _version["researcher"]
+date_ = datetime.today().strftime("%Y%m%d")
+# =========== WORKFLOW ===========
+# ----- All rule ----
+rule all:
+    input:
+        f"{processed_}dataframe_{project_id_}{current_version_}_{researcher_}_{date_}.parquet",
+        f"{reports_}workflow-dag_{project_id_}{current_version_}_{researcher_}_{date_}.svg"
+
+# ----- Analysis rules -----
+rule aggregate_dataframe:
+    input:
+        expand(
+            raw_ + "record_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}_metric={metric}.pkl",
+            N=10_000,
+            avgk=5,
+            mu=config["network"]["mu"],
+            gamma=config["network"]["gamma"],
+            tau=1.0,
+            rep=range(config["experiment"]["params"]["repetitions"]),
+            pfi=config["experiment"]["params"]["pfi"],
+            metric=config["experiment"]["params"]["metrics"]
+        )
+    output:
+        f"{processed_}dataframe_{project_id_}{current_version_}_{researcher_}_{date_}.parquet"
+    script:
+        scripts_ + "get_aggregate_dataframe.py"
+
+rule measure_performance:
+    input:
+        raw_ + "reconstruction_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}_metric={metric}.pkl"
+    output:
+        temp(raw_ + "record_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}_metric={metric}.pkl")
+    script:
+        scripts_ + "get_performance.py"
+
+# rule generate_plots:
+
+rule generate_dag:
+    output:
+        f"{reports_}workflow-dag_{project_id_}{current_version_}_{researcher_}_{date_}.svg"
+    shell:
+        "snakemake --dag | dot -Tsvg > {output}"
+
+# ----- Computation rules -----
+# Input - Pickled duplex
+# Output - Pickled hashmap of duplex, subtensor, and test set
+rule observe_subtensor:
+    input:
+        data_raw_ + "LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}.pkl"
+    output:
+        temp(data_preprocessed_ + "observed_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}.pkl")
+    params:
+        pfi = "{pfi}",
+        largest_component = config["experiment"]["params"]["largest_component"]
+    script:
+        scripts_ + "get_subtensor.py"
+
+# Input - Pickled hashmap of duplex, subtensor, and test set
+# Output - Compressed matrix
+rule node2vec:
+    input:
+        data_preprocessed_ + "observed_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}.pkl"
+    output:
+        temp(raw_ + "embeddings_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}.pkl")
+    params:
+        hyperparams = config["experiment"]["hyperparams"]["embedding"]
+    script:
+        scripts_ + "get_embeddings.py"
+
+# Input - Pickled hashmap of duplex, subtensor, and test set; compressed matrix
+# Output - Reconstruction df
+rule reconstruct_tensor:
+    input:
+        data_preprocessed_ + "observed_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}.pkl",
+        raw_ + "embeddings_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}.pkl"
+    output:
+        temp(raw_ + "reconstruction_LFR_N={N}_avgk={avgk}_mu={mu}_gamma={gamma}_tau={tau}_rep={rep}_pfi={pfi}_metric={metric}.pkl")
+    script:
+        scripts_ + "get_reconstruction.py"

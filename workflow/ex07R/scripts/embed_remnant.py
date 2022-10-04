@@ -3,7 +3,6 @@
 import os  # for calling shell scripts
 import sys
 import pickle
-import snakemake
 
 # --- Scientific ---
 import numpy as np  # General computational tools

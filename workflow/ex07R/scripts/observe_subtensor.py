@@ -4,7 +4,6 @@ import sys  # For adding src to path
 from os.path import abspath as ap
 import pickle  # For serializing output
 import random
-import snakemake
 
 # --- Network Science ---
 import networkx as nx
@@ -102,8 +101,11 @@ def partial_information(G, frac):
     # Add aggregate edges we don't know about
     for e in Etest:
         rem_G1.add_edge(e[0], e[1])
-        rem_G2.add_edge(e[0], e[1])with open(snakemake.input[0], "rb") as _fh:
-        duplex = pickle.load(_fh)
+        rem_G2.add_edge(e[0], e[1])
+
+    # Add to remnant alpha the things known to be in alpha
+    # So remnant alpha is unknown + known(alpha)
+    for e in Etrain:
         if Etrain[e] == 1:
             rem_G1.add_edge(e[0], e[1])
         if Etrain[e] == 0:
@@ -115,7 +117,7 @@ def partial_information(G, frac):
 # ============== MAIN ===============
 def main(multiplex, params):
     # Restrict multiplex to duplex
-    duplex = duplex_network(multiplex, params["alpha"], params["beta"])
+    duplex = duplex_network(multiplex, int(params["alpha"]), int(params["beta"]))
 
     # Observe subtensor
     remnant_G, remnant_H, test_set = \
@@ -144,11 +146,11 @@ if __name__ == "__main__":
     multiplex = read_file(snakemake.input["duplex_edgelist"])
 
     # Book-keeping system name
-    params = snakemake.params
+    params = dict(snakemake.params)
     params.update({"system": snakemake.wildcards["system"]})
 
     # Run observation procedure on system
-    observation = main(multiplex, snakemake.params)
+    observation = main(multiplex, params)
 
     # Save to disk
     with open(snakemake.output[0], "wb") as _fh:

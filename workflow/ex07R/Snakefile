@@ -12,7 +12,7 @@ from datetime import datetime
 from itertools import product
 
 # ======== CONFIG =========
-configfile: "config.yaml"
+configfile: "test.yaml"
 
 # Aliases
 _meta = config["meta"]
@@ -80,7 +80,7 @@ rule meta_dag:
 # - Data analysis -
 rule aggregate_records:
     input:
-        *[
+        [
             expand(
                 _datafiles["intermediary"]["record"].format(dir=_pathing["temp"].format(root=ROOT)),
                 system=system_,
@@ -100,15 +100,12 @@ rule aggregate_records:
             date=DATE
         )
     script:
-        _pathing["scripts"] + "/aggregate_records.py" #f"{_pathing["scripts"]}/aggregate_records.py"
+        _pathing["scripts"] + "aggregate_records.py"
 
 rule measure_performance:
     input:
         reconstruction = _datafiles["intermediary"]["reconstruction"].format(
             dir=_pathing["temp"].format(root=ROOT)
-        ),
-        ground_truth = _datafiles["input"]["duplex"].format(
-            dir=_pathing["input"]["raw"].format(root=ROOT)
         )
     output:
         _datafiles["intermediary"]["record"].format(
@@ -126,27 +123,22 @@ rule generate_plots:
             date=DATE
         )
     output:   # * CAN WE AUTO GENERATE MORE? :/
-        scatter = \
-            _datafiles["output"]["figures"]["scatter"].format(
-                dir=_pathing["output"]["figures"].format(root=ROOT),
-                project_id=_meta["project_id"], current_version=_meta["current_version"],
-                researcher=_meta["researcher"],
-                date=DATE
-            )
-
-
+        scatter = _datafiles["output"]["figures"]["scatter"].format(
+            dir=_pathing["output"]["figures"].format(root=ROOT),
+            project_id=_meta["project_id"], current_version=_meta["current_version"],
+            researcher=_meta["researcher"],
+            date=DATE
+        )
     script:
         _pathing["scripts"] + "generate_plots.py"
-
 
 
 # ----- Computation rules -----
 rule observe_subtensor:
     input:
-        duplex_edgelist = \
-            _datafiles["input"]["duplex"].format(
-                dir=_pathing["input"]["raw"].format(root=ROOT)
-            )
+        duplex_edgelist = _datafiles["input"]["duplex"].format(
+            dir=_pathing["input"]["raw"].format(root=ROOT)
+        )
     output:
         _datafiles["intermediary"]["observed"].format(
             dir=_pathing["temp"].format(root=ROOT)
@@ -195,7 +187,7 @@ rule reconstruct_tensor:
         distances = _datafiles["intermediary"]["distances"].format(
             dir=_pathing["temp"].format(root=ROOT)
         ),
-        observed = _datafiles["intermediary"]["observed"].format(
+        observation = _datafiles["intermediary"]["observed"].format(
             dir=_pathing["temp"].format(root=ROOT)
         )
     output:

@@ -1,7 +1,6 @@
 # ============= SET-UP =================
 # --- Standard library ---
 import pickle  # For serializing output
-import snakemake
 
 # --- Scientific ---
 import numpy as np  # General computational tools

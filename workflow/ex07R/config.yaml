@@ -90,7 +90,7 @@ workflow:
       dataframe: "{root}/results/dataframes"
       figures: "{root}/results/plots"
       reports: "{root}/results/reports"
-    scripts: "./scripts"
+    scripts: "./scripts/"
     temp: "{root}/workflow/.tmp"
 
   datafiles:

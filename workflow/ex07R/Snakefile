@@ -38,13 +38,13 @@ rule all:
             researcher=_meta["researcher"],
             date=DATE
         ),
-        # Snakemake report
-        _datafiles["output"]["report"].format(
-            dir=_pathing["output"]["reports"].format(root=ROOT),
-            project_id=_meta["project_id"], current_version=_meta["current_version"],
-            researcher=_meta["researcher"],
-            date=DATE
-        ),
+        # # Snakemake report
+        # _datafiles["output"]["report"].format(
+        #     dir=_pathing["output"]["reports"].format(root=ROOT),
+        #     project_id=_meta["project_id"], current_version=_meta["current_version"],
+        #     researcher=_meta["researcher"],
+        #     date=DATE
+        # ),
         # DAG
         _datafiles["output"]["dag"].format(
             dir=_pathing["output"]["reports"].format(root=ROOT),

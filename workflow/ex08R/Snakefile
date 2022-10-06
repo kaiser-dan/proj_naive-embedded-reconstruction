@@ -161,7 +161,9 @@ rule calculate_remnant_spectra:
             dir=_pathing["temp"].format(root=ROOT)
         )
     params:
-        num_values = _hyperparams["spectra"]["num_values"]
+        dimension = _hyperparams["spectra"]["dimension"],
+        maxiter_multiplier = _hyperparams["spectra"]["maxiter_multiplier"],
+        tol_exp = _hyperparams["spectra"]["tol_exp"],
     script:
         _pathing["scripts"] + "calculate_remnant_spectra.py"
 

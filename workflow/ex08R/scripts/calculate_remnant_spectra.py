@@ -15,37 +15,55 @@ import networkx as nx
 # =================== FUNCTIONS ===================
 
 # ============== MAIN ===============
-def main(remnants, num_values):
+def main(remnants, hyperparams):
     # Book-keeping
+    ## Indexing objects
+    _r = len(remnants)
     _nodes = sorted(remnants[0].nodes())  # * Force networkx indexing
-    _nodes_reindexing = {node: idx for idx, node in enumerate(_nodes)}
+    _nodes_reindexing = {node: idx for idx, node in enumerate(_nodes)}  # Allow for non-contiguous node indices
+
+    ## Hyperparams
+    dimension = np.array([hyperparams["dimension"]]*_r)
+    maxiter = len(_nodes)*hyperparams["maxiter_multiplier"]
+    if hyperparams["tol_exp"] >= 0:
+        tol = 0
+    else:
+        tol = 10**hyperparams["tol_exp"]
 
     # Calculate normalized Laplacian
-    L_normalized = tuple((nx.normalized_laplacian_matrix(G, nodelist=_nodes) for G in remnants))
+    L_normalized = tuple((
+        nx.normalized_laplacian_matrix(G, nodelist=_nodes)
+        for G in remnants
+    ))
+
+    # Account for first eigenvalue correlated with degrees
+    dimension += np.array([1]*_r)
+    # Account for algebraic multiplicity of trivial eigenvalues equal to number of connected components
+    dimension += np.array([
+        nx.number_connected_components(R)
+        for R in remnants
+    ])
 
     # Calculate eigenspectra
-    spectra_ = [eigsh(L, k=num_values, which="SM") for L in L_normalized]
-
-    # * Remove first eigenvalue, correlated with degree
-    # * Set aside trivial eigenvalues
-    nontrivial_eigenvalue_column_indices = [
-        [
-            idx for idx in range(1, num_values)
-            if not np.isclose(spectra_G[0][idx], 0)
-        ]
-        for spectra_G in spectra_
-    ]
-
     spectra = [
-        # Eigenvectors
-        np.array([
-            row[nontrivial_eigenvalue_column_indices[j]]
-            for row in spectra_[j][1]
-        ])
-        for j in range(len(spectra_))
+        eigsh(
+            L_normalized[idx], k=dimension[idx],
+            which="SM", maxiter=maxiter, tol=tol,
+        )
+        for idx in range(_r)
     ]
 
-    return spectra, _nodes_reindexing
+    # Retrieve eigenvectors and first non-trivial dimension-many components
+    eigenvectors = [spectra_[1] for spectra_ in spectra]
+    eigenvectors = [
+        np.array([
+            vector[-hyperparams["dimension"]:]
+            for vector in eigenvectors_
+        ])
+        for eigenvectors_ in eigenvectors
+    ]
+
+    return eigenvectors, _nodes_reindexing
 
 if __name__ == "__main__":
     # Load observation
@@ -53,8 +71,10 @@ if __name__ == "__main__":
         remnants = pickle.load(_fh)["remnant_duplex"]
 
     # Run observation procedure
-    spectra = main(remnants, snakemake.params.num_values)
+    hyperparams = dict(snakemake.params)
+    print(hyperparams)
+    (eigenvectors, _nodes_reindexing) = main(remnants, hyperparams)
 
     # Save to disk
     with open(snakemake.output[0], "wb") as _fh:
-        pickle.dump(spectra, _fh, pickle.HIGHEST_PROTOCOL)
+        pickle.dump((eigenvectors, _nodes_reindexing), _fh, pickle.HIGHEST_PROTOCOL)

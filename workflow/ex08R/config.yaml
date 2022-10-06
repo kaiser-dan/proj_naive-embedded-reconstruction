@@ -45,7 +45,7 @@
 # =========================================
 meta:
   project_id: "EMB_ex08R"
-  current_version: "v1.0"
+  current_version: "v1.1"
   researcher: "DK"
 
 
@@ -72,7 +72,9 @@ experiment:
 
   hyperparams:
     spectra:
-      num_values: 15
+      dimension: 40
+      maxiter_multiplier: 100 # 0
+      tol_exp: -5 # 1 (-Inf)
 
 
 workflow:

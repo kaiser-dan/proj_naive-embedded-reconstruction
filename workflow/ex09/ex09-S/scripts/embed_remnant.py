@@ -31,7 +31,7 @@ def embed_system(remnant_G, remnant_H, hyperparams, embedding_method = "node2vec
         raise NotImplementedError("Only Node2Vec prepared rn!")
 
     # Retrieve vectors from embedding
-    vectors = np.array([R_G_vectors, R_H_vectors])
+    vectors = (R_G_vectors, R_H_vectors)
 
     return vectors
 
@@ -81,7 +81,7 @@ def helper_node2vec(remnant_G, remnant_H, hyperparams, per_component=True):
         R_G_embedded_model = R_G_embedding.wv
         R_H_embedded_model = R_H_embedding.wv
 
-        return R_G_embedded_model, R_H_embedded_model, None
+        return R_G_embedded_model, R_H_embedded_model
 
 def helper_index_vectors_from_model(embedding_model, node_index_range, per_component=True):
     if per_component:

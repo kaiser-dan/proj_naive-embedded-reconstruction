@@ -48,6 +48,7 @@ if __name__ == "__main__":
         "system": wc["system"],
         "alpha": wc["alpha"],
         "beta": wc["beta"],
+        "dimension": wc["dimension"],
         "metric": wc["metric"],
         "pfi": wc["pfi"],
         "rep": wc["rep"]

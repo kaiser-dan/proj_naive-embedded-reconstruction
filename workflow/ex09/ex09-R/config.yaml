@@ -39,8 +39,8 @@
 # <<<< Configuration 'README' <<<<
 # =========================================
 meta:
-  project_id: "EMB_ex10-R"
-  current_version: "v1.0"
+  project_id: "EMB_ex09-R"
+  current_version: "v1.1"
   researcher: "DK"
 
 
@@ -61,16 +61,20 @@ network:
 
 experiment:
   params:
-    pfis: [0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90] #, 0.95]
-    metrics: ["inverse", "negexp"]
-    repetitions: 5
+    pfis: [0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95]
+    metrics: ["inverse"] # "negexp"]
+    repetitions: 1
+    dimensions: [10,15,20,30,40,60,80,100,120]
 
   hyperparams:
-    spectra:
-      dimension: 40
-      maxiter_multiplier: 150 # 0
-      tol_exp: -10 # 1 (-Inf)
-      ncv_multiplier: 6
+    embedding:
+      walk_length: 30
+      num_walks: 100
+      workers: 4
+      window: 10
+      min_count: 1
+      batch_words: 4
+
 
 
 workflow:
@@ -92,10 +96,10 @@ workflow:
       duplex: "{dir}/duplex_system={{system}}.edgelist"
     output:
       observation: "{dir}/observed_pfi={{pfi}}_system={{system}}_alpha={{alpha}}_beta={{beta}}_rep={{rep}}.pkl"
-      spectra: "{dir}/sprectra_pfi={{pfi}}_system={{system}}_alpha={{alpha}}_beta={{beta}}_rep={{rep}}.pkl"
-      distances: "{dir}/distances_pfi={{pfi}}_system={{system}}_alpha={{alpha}}_beta={{beta}}_rep={{rep}}.pkl"
-      reconstruction: "{dir}/reconstruction_metric={{metric}}_pfi={{pfi}}_system={{system}}_alpha={{alpha}}_beta={{beta}}_rep={{rep}}.pkl"
-      record: "{dir}/record_metric={{metric}}_pfi={{pfi}}_system={{system}}_alpha={{alpha}}_beta={{beta}}_rep={{rep}}.pkl"
+      vectors: "{dir}/vectors_pfi={{pfi}}_dimension={{dimension}}_system={{system}}_alpha={{alpha}}_beta={{beta}}_rep={{rep}}.pkl"
+      distances: "{dir}/distances_pfi={{pfi}}_dimension={{dimension}}_system={{system}}_alpha={{alpha}}_beta={{beta}}_rep={{rep}}.pkl"
+      reconstruction: "{dir}/reconstruction_metric={{metric}}_pfi={{pfi}}_dimension={{dimension}}_system={{system}}_alpha={{alpha}}_beta={{beta}}_rep={{rep}}.pkl"
+      record: "{dir}/record_metric={{metric}}_pfi={{pfi}}_dimension={{dimension}}_system={{system}}_alpha={{alpha}}_beta={{beta}}_rep={{rep}}.pkl"
     result:
       dataframe: "{dir}/dataframe_{project_id}{current_version}_{researcher}_{date}.parquet"
       report: "{dir}/report_{project_id}{current_version}_{researcher}_{date}.html"

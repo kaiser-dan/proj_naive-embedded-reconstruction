@@ -8,12 +8,12 @@ import numpy as np  # General computational tools
 # --- Data handling and visualization ---
 
 # =================== FUNCTIONS ===================
-def per_spectra_distance(spectra, edge):
+def per_layer_distance(vectors, edge):
     # Book-keeping
     (i, j) = edge
-    G, H = spectra
-    x = np.array(G[i, :]) - np.array(G[j, :])
-    y = np.array(H[i, :]) - np.array(H[j, :])
+    G, H = vectors
+    x = np.array(G[i]) - np.array(G[j])
+    y = np.array(H[i]) - np.array(H[j])
 
     # Calculate distance for each embedding
     norm_x = np.linalg.norm(x) + 1e-60
@@ -23,10 +23,10 @@ def per_spectra_distance(spectra, edge):
 
 
 # ============== MAIN ===============
-def main(spectra, test_set, _nodes_reindexing):
+def main(vectors, test_set):
     # Calculate distances system
     distances = {
-        edge: per_spectra_distance(spectra, (_nodes_reindexing[edge[0]], _nodes_reindexing[edge[1]]))
+        edge: per_layer_distance(vectors, edge)
         for edge in test_set
     }
 
@@ -38,12 +38,12 @@ if __name__ == "__main__":
     with open(snakemake.input.observation, "rb") as _fh:
         test_set = pickle.load(_fh)["test_set"]
 
-    # Load spectra
-    with open(snakemake.input.spectra, "rb") as _fh:
-        spectra, _nodes_reindexing = pickle.load(_fh)
+    # Load vectors
+    with open(snakemake.input.vectors, "rb") as _fh:
+        vectors = pickle.load(_fh)
 
     # Run observation procedure
-    distances = main(spectra, test_set, _nodes_reindexing)
+    distances = main(vectors, test_set)
 
     # Save to disk
     with open(snakemake.output[0], "wb") as _fh:

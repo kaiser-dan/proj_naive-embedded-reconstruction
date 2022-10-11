@@ -100,6 +100,7 @@ rule aggregate_records:
                     system=system_,
                     alpha=alpha,
                     beta=beta,
+                    dimension=_params["dimensions"],
                     metric=_params["metrics"],
                     pfi=_params["pfis"],
                     rep=REPETITIONS,
@@ -150,27 +151,23 @@ rule observe_subtensor:
     script:
         _pathing["scripts"] + "observe_subtensor.py"
 
-rule calculate_remnant_spectra:
+rule embed_remnant:
     input:
-        observation = _datafiles["output"]["observation"].format(
+        _datafiles["output"]["observation"].format(
             dir=_pathing["output"]["raw"].format(root=ROOT)
         )
     output:
-        pipe(_datafiles["output"]["spectra"].format(
+        pipe(_datafiles["output"]["vectors"].format(
             dir=_pathing["output"]["raw"].format(root=ROOT)
         ))
     params:
-        dimension = _hyperparams["spectra"]["dimension"],
-        maxiter_multiplier = _hyperparams["spectra"]["maxiter_multiplier"],
-        tol_exp = _hyperparams["spectra"]["tol_exp"],
-        ncv_multiplier = _hyperparams["spectra"]["ncv_multiplier"]
+        hyperparams = config["experiment"]["hyperparams"]["embedding"]
     script:
-        _pathing["scripts"] + "calculate_remnant_spectra.py"
-
+        _pathing["scripts"] + "embed_remnant.py"
 
 rule calculate_distances:
     input:
-        spectra = _datafiles["output"]["spectra"].format(
+        vectors = _datafiles["output"]["vectors"].format(
             dir=_pathing["output"]["raw"].format(root=ROOT)
         ),
         observation = _datafiles["output"]["observation"].format(

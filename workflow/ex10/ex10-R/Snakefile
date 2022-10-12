@@ -105,7 +105,7 @@ rule aggregate_records:
                     rep=REPETITIONS,
                 )
                 # * Remove symmetric and trivial duplexes
-                for alpha in _network[system_]["alpha"] for beta in _network[system_]["alpha"] if alpha < beta
+                for alpha in _network[system_]["alpha"] for beta in _network[system_]["beta"] if alpha < beta
             ]
             for system_ in _network.keys()
         ]

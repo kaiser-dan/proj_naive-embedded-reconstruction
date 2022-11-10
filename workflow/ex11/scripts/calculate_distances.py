@@ -38,7 +38,7 @@ if __name__ == "__main__":
     with open(snakemake.input.observation, "rb") as _fh:
         observation_data = pickle.load(_fh)
     test_set = observation_data["test_set"]
-    pfi = observation_data["pfi"] # for convex combination
+    pfi = float(observation_data["pfi"]) # for convex combination
 
     # Load vectors
     with open(snakemake.input.vectors, "rb") as _fh:
@@ -50,7 +50,10 @@ if __name__ == "__main__":
     # * Calculate convex combination at distance stage
     # * NOTE: This is not the same as convex combination of layer-wise scores as 1/x and exp(-x) are nonlinear!
     distances = {
-        edge: pfi*observed_distances[edge] + (1-pfi)*remnant_distances[edge]
+        edge: (
+            pfi*observed_distances[edge][0] + (1-pfi)*remnant_distances[edge][0],
+            pfi*observed_distances[edge][1] + (1-pfi)*remnant_distances[edge][1]
+        )
         for edge in test_set
     }
 

@@ -135,6 +135,8 @@ def main(multiplex, params):
         "repetition": params["rep"]
     }
 
+    # print(f"=============\n {params['pfi']}\n ==================")
+
     return data
 
 

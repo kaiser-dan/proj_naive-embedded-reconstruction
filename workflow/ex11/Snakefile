@@ -10,7 +10,8 @@ from datetime import datetime
 from itertools import product
 
 # ======== CONFIG =========
-configfile: "config.yaml"
+configfile: "test_config.yaml"
+config = config["synthetic"] # ! Testing
 
 # Aliases
 _meta = config["meta"]
@@ -22,7 +23,7 @@ _datafiles = config["workflow"]["datafiles"]
 
 # Globals
 DATE = datetime.today().strftime("%Y%m%d")
-ROOT = "../../.."
+ROOT = "../.."
 REPETITIONS = range(1, int(_params["repetitions"])+1)
 
 # =========== WORKFLOW ===========

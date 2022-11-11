@@ -10,8 +10,8 @@ from datetime import datetime
 from itertools import product
 
 # ======== CONFIG =========
-configfile: "test_config.yaml"
-config = config["synthetic"] # ! Testing
+configfile: "config.yaml"
+config = config["synthetic"]
 
 # Aliases
 _meta = config["meta"]

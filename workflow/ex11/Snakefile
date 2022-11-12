@@ -11,7 +11,7 @@ from itertools import product
 
 # ======== CONFIG =========
 configfile: "config.yaml"
-config = config["synthetic"]
+config = config["real"]
 
 # Aliases
 _meta = config["meta"]
@@ -24,7 +24,7 @@ _datafiles = config["workflow"]["datafiles"]
 # Globals
 DATE = datetime.today().strftime("%Y%m%d")
 ROOT = "../.."
-REPETITIONS = range(1, int(_params["repetitions"])+1)
+REPETITIONS = range(1, int(_params["repetitions"]))
 
 # =========== WORKFLOW ===========
 # ----- All rule ----
@@ -90,17 +90,46 @@ rule generate_plots:
         _pathing["scripts"] + "generate_plots.py"
 
 # - Data aggregation -
-rule aggregate_records:
+# rule aggregate_records:
+#     input:
+#         expand(
+#             _datafiles["output"]["record"].format(dir=_pathing["output"]["raw"].format(root=ROOT)),
+#             avg_k=_network["avg_k"],
+#             gamma=_network["gamma"],
+#             mu=_network["mu"],
+#             metric=_params["metrics"],
+#             pfi=_params["pfis"],
+#             rep=REPETITIONS,
+#         )
+#     output:
+#         _datafiles["result"]["dataframe"].format(
+#             dir=_pathing["result"]["dataframe"].format(root=ROOT),
+#             project_id=_meta["project_id"], current_version=_meta["current_version"],
+#             researcher=_meta["researcher"],
+#             date=DATE
+#         )
+#     script:
+#         _pathing["scripts"] + "aggregate_records.py"
+
+rule aggregate_records_real:
     input:
-        expand(
-            _datafiles["output"]["record"].format(dir=_pathing["output"]["raw"].format(root=ROOT)),
-            avg_k=_network["avg_k"],
-            gamma=_network["gamma"],
-            mu=_network["mu"],
-            metric=_params["metrics"],
-            pfi=_params["pfis"],
-            rep=REPETITIONS,
-        )
+        [
+            [
+                expand(
+                    _datafiles["output"]["record"].format(dir=_pathing["output"]["raw"].format(root=ROOT)),
+                    system=system_,
+                    alpha=alpha,
+                    beta=beta,
+                    dimension=_params["dimensions"],
+                    metric=_params["metrics"],
+                    pfi=_params["pfis"],
+                    rep=REPETITIONS,
+                )
+                # * Remove symmetric and trivial duplexes
+                for alpha in _network[system_]["layers"] for beta in _network[system_]["layers"] if alpha < beta
+            ]
+            for system_ in _network.keys()
+        ]
     output:
         _datafiles["result"]["dataframe"].format(
             dir=_pathing["result"]["dataframe"].format(root=ROOT),
@@ -110,6 +139,7 @@ rule aggregate_records:
         )
     script:
         _pathing["scripts"] + "aggregate_records.py"
+
 
 rule measure_performance:
     input:
@@ -127,9 +157,24 @@ rule measure_performance:
 
 
 # ----- Computation rules -----
-rule observe_subtensor:
+# rule observe_subtensor:
+#     input:
+#         multiplex = _datafiles["input"]["duplex"].format(
+#             dir=_pathing["input"]["preprocessed"].format(root=ROOT)
+#         )
+#     output:
+#         temp(_datafiles["output"]["observation"].format(
+#             dir=_pathing["output"]["raw"].format(root=ROOT)
+#         ))
+#     params:
+#         pfi = "{pfi}",
+#         rep = "{rep}"
+#     script:
+#         _pathing["scripts"] + "observe_subtensor.py"
+
+rule observe_subtensor_real:
     input:
-        multiplex = _datafiles["input"]["duplex"].format(
+        duplex_edgelist = _datafiles["input"]["duplex"].format(
             dir=_pathing["input"]["preprocessed"].format(root=ROOT)
         )
     output:
@@ -137,6 +182,8 @@ rule observe_subtensor:
             dir=_pathing["output"]["raw"].format(root=ROOT)
         ))
     params:
+        alpha = "{alpha}",
+        beta = "{beta}",
         pfi = "{pfi}",
         rep = "{rep}"
     script:

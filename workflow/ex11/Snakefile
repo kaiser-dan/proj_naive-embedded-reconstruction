@@ -153,7 +153,7 @@ rule measure_performance:
     params:
         metric = "{metric}"
     script:
-        _pathing["scripts"] + "measure_performance.py"
+        _pathing["scripts"] + "measure_performance_real.py"
 
 
 # ----- Computation rules -----
@@ -187,7 +187,7 @@ rule observe_subtensor_real:
         pfi = "{pfi}",
         rep = "{rep}"
     script:
-        _pathing["scripts"] + "observe_subtensor.py"
+        _pathing["scripts"] + "observe_subtensor_real.py"
 
 rule embed_remnant:
     input:

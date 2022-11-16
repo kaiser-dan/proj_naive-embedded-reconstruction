@@ -88,6 +88,7 @@ real:
 
     hyperparams:
       embedding:
+        dimensions: 120
         walk_length: 30
         num_walks: 100
         workers: 4

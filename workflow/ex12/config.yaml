@@ -80,17 +80,12 @@ real:
       pfis: [0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95]
       metrics: ["inverse", "negexp"]
       repetitions: 5
-      dimensions: [120] # [40,80,120]
 
     hyperparams:
-      embedding:
-        dimensions: 120
-        walk_length: 30
-        num_walks: 100
-        workers: 4
-        window: 10
-        min_count: 1
-        batch_words: 4
+      method: "LE"
+      dimension: 40
+      maxiter_multiplier: 100 # 0
+      tol_exp: -8 # 1 (-Inf)
 
 
 

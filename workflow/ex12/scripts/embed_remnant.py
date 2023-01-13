@@ -7,6 +7,7 @@ import pickle
 # --- Scientific ---
 import numpy as np  # General computational tools
 from scipy.sparse.linalg import eigsh
+from scipy.linalg import eigh
 
 # --- Network science ---
 import networkx as nx
@@ -71,14 +72,22 @@ def LE(remnants, hyperparams):
     dimension += num_components
 
     # Calculate eigenspectra
-    spectra = [
-        eigsh(
-            L_normalized[idx], k=dimension[idx],
-            which="SM", maxiter=maxiter, tol=tol,
-            ncv=6*dimension[idx]+1
-        )
-        for idx in range(_r)
-    ]
+    try:
+        spectra = [
+            eigsh(
+                L_normalized[idx], k=min(len(_nodes), dimension[idx]),
+                which="SM", maxiter=maxiter, tol=tol,
+                ncv=6*dimension[idx]+1
+            )
+            for idx in range(_r)
+        ]
+    except TypeError:
+        spectra = [
+            eigh(
+                L_normalized[idx].toarray()
+            )
+            for idx in range(_r)
+        ]
 
     # * Ensure algebraic multiplcity of trivial eigenvalue matches num_components
     w = [spectra_[0] for spectra_ in spectra]
@@ -104,8 +113,15 @@ def LE(remnants, hyperparams):
         for eigenvectors_ in eigenvectors
     ]
 
-    out_dict_remnants_1={_nodes_reindexing[node]:eigenvectors[0][node] for node in _nodes}
-    out_dict_remnants_2={_nodes_reindexing[node]:eigenvectors[1][node] for node in _nodes}
+    # print(f"N = {len(_nodes)}\n |eigenvectors| = {len(eigenvectors[0])}\n N_reindex = {len(_nodes_reindexing)}")
+    out_dict_remnants_1 = {
+        _nodes_reindexing[node]: eigenvectors[0][_nodes_reindexing[node]]
+        for node in _nodes
+    }
+    out_dict_remnants_2 = {
+        _nodes_reindexing[node]: eigenvectors[1][_nodes_reindexing[node]]
+        for node in _nodes
+    }
 
     return out_dict_remnants_1, out_dict_remnants_2
 

@@ -120,7 +120,7 @@ rule aggregate_records_real:
                     system=system_,
                     alpha=alpha,
                     beta=beta,
-                    dimension=_params["dimensions"],
+                    dimension=-1,
                     metric=_params["metrics"],
                     pfi=_params["pfis"],
                     rep=REPETITIONS,

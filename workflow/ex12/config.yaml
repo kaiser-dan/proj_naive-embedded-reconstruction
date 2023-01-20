@@ -1,32 +1,28 @@
 # =============================================================================
 synthetic:
   meta:
-    project_id: "EMB_ex11-S"
-    current_version: "v1.0-TEST"
+    project_id: "EMB_ex12-S"
+    current_version: "v1.0"
     researcher: "DK"
 
 
   network:
-    avg_k: [5]
-    gamma: [2.5]
-    mu: [0.1]
+    avg_k: [20]
+    gamma: [2.1, 2.5, 2.9, 3.5]
+    mu: [0.1] #, 0.2, 0.3, 0.4, 0.5]
 
 
   experiment:
     params:
-      pfis: [0.10, 0.50, 0.95]
-      metrics: ["inverse"]
-      repetitions: 1
+      pfis: [0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95]
+      metrics: ["inverse", "negexp"]
+      repetitions: 3
 
     hyperparams:
-      embedding:
-        dimensions: 128
-        walk_length: 30
-        num_walks: 100
-        workers: 4
-        window: 10
-        min_count: 1
-        batch_words: 4
+      method: "LE"
+      dimension: 40
+      maxiter_multiplier: 100 # 0
+      tol_exp: -8 # 1 (-Inf)
 
 
   workflow:
@@ -63,41 +59,33 @@ synthetic:
 # =============================================================================
 real:
   meta:
-    project_id: "EMB_ex11-R"
-    current_version: "v1.0"
+    project_id: "EMB_ex12-R"
+    current_version: "v2.0"
     researcher: "DK"
 
 
   network:
     # arxiv:
-    #   alpha: [1, 2, 3] #, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-    #   beta: [2, 3, 4] #, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+      # layers: [2, 6, 7] # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
     celegans:
-      alpha: [1, 2]
-      beta: [2, 3]
+      layers: [1, 2, 3]
     # drosophila:
-    #   alpha: [1, 2, 3, 4, 5, 6]
-    #   beta: [2, 3, 4, 5, 6, 7]
+      # layers: [1, 2, 3] # [1, 2, 3, 4, 5, 6, 7]
     london:
-      alpha: [1, 2]
-      beta: [2, 3]
+      layers: [1, 2, 3]
 
 
   experiment:
     params:
-      pfis: [0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95]
+      pfis: [0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90]
       metrics: ["inverse", "negexp"]
       repetitions: 5
-      dimensions: [10,15,20,30,40,60,80,100,120]
 
     hyperparams:
-      embedding:
-        walk_length: 30
-        num_walks: 100
-        workers: 4
-        window: 10
-        min_count: 1
-        batch_words: 4
+      method: "LE"
+      dimension: 40
+      maxiter_multiplier: 100 # 0
+      tol_exp: -8 # 1 (-Inf)
 
 
 

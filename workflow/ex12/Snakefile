@@ -120,7 +120,7 @@ rule aggregate_records_real:
                     system=system_,
                     alpha=alpha,
                     beta=beta,
-                    dimension=_params["dimensions"],
+                    dimension=-1,
                     metric=_params["metrics"],
                     pfi=_params["pfis"],
                     rep=REPETITIONS,
@@ -141,7 +141,21 @@ rule aggregate_records_real:
         _pathing["scripts"] + "aggregate_records.py"
 
 
-rule measure_performance:
+# rule measure_performance:
+#     input:
+#         reconstruction = _datafiles["output"]["reconstruction"].format(
+#             dir=_pathing["output"]["raw"].format(root=ROOT)
+#         )
+#     output:
+#         temp(_datafiles["output"]["record"].format(
+#             dir=_pathing["output"]["raw"].format(root=ROOT)
+#         ))
+#     params:
+#         metric = "{metric}"
+#     script:
+#         _pathing["scripts"] + "measure_performance.py"
+
+rule measure_performance_real:
     input:
         reconstruction = _datafiles["output"]["reconstruction"].format(
             dir=_pathing["output"]["raw"].format(root=ROOT)
@@ -154,7 +168,6 @@ rule measure_performance:
         metric = "{metric}"
     script:
         _pathing["scripts"] + "measure_performance_real.py"
-
 
 # ----- Computation rules -----
 # rule observe_subtensor:
@@ -199,7 +212,7 @@ rule embed_remnant:
             dir=_pathing["output"]["raw"].format(root=ROOT)
         ))
     params:
-        hyperparams = config["experiment"]["hyperparams"]["embedding"]
+        hyperparams = config["experiment"]["hyperparams"]
     script:
         _pathing["scripts"] + "embed_remnant.py"
 

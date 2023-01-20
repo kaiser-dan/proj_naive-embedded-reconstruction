@@ -1,6 +1,8 @@
 # Multiplex Reconstruction via Graph Embeddings
 
-[Project Description]
+This project provides source code for the reconstruction of multiplex networks from partial structural observations leveraging graph embeddings. The repository also contains the original scientific analyses developed by the Authors (see below) for the paper
+
+- _In preparation_
 
 ## Getting Started
 

@@ -170,6 +170,7 @@ cython_debug/
 data/
 *.dat
 results/raw/
+_research/_tmp/
 
 # Cached modules
 *.pyc

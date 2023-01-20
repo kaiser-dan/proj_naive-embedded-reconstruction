@@ -115,11 +115,11 @@ def LE(remnants, hyperparams):
 
     # print(f"N = {len(_nodes)}\n |eigenvectors| = {len(eigenvectors[0])}\n N_reindex = {len(_nodes_reindexing)}")
     out_dict_remnants_1 = {
-        _nodes_reindexing[node]: eigenvectors[0][_nodes_reindexing[node]]
+        node: eigenvectors[0][_nodes_reindexing[node]]
         for node in _nodes
     }
     out_dict_remnants_2 = {
-        _nodes_reindexing[node]: eigenvectors[1][_nodes_reindexing[node]]
+        node: eigenvectors[1][_nodes_reindexing[node]]
         for node in _nodes
     }
 

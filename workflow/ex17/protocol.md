@@ -6,8 +6,8 @@
 
 | Version | Date Started | Date Finished | Notes                                          |
 | ------- | ------------ | ------------- | ---------------------------------------------- |
-| v1.0    | 2023-01-21   | XXX           | Refactored workflow; not backwards compatible! |
-|         |              |               |                                                |
+| v1.0    | 2023-01-23   | 2023-01-23           | Initial notebook version |
+| v2.0 | 2023-01-23 | XXX | Refactored workflow; not backwards compatible! |
 
 
 # Experiment

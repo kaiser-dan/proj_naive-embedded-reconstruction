@@ -21,11 +21,11 @@ global:
 
   files:
     observations: "{in_pcsd_dir}/remnants_{tag}_system={{system}}_pfi={{pfi}}.pkl"
-    embeddings: "{out_raw_dir}/embeddings_{tag}_system={{system}}_pfi={{pfi}}_method={{method}}" ???
-    distances: "{out_raw_dir}/XXX"
-    reconstructions: "{out_pcsd_dir}/XXX"
-    performances: "{out_pcsd_dir}/XXX"
-    records: "{results_df_dir}/XXX"
+    embeddings: "{out_raw_dir}/embeddings_{tag}_system={{system}}_pfi={{pfi}}_method={{method}}_walklength={{walk_length}}_numwalks={{num_walks}}_dimensions={{dimensions}}.pkl"
+    distances: "{out_raw_dir}/distances_{tag}_system={{system}}_pfi={{pfi}}_method={{method}}_walklength={{walk_length}}_numwalks={{num_walks}}_dimensions={{dimensions}}_metric={{metric}}.pkl"
+    reconstructions: "{out_pcsd_dir}/reconstruction_{tag}_system={{system}}_pfi={{pfi}}_method={{method}}_walklength={{walk_length}}_numwalks={{num_walks}}_dimensions={{dimensions}}_metric={{metric}}.pkl"
+    records: "{out_pcsd_dir}/XXX"
+    dataframe: "{results_df_dir}/XXX"
     figures: "{results_fig_dir}/XXX"
     rulegraphs: "{results_rep_dir}/XXX"
 
@@ -33,26 +33,47 @@ global:
 ex17:
   metadata:
     project_id: "EMB_ex17"
-    current_version: "v1.0"
+    current_version: "v2.0-alpha"
     researcher: "DK"
 
   parameters:
+    systems: [
+      "arxiv-2-6",
+      "arxiv-2-7",
+      "arxiv-6-7",
+      "celegans-1-2",
+      "celegans-1-3",
+      "celegans-2-3",
+      "london-1-2",
+      "london-1-3",
+      "london-2-3",
+      "drosophila-1-2",
+      "drosophila-1-3",
+      "drosophila-1-4",
+      "drosophila-2-3",
+      "drosophila-2-4",
+      "drosophila-3-4"]
     pfis:
       start: 0.05
       stop: 0.95
-      step: 0.05
+      num: 50
     embedding:
       method: "N2V"
       parameters:
         walk_length:
-          start: 10
-          stop: 30
-          step: 2
+          start: 2
+          stop: 50
+          num: 48
         num_walks: 100
-        dimensions: 128
-      hyperparameters:
+        dimensions:
+          start: 4
+          stop: 256
+          num: 7
+          base: 2
         workers: 8
+        quiet: True
+      hyperparameters:
         window: 10
         min_count: 1
         batch_words: 4
-    metrics: ["inverse"]
+    metrics: "inverse"

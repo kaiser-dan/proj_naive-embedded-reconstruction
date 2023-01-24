@@ -13,12 +13,15 @@ configfile: "config.yaml"
 experiment = "ex17"
 
 # Parameters
-PFIS = np.linspace(
-    start=config[experiment]["parameters"]["pfis"]["start"],
-    stop=config[experiment]["parameters"]["pfis"]["stop"],
-    step=config[experiment]["parameters"]["pfis"]["step"],
-    endpoint=True
-)
+_params = config[experiment]["parameters"]
+PFIS = np.linspace(**_params["pfis"])
+METRICS = _params["metrics"]
+
+_params = _params["embedding"]
+METHODS = _params["method"]
+WALKLENGTHS = np.linspace(**_params["walk_length"])
+NUMWALKS = _params["num_walks"]
+DIMENSIONS = np.geomspace(**_params["dimensions"])
 
 # Globals
 DATE = datetime.today().strftime("%Y%m%d")
@@ -26,13 +29,16 @@ ROOT = "../.."
 TAG = "{project_id}{current_version}_{researcher}".format(**config[experiment]["metadata"])
 
 # Aliases
-_input_raw = config["global"]["directories"]["input"]["raw"].format(root=ROOT)
-_input_preprocessed = config["global"]["directories"]["input"]["preprocessed"].format(root=ROOT)
-_output_raw = config["global"]["directories"]["output"]["raw"].format(root=ROOT)
-_output_processed = config["global"]["directories"]["output"]["processed"].format(root=ROOT)
-_dataframes = config["global"]["directories"]["results"]["dataframes"].format(root=ROOT)
-_figures = config["global"]["directories"]["results"]["dataframes"].format(root=ROOT)
-_reports = config["global"]["directories"]["results"]["dataframes"].format(root=ROOT)
+_directories = config["global"]["directories"]
+_files = config["global"]["files"]
+
+_input_raw = _directories["input"]["raw"].format(root=ROOT)
+_input_preprocessed = _directories["input"]["preprocessed"].format(root=ROOT)
+_output_raw = _directories["output"]["raw"].format(root=ROOT)
+_output_processed = _directories["output"]["processed"].format(root=ROOT)
+_dataframes = _directories["results"]["dataframes"].format(root=ROOT)
+_figures = _directories["results"]["dataframes"].format(root=ROOT)
+_reports = _directories["results"]["dataframes"].format(root=ROOT)
 
 
 
@@ -40,20 +46,20 @@ _reports = config["global"]["directories"]["results"]["dataframes"].format(root=
 # ----- All rule ----
 rule all:
     input:
-        # Dataframe
-        _datafiles["result"]["dataframe"].format(
-            dir=_pathing["result"]["dataframe"].format(root=ROOT),
-            project_id=_meta["project_id"], current_version=_meta["current_version"],
-            researcher=_meta["researcher"],
-            date=DATE
-        ),
-        # DAG
-        _datafiles["result"]["dag"].format(
-            dir=_pathing["result"]["reports"].format(root=ROOT),
-            project_id=_meta["project_id"], current_version=_meta["current_version"],
-            researcher=_meta["researcher"],
-            date=DATE
+        # temp input
+        expand(
+            _files["reconstructions"].format(out_pcsd_dir=_output_processed, tag=TAG),
+            system=SYSTEMS,
+            method=METHODS,
+            walk_length=WALKLENGTHS,
+            num_walks=NUMWALKS,
+            dimensions=DIMENSIONS,
+            metric=METRICS
         )
+
+        # Dataframe
+        # DAG
+        # figures
 
 
 # ----- Analysis rules -----
@@ -64,10 +70,10 @@ rule all:
 # Step (1)
 rule observe_remnants:
     input:
-        preprocessed_multiplex = # TODO: Fill in input files
+        preprocessed_multiplex = 
     output:
         expand(
-            config["global"]["directories"]["files"]["observations"].format(in_pcsd_dir=_input_preprocessed, tag=TAG),
+            _files["observations"].format(in_pcsd_dir=_input_preprocessed, tag=TAG),
             pfi=PFIS
         )
     script:
@@ -77,6 +83,26 @@ rule observe_remnants:
 # Step (2)
 rule embed:
     input:
-        observations = config["global"]["directories"]["files"]["observations"].format(in_pcsd_dir=_input_preprocessed, tag=TAG)\
+        observations = _files["observations"].format(in_pcsd_dir=_input_preprocessed, tag=TAG)
     output:
-        embeddings = config["global"]["directories"]["files"]["embeddings"].format(in_pcsd_dir=_input_preprocessed, tag=TAG)
+        embeddings = _files["embeddings"].format(out_raw_dir=_output_raw, tag=TAG)
+    script:
+        "scripts/embed_remnants.py"
+
+# Step (3)
+rule calculate_distances:
+    input:
+        embeddings = _files["embeddings"].format(out_raw_dir=_output_raw, tag=TAG)
+    output:
+        distances = _files["distances"].format(out_raw_dir=_output_raw, tag=TAG)
+    script:
+        "scripts/calculate_distances.py"
+
+# Step (4)
+rule reconstruct_multiplex:
+    input:
+        distances = _files["distances"].format(out_raw_dir=_output_raw, tag=TAG)
+    output:
+        reconstructions = _files["reconstructions"].format(out_pcsd_dir=_output_processed, tag=TAG)
+    script:
+        "scripts/reconstruct_multiplex.py"

@@ -23,7 +23,12 @@ def classify_from_score(score):
     # If within tolerance of 0.5, randomly classify
     if not np.isclose(score, 0.5):
         # If score non-central, assign to G weighted by score
+        # ! >>> POTENTIAL BUG >>>
         class_ = int(np.random.rand() <= score)
+        # ! <<< POTENTIAL BUG <<<
+        # ! >>> HOT FIX >>>
+        # class_ = int(np.random.rand() >= score)
+        # ! <<< HOT FIX <<<
     else:
         class_ = np.random.randint(2)
 

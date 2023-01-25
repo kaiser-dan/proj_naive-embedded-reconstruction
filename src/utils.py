@@ -89,7 +89,7 @@ def partial_information(G1, G2, frac):
     # Remnants
     rem_G1, rem_G2, Etest = _build_remnants(G1, G2, Etrain, Etest)
 
-    return rem_G1, rem_G2, Etest
+    return rem_G1, rem_G2, Etest, Etrain
 
 
 def balanced_partial_information(G1, G2, frac, seednodes=[0], search="bfs"):

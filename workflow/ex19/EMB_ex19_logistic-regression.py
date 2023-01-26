@@ -31,7 +31,7 @@ from tqdm.auto import tqdm
 metadata = {
     "PROJECT_ID": "EMB_ex19",
     "RESEARCHERS": "DK",
-    "CURRENT_VERSION": "v1.1",
+    "CURRENT_VERSION": "v1.1.1",
     "DATE": datetime.today().strftime("%Y%m%d")
 }
 TAG = "{PROJECT_ID}{CURRENT_VERSION}_{RESEARCHERS}_{DATE}".format(**metadata)
@@ -48,16 +48,20 @@ def main(system, l1, l2, **parameters):
     records = []
     for theta in tqdm(np.linspace(parameters["theta_min"], parameters["theta_max"], parameters["theta_num"]), desc="theta"):
         for _ in tqdm(range(parameters["repeat"]), desc="Repetitions"):
-            score = workflow(G, H, theta, parameters)
+            try:
+                score = workflow(G, H, theta, parameters)
 
-            record = {
-                "system": system,
-                "l1": l1,
-                "l2": l2,
-                "theta": theta,
-                "score": score
-            }
-            records.append(record)
+
+                record = {
+                    "system": system,
+                    "l1": l1,
+                    "l2": l2,
+                    "theta": theta,
+                    "score": score
+                }
+                records.append(record)
+            except:
+                continue
 
     return records
 
@@ -199,11 +203,11 @@ def _set_parameters(
 
 # ========== MAIN ==========
 if __name__ == "__main__":
-    system = "london"
-    l1 = 1
-    l2 = 2
-
-    records = main(system, l1, l2, repeat=1, theta_num=3)
+    records = []
+    for system in ["celegans", "london"]:
+        for l1, l2 in [(1,2), (1,3), (2,3)]:
+            print("="*16 + f" {system}-{l1}-{l2} " + "="*16)
+            records.extend(main(system, l1, l2, workers=24, repeat=3, theta_num=6))
 
     df = pd.DataFrame.from_records(records)
     df.to_csv(f"dataframe_{TAG}.csv", index_label="_UID")

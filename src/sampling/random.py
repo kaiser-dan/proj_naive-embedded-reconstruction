@@ -1,3 +1,19 @@
+"""Project source code for random observed sub-multiplex simulation.
+"""
+# ============= SET-UP =================
+# --- Standard library ---
+import random
+
+# --- Scientific computing ---
+import numpy as np
+
+# --- Network science ---
+import networkx as nx
+
+# --- Project code ---
+from utils.remnants import _build_remnants
+
+# ============= FUNCTIONS =================
 def partial_information(G1, G2, frac):
     # Training/test sets
     Etest = {}

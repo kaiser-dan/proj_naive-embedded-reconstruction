@@ -69,3 +69,15 @@ def balanced_partial_information(G1, G2, frac, seednodes=[0], search="bfs"):
     rem_G1, rem_G2, Etest = _build_remnants(G1, G2, Etrain, Etest)
 
     return rem_G1, rem_G2, Etest
+
+
+def _snowball_sample_edges(trees, seen, iterations):
+    count = 0
+    while count < iterations:
+        for tree in trees:
+            candidate_edge_observation = tree.popleft()
+            if not seen[candidate_edge_observation]:
+                seen[candidate_edge_observation] = True
+                count += 1
+
+    return seen

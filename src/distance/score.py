@@ -6,14 +6,20 @@ import numpy as np
 
 
 # ============= FUNCTIONS =================
-inverse = lambda x: 1/x
-negexp = lambda x: np.exp(-x)
-logistic = lambda x: 1 / (1 + negexp(x))
-tanh = lambda x: np.tanh(x)
-arctan = lambda x: np.arctan(x)
+# --- Likelihood models ---
+# Basic convex models
+inverse_ = lambda x: 1/x
+negexp_ = lambda x: np.exp(-x)
 
-def likelihood(target, *other_distances, metric:function = inverse):
-    likelihood_of_target = metric(target)
-    normalization_term = likelihood_of_target + sum([metric(dist) for dist in other_distances])
+# Sigmoid models
+logistic_ = lambda x: 1 / (1 + negexp_(x))
+tanh_ = lambda x: np.tanh(x)
+arctan_ = lambda x: np.arctan(x)
+
+# --- Drivers ---
+def likelihood(target_distance, *other_distances, likelihood_model:function = inverse_):
+    likelihood_of_target = likelihood_model(target_distance)
+    likelihoods_of_others = [likelihood_model(dist) for dist in other_distances]
+    normalization_term = likelihood_of_target + sum(likelihoods_of_others)
 
     return likelihood_of_target / normalization_term

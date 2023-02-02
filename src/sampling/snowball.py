@@ -1,3 +1,20 @@
+"""Project source code for random observed sub-multiplex simulation.
+"""
+# ============= SET-UP =================
+# --- Standard library ---
+import collections import deque
+
+# --- Scientific computing ---
+
+# --- Network science ---
+import networkx as nx
+
+# --- Project code ---
+from utils.remnants import _build_remnants
+
+
+# ============= FUNCTIONS =================
+
 def balanced_partial_information(G1, G2, frac, seednodes=[0], search="bfs"):
     """
     balanced_partial_information Observe a priori subduplex of `G1+G2` with a balanced snowball from the `seednodes` nodes.

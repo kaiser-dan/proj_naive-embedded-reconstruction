@@ -1,4 +1,4 @@
-"""Project source code for 
+"""Project source code for common remnant comprehension utility.
 """
 # ============= SET-UP =================
 # --- Network science ---

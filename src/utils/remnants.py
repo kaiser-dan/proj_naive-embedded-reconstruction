@@ -1,4 +1,4 @@
-"""Project source code for 
+"""Project source code for comprehending remnants
 """
 # ============= SET-UP =================
 # --- Network science ---

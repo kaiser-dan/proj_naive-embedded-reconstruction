@@ -1,3 +1,4 @@
 from src import utils
-from src import synthetic
-from src import glee
+from src import sampling
+from src import distance
+from src import embed

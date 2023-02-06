@@ -1,0 +1,78 @@
+"""Project source code for applying Laplacian Eigenmap embedding.
+"""
+# ============= SET-UP =================
+# --- Scientific computing ---
+import numpy as np
+from scipy.sparse.linalg import eigsh  # eigensolver
+
+# --- Network science ---
+import networkx as nx
+
+
+# ============= FUNCTIONS =================
+# --- Helpers ---
+def _reindex_nodes(graph):
+    reindexed_nodes = {
+        index: new_index
+        for new_index, index in enumerate(sorted(graph.nodes()))
+    }  # Allow for non-contiguous node indices
+    return reindexed_nodes
+
+
+# --- Driver ---
+def LE(graph, parameters, hyperparameters):
+    """Embed `graph` using Laplacian eigenmaps.
+
+    Parameters
+    ----------
+    graph : nx.Graph
+        Graph to embed. Node and edge attributes are ignored.
+    parameters : dict
+        Keyword arguments for LE parameter selection.
+    hyperparameters : dict
+        Keyword arguments for ARPACK convergence parameters.
+
+    Returns
+    -------
+    np.array
+        Map of node ids to embedded vectors (as rows).
+    """
+    # >>> Book-keeping >>>
+    reindexed_nodes = _reindex_nodes(graph)  # fix networkx indexing
+    vectors = np.zeros(
+        (graph.number_of_nodes(), parameters["dimension"])
+    )  # initialize embedded vectors
+    # <<< Book-keeping <<<
+
+    # Calculate normalized Laplacian matrix
+    L = nx.normalized_laplacian_matrix(graph, nodelist=sorted(graph.nodes()))
+
+    # Compute the eigenspectra of the normalized Laplacian matrix
+    _, eigenvectors = \
+        eigsh(L, **parameters, **hyperparameters)
+
+    # Apply node reindexing (thanks networkx :/)
+    for index, new_index in reindexed_nodes.items():
+        vectors[index, :] = eigenvectors[new_index]
+
+    return vectors
+
+
+def LE_per_component(graph, parameters, hyperparameters):
+    # >>> Book-keeping >>>
+    vectors_per_component = []  # list of vector embeddings, canonical ordering
+    # <<< Book-keeping <<<
+
+    # Retrieve each component as a graph
+    component_subgraphs = [
+        graph.subgraph(component).copy()
+        for component in nx.connected_components(graph)
+    ]
+
+    # Embed each component by themselves
+    for component_subgraph in component_subgraphs:
+        vectors_per_component.append(
+            LE(component_subgraph, parameters, hyperparameters)
+        )
+
+    return vectors_per_component

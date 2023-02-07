@@ -5,10 +5,8 @@
 import random
 
 # --- Scientific computing ---
-import numpy as np
 
 # --- Network science ---
-import networkx as nx
 
 # --- Project code ---
 from utils.remnants import _build_remnants

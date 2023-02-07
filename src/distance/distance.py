@@ -1,11 +1,20 @@
 """Project source code for calculating distances between vectors.
 """
 # ============= SET-UP =================
-# --- Scientific ---
+# --- Scientific computations ---
 import numpy as np
+
+# --- Network science ---
+from networkx import node_connected_component as component
 
 
 # ============= FUNCTIONS =================
+# --- Metrics ---
+def euclidean_distance(x, y): return np.linalg.norm(x - y)
+def cosine_similarity(x, y): return np.arccos(np.dot(x, y) / (np.norm(x) * np.norm(y)))
+def poincare_disk_distance(x, y): raise NotImplementedError("Hyperbolic distance not yet implemented!")
+
+
 # --- Drivers ---
 def embedded_edge_distance(edge, X, Y, distance_=euclidean_distance):
     src, tgt = edge
@@ -15,17 +24,16 @@ def embedded_edge_distance(edge, X, Y, distance_=euclidean_distance):
 
     return distance_(x, y)
 
-# --- Computations ---
-def euclidean_distance(x, y):
-    return np.linalg.norm(x - y)
 
-def cosine_similarity(x, y):
-    dot_ = np.dot(x, y)
+def component_penalized_embedded_edge_distance(edge, graph, X, Y, penalty=2**8, distance_=euclidean_distance):
+    src, tgt = edge
 
-    # Applying Cauchy-Schwartz inequality
-    cosine_ = dot_ / (np.norm(x) * np.norm(y))
+    x = X[src] - X[tgt]
+    y = Y[src] - Y[tgt]
 
-    return np.arccos(cosine_)
+    dist = distance_(x, y)
 
-def poincare_disk_distance(x, y):
-    raise NotImplementedError("Hyperbolic distance not yet implemented!")
+    if component(graph, src) != component(graph, tgt):
+        dist += penalty
+
+    return dist

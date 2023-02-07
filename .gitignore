@@ -167,7 +167,8 @@ cython_debug/
 .snakemake
 
 # Data files
-data/
+data/input/
+data/output/
 *.dat
 results/raw/
 _research/_tmp/

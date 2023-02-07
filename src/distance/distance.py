@@ -16,22 +16,15 @@ def poincare_disk_distance(x, y): raise NotImplementedError("Hyperbolic distance
 
 
 # --- Drivers ---
-def embedded_edge_distance(edge, X, Y, distance_=euclidean_distance):
+def embedded_edge_distance(edge, vectors, distance_=euclidean_distance):
     src, tgt = edge
 
-    x = X[src] - X[tgt]
-    y = Y[src] - Y[tgt]
+    return distance_(vectors[src], vectors[tgt]) + 1e-16
 
-    return distance_(x, y)
-
-
-def component_penalized_embedded_edge_distance(edge, graph, X, Y, penalty=2**8, distance_=euclidean_distance):
+def component_penalized_embedded_edge_distance(edge, graph, vectors, penalty=2**8, distance_=euclidean_distance):
     src, tgt = edge
 
-    x = X[src] - X[tgt]
-    y = Y[src] - Y[tgt]
-
-    dist = distance_(x, y)
+    dist = distance_(vectors[src], vectors[tgt]) + 1e-16
 
     if component(graph, src) != component(graph, tgt):
         dist += penalty

@@ -34,26 +34,37 @@ def LE(graph, parameters, hyperparameters):
 
     Returns
     -------
-    np.array
+    ~~np.array~~
+    dict
         Map of node ids to embedded vectors (as rows).
+
     """
     # >>> Book-keeping >>>
     reindexed_nodes = _reindex_nodes(graph)  # fix networkx indexing
-    vectors = np.zeros(
-        (graph.number_of_nodes(), parameters["dimension"])
-    )  # initialize embedded vectors
+    vectors = dict()
+    # ! >>> BROKEN >>>
+    # vectors = np.zeros(
+    #     (graph.number_of_nodes(), parameters["k"])  # needs k for scipy.sparse.linalg.eigsh
+    # )  # initialize embedded vectors
+    # ! <<< BROKEN <<<
     # <<< Book-keeping <<<
 
     # Calculate normalized Laplacian matrix
     L = nx.normalized_laplacian_matrix(graph, nodelist=sorted(graph.nodes()))
 
     # Compute the eigenspectra of the normalized Laplacian matrix
+    # ! >>> BROKEN >>>
+    #_, eigenvectors = \
+    #    eigsh(L, **parameters, **hyperparameters)
+    # ! <<< BROKEN <<<
+    # ! >>> HOTFIX >>>
     _, eigenvectors = \
-        eigsh(L, **parameters, **hyperparameters)
+        eigsh(L, k=parameters["k"], maxiter=hyperparameters["maxiter"], tol=hyperparameters["tol"])
+    # ! <<< HOTFIX <<<
 
     # Apply node reindexing (thanks networkx :/)
     for index, new_index in reindexed_nodes.items():
-        vectors[index, :] = eigenvectors[new_index]
+        vectors[index] = eigenvectors[new_index]
 
     return vectors
 

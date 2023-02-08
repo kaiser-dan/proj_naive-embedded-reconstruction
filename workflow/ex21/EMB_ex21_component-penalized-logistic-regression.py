@@ -28,7 +28,8 @@ from utils import parameters as params
 
 # --- Miscellaneous ---
 from datetime import datetime
-from tqdm.auto import tqdm
+from tqdm.auto import tqdm, trange
+from tabulate import tabulate
 
 
 # ========== FUNCTIONS ==========
@@ -37,12 +38,12 @@ def experiment(system, layer_pair, parameters, hyperparameters):
     record = {
         "system": system,
         "l1": layer_pair[0],
-        "l2": layer_pair[0],
+        "l2": layer_pair[1],
         "theta": parameters["theta"],
-        "accuracy": 0.0,
-        "auroc": 0.0,
-        "coef": 0.0,
-        "intercept": 0.0
+        "accuracy": -1.0,
+        "auroc": -1.0,
+        "coef": -1.0,
+        "intercept": -1.0
     }  # initialize record
     # <<< Book-keeping <<<
 
@@ -108,15 +109,18 @@ def main(systems, parameters, hyperparameters, output_filehandle=None):
 
     # >>> Experiment >>>
     # Loop over all desired induced duplexes
-    for system, layers in tqdm(systems.items(), desc="Systems-level progress"):
-        for layer_pair in layers:
+    for system, layers in tqdm(systems.items(), desc="Systems-level progress", position=0, colour="white"):
+        for layer_pair in tqdm(layers, desc="Layer pairs", position=1, leave=False, colour="green"):
             # Loop over theta (primary variable)
-            for theta in thetas:
+            for theta in tqdm(thetas, desc="theta", position=2, leave=False, colour="yellow"):
                 parameters["theta"] = theta
                 # Repeat for statistics
-                for _ in range(hyperparameters["repeat"]):
-                    record = experiment(system, layer_pair, parameters, hyperparameters)
-                    records.append(record)
+                for _ in trange(hyperparameters["repeat"], desc="Repetitions", position=3, leave=False, colour="red"):
+                    try:
+                        record = experiment(system, layer_pair, parameters, hyperparameters)
+                        records.append(record)
+                    except TypeError:
+                        print(f"{system}({layer_pair[0]}, {layer_pair[1]}) - theta = {theta} \t remnant too sparse, k >= N")
     # <<< Experiment <<<
 
     # >>> Post-processing >>>
@@ -125,7 +129,7 @@ def main(systems, parameters, hyperparameters, output_filehandle=None):
         df.to_csv(output_filehandle, index_label="_UID")
     # <<< Post-processing <<<
 
-    return records
+    return df
 
 if __name__ == "__main__":
     # >>> Experiment set-up >>>
@@ -133,7 +137,7 @@ if __name__ == "__main__":
     metadata = {
         "PROJECT_ID": "EMB_ex21",
         "RESEARCHERS": "DK",
-        "CURRENT_VERSION": "v2.0",
+        "CURRENT_VERSION": "v2.1",
         "DATE": datetime.today().strftime("%Y%m%d")
     }
     TAG = "{PROJECT_ID}{CURRENT_VERSION}_{RESEARCHERS}_{DATE}".format(**metadata)
@@ -141,12 +145,15 @@ if __name__ == "__main__":
 
     # Parameter ranges
     systems = {
-        "celegans": [(1, 2)] #, (1, 3), (2, 3)],
+        # "arxiv": [(2, 6), (2, 7), (6, 7)],
+        "celegans": [(1, 2), (1, 3), (2, 3)],
+        # "drosophila": [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)],
         # "london": [(1, 2), (1, 3), (2, 3)],
     }
-    parameters, hyperparameters = params.set_parameters_LE()
+    parameters, hyperparameters = params.set_parameters_LE(theta_num=10)
     # <<< Experiment set-up <<<
 
     # >>> Experiment >>>
-    main(systems, parameters, hyperparameters) #, output_filehandle)
+    df = main(systems, parameters, hyperparameters, output_filehandle)
+    print(tabulate(df, headers='keys', tablefmt='psql'))
     # <<< Experiment <<<

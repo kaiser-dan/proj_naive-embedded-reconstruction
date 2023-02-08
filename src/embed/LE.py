@@ -2,7 +2,6 @@
 """
 # ============= SET-UP =================
 # --- Scientific computing ---
-import numpy as np
 from scipy.sparse.linalg import eigsh  # eigensolver
 
 # --- Network science ---
@@ -43,6 +42,9 @@ def LE(graph, parameters, hyperparameters):
     reindexed_nodes = _reindex_nodes(graph)  # fix networkx indexing
     vectors = dict()
     # ! >>> BROKEN >>>
+    # ! Non-contiguous indexing in some real remnants is causing
+    # ! indexing errors with arrays - generalizing to a dict instead
+    # ! All downstream analyses are able to proceed
     # vectors = np.zeros(
     #     (graph.number_of_nodes(), parameters["k"])  # needs k for scipy.sparse.linalg.eigsh
     # )  # initialize embedded vectors
@@ -59,7 +61,12 @@ def LE(graph, parameters, hyperparameters):
     # ! <<< BROKEN <<<
     # ! >>> HOTFIX >>>
     _, eigenvectors = \
-        eigsh(L, k=parameters["k"], maxiter=hyperparameters["maxiter"], tol=hyperparameters["tol"])
+        eigsh(
+            L, k=parameters["k"],
+            maxiter=hyperparameters["maxiter"],
+            tol=hyperparameters["tol"],
+            ncv=hyperparameters["NCV"]*graph.number_of_nodes()
+        )
     # ! <<< HOTFIX <<<
 
     # Apply node reindexing (thanks networkx :/)

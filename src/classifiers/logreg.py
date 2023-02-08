@@ -14,14 +14,14 @@ def train_fit_logreg(X_train, y_train, seed=37):
     return model
 
 def get_model_fit(model):
-    return model.intercept_, model.coef_
+    return model.intercept_[0], model.coef_[0][0]
 
 # --- Reconstruction ---
 def get_reconstruction(model, X_test):
     return model.predict(X_test)
 
 def get_scores(model, X_test):
-    return model.predict_proba(X_test)
+    return model.predict_proba(X_test)[:, 0]
 
 # --- Performance measures ---
 def get_model_accuracy(model, X_test, y_test):

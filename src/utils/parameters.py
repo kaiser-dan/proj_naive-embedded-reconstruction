@@ -72,6 +72,7 @@ def set_parameters_LE(
         # >>> LE embedding <<<
         "maxiter": maxiter,
         "tol": tol,
+        "NCV": 6,
 
         # >>> Logistic regression <<<
         "penalty": penalty,  # L2 regularization

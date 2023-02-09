@@ -282,7 +282,7 @@ def overlap_multiplex(num_nodes=100, proportion_overlap=0.5):
 
     #overlapping nodes
     move=int((1-proportion_overlap)*num_nodes)
-    mapping={i:(i+move)%2*num_nodes for i in g2.nodes()}
+    mapping={i:(i+move)%(2*num_nodes) for i in g2.nodes()}
     g2=nx.relabel_nodes(g2,mapping)
 
     return [g1,g2]

@@ -246,3 +246,35 @@ def lfr_multiplex (N, tau1, tau2, mu, average_degree, max_degree, min_community,
 
     return G, sigma1, sigma2, mu
 
+
+def overlap_multiplex(n=100,o=0.5):
+    '''
+    Input: n: Size of active nodes on each layer (default-->100), overlapping nodes: Fraction of nodes appearing on both layers (o-->[0,1])
+    Output: [nx object layer 1, nx object layer 2]
+   
+    '''
+
+    #create layer 1
+    g1=nx.barabasi_albert_graph(n,1)
+    g1.add_edges_from([(random.choice(list(g1.nodes())),random.choice(list(g1.nodes()))) for _ in range(10)])
+    g1.remove_edges_from(nx.selfloop_edges(g1))
+
+    #create layer 2
+    g2=nx.barabasi_albert_graph(n,1)
+    g2.add_edges_from([(random.choice(list(g2.nodes())),random.choice(list(g2.nodes()))) for _ in range(10)])
+    g2.remove_edges_from(nx.selfloop_edges(g2))
+
+    #relabel nodes
+    shuffle=random.sample(g2.nodes(),n)
+    mapping={i:shuffle[i] for i in g2.nodes()}
+    g2=nx.relabel_nodes(g2,mapping)
+
+    g1.add_nodes_from(list(range(n,2*n)))
+    g2.add_nodes_from(list(range(n,2*n)))
+
+    #overlapping nodes
+    move=int((1-o)*n)
+    mapping={i:(i+move)%2*n for i in g2.nodes()}
+    g2=nx.relabel_nodes(g2,mapping)
+
+    return [g1,g2]

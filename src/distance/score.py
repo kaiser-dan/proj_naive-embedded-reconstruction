@@ -1,8 +1,11 @@
 """Project source code for calculating likelihoods from vector distances.
 """
 # ============= SET-UP =================
-# --- Scientific ---
+# --- Scientific computing ---
 import numpy as np
+
+# --- Network science ---
+from networkx import node_connected_component as component
 
 # --- Project source code ---
 from distance.distance import *
@@ -21,6 +24,7 @@ def arctan_(x): return np.arctan(x)
 
 
 # --- Drivers ---
+# Probabilities
 def likelihood(
     target_distance, *other_distances,
         likelihood_model = inverse_):
@@ -35,14 +39,17 @@ def likelihood(
 
     return likelihood_of_target / normalization_term
 
-
+# Features
 def embedded_edge_distance_ratio(
     edge, vectors_numerator, vectors_denominator,
         distance_=euclidean_distance):
+    # Calculate edge distance in each remnant
+    dist_numerator = embedded_edge_distance(edge, vectors_numerator, distance_)
+    dist_denominator = embedded_edge_distance(edge, vectors_denominator, distance_)
+
+    # Calculate distance ratio
     try:
-        ratio = \
-            embedded_edge_distance(edge, vectors_numerator, distance_) \
-                / embedded_edge_distance(edge, vectors_denominator, distance_)
+        ratio = dist_numerator / dist_denominator
     except ZeroDivisionError:
         ratio = np.finfo(np.float64).max
     finally:
@@ -54,11 +61,30 @@ def component_penalized_embedded_edge_distance_ratio(
     graph_numerator, graph_denominator,
     vectors_numerator, vectors_denominator,
         penalty=2**8, distance_=euclidean_distance):
+    # >>> Book-keeping >>>
+    src, tgt = edge  # identify nodes incident to edge
+    # <<< Book-keeping <<<
+
+    # >>> Score (feature) calculation >>>
+    # Calculate edge distance in each remnant
+    dist_numerator = component_penalized_embedded_edge_distance(edge, graph_numerator, vectors_numerator, penalty, distance_)
+    dist_denominator = component_penalized_embedded_edge_distance(edge, graph_denominator, vectors_denominator, penalty, distance_)
+
+    # Account for isolated component bias
+    component_numerator_src = component(graph_numerator, src)
+    component_numerator_tgt = component(graph_numerator, tgt)
+    component_denominator_src = component(graph_denominator, src)
+    component_denominator_tgt = component(graph_denominator, tgt)
+    if (component_numerator_src == component_numerator_tgt) and (len(component_numerator_src) <= 15):
+        dist_numerator += penalty
+    elif (component_denominator_src == component_denominator_tgt) and (len(component_denominator_src) <= 15):
+        dist_denominator += penalty
+
+    # Calculate distance ratio
     try:
-        ratio = \
-            component_penalized_embedded_edge_distance(edge, graph_numerator, vectors_numerator, penalty, distance_) \
-                / component_penalized_embedded_edge_distance(edge, graph_denominator, vectors_denominator, penalty, distance_)
-    except: # ZeroDivisionError:
+        ratio = dist_numerator / dist_denominator
+    except ZeroDivisionError:
         ratio = np.finfo(np.float64).max
+    # <<< Score (feature) calculation <<<
     finally:
         return ratio

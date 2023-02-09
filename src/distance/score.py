@@ -77,7 +77,7 @@ def component_penalized_embedded_edge_distance_ratio(
     component_denominator_tgt = component(graph_denominator, tgt)
     if (component_numerator_src == component_numerator_tgt) and (len(component_numerator_src) <= 15):
         dist_numerator += penalty
-    elif (component_denominator_src == component_denominator_tgt) and (len(component_denominator_src) <= 15):
+    if (component_denominator_src == component_denominator_tgt) and (len(component_denominator_src) <= 15):
         dist_denominator += penalty
 
     # Calculate distance ratio

@@ -18,7 +18,7 @@ sys.path.append("../../src/")
 
 # Primary modules
 from classifiers import logreg  # logistic regression
-from data import dataio, preprocessing  # reading data, form duplex
+from data import preprocessing, benchmarks  # reading data, form duplex
 from distance.score import component_penalized_embedded_edge_distance_ratio, format_distance_ratios  # Feature calculations for logreg
 from embed import N2V, LE  # graph embeddings
 from sampling.random import partial_information  # sample training set
@@ -35,12 +35,11 @@ import warnings
 warnings.filterwarnings("ignore")  # remove sklearn depreciation warning >.>
 
 # ========== FUNCTIONS ==========
-def experiment(system, layer_pair, parameters, hyperparameters, dense_error=False):
+def experiment(num_nodes, prop_overlap, parameters, hyperparameters, dense_error=False):
     # >>> Book-keeping >>>
     record = {
-        "system": system,
-        "l1": layer_pair[0],
-        "l2": layer_pair[1],
+        "num_nodes": num_nodes,
+        "prop_overlap": prop_overlap,
         "theta": parameters["theta"],
         "accuracy": -1.0,
         "auroc": -1.0,
@@ -51,8 +50,8 @@ def experiment(system, layer_pair, parameters, hyperparameters, dense_error=Fals
 
     # >>> Procedure >>>
     # * Step (1) - Bring duplex into memory
-    D = dataio.read_file(f"../../data/input/raw/duplex_system={system}.edgelist")
-    G, H = preprocessing.duplex_network(D, *layer_pair)
+    D = benchmarks.overlap_multiplex(num_nodes, prop_overlap)
+    G, H = preprocessing.duplex_network(D, 0, 1)
 
     # * Steps (2) thru (4) - Observe a priori information and calculate remnants
     R_G, R_H, testset, trainset = partial_information(G, H, parameters["theta"])
@@ -117,19 +116,19 @@ def main(systems, parameters, hyperparameters, output_filehandle=None):
 
     # >>> Experiment >>>
     # Loop over all desired induced duplexes
-    for system, layers in tqdm(systems.items(), desc="Systems-level progress", position=0, colour="white"):
-        for layer_pair in tqdm(layers, desc="Layer pairs", position=1, leave=False, colour="green"):
+    for num_nodes, prop_overlaps in tqdm(systems.items(), desc="Systems-level progress", position=0, colour="white"):
+        for prop_overlap in tqdm(prop_overlaps, desc="Overlap proportion", position=1, leave=False, colour="green"):
             # Loop over theta (primary variable)
             for theta in tqdm(thetas, desc="theta", position=2, leave=False, colour="yellow"):
                 parameters["theta"] = theta
                 # Repeat for statistics
                 for _ in trange(hyperparameters["repeat"], desc="Repetitions", position=3, leave=False, colour="red"):
                     try:
-                        record = experiment(system, layer_pair, parameters, hyperparameters)
+                        record = experiment(num_nodes, prop_overlap, parameters, hyperparameters)
                         records.append(record)
                     except TypeError:  # small component, k >= N. Can restart with dense solver.
                         # sys.stderr.write(f">>> {system}({layer_pair[0]}, {layer_pair[1]}) - theta = {theta} \t remnant too sparse, k >= N\n >>> Restarting with dense eigensolver")
-                        record = experiment(system, layer_pair, parameters, hyperparameters, dense_error=True)
+                        record = experiment(num_nodes, prop_overlap, parameters, hyperparameters, dense_error=True)
                         records.append(record)
     # <<< Experiment <<<
 
@@ -145,9 +144,9 @@ if __name__ == "__main__":
     # >>> Experiment set-up >>>
     # Metadata
     metadata = {
-        "PROJECT_ID": "EMB_ex21",
+        "PROJECT_ID": "EMB_ex22",
         "RESEARCHERS": "DK",
-        "CURRENT_VERSION": "v3.1.4",
+        "CURRENT_VERSION": "v1.0",
         "DATE": datetime.today().strftime("%Y%m%d")
     }
     TAG = "{PROJECT_ID}{CURRENT_VERSION}_{RESEARCHERS}_{DATE}".format(**metadata)
@@ -155,15 +154,14 @@ if __name__ == "__main__":
 
     # Parameter ranges
     systems = {
-        # "arxiv": [(2, 6), (2, 7), (6, 7)],
-        "celegans": [(1, 2), (1, 3), (2, 3)],
-        # "drosophila": [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)],
-        "london": [(1, 2), (1, 3), (2, 3)],
+        x*100 : np.logspace(start=-3, stop=-1, num=3, base=10)
+        for x in range(1, 10, 2)
     }
-    parameters, hyperparameters = params.set_parameters_LE(theta_num=10)
+    parameters, hyperparameters = params.set_parameters_LE(theta_num=6, repeat=3)
     # <<< Experiment set-up <<<
 
     # >>> Experiment >>>
+    print("\n", "="*30, TAG, "="*30, "\n\n")
     df = main(systems, parameters, hyperparameters, output_filehandle)
     print(tabulate(df, headers='keys', tablefmt='psql'))
     # <<< Experiment <<<

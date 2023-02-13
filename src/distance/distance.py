@@ -24,7 +24,10 @@ def embedded_edge_distance(edge, vectors, distance_=euclidean_distance):
 def component_penalized_embedded_edge_distance(edge, graph, vectors, penalty=2**8, distance_=euclidean_distance):
     src, tgt = edge
 
-    dist = distance_(vectors[src], vectors[tgt]) + 1e-16
+    try:
+        dist = distance_(vectors[src], vectors[tgt]) + 1e-16
+    except ValueError:  # Dimension mismatch when per-component embedding applied
+        dist = 1e-16
 
     if component(graph, src) != component(graph, tgt):
         dist += penalty

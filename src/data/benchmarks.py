@@ -246,3 +246,43 @@ def lfr_multiplex (N, tau1, tau2, mu, average_degree, max_degree, min_community,
 
     return G, sigma1, sigma2, mu
 
+
+def overlap_multiplex(num_nodes=100, proportion_overlap=0.5):
+    """Generate a synthetic duplex with tunable number of overlapping active nodes.
+
+    Parameters
+    ----------
+    num_nodes : int, optional
+        Number of nodes in each layer (equivalent), by default 100
+    proportion_overlap : float, optional
+        Proportion of nodes to be active in both layers, by default 0.5
+
+    Returns
+    -------
+    list
+        Resultant layers of the synthetic duplex.
+    """
+    #create layer 1
+    g1=nx.barabasi_albert_graph(num_nodes,1)
+    g1.add_edges_from([(random.choice(list(g1.nodes())),random.choice(list(g1.nodes()))) for _ in range(10)])
+    g1.remove_edges_from(nx.selfloop_edges(g1))
+
+    #create layer 2
+    g2=nx.barabasi_albert_graph(num_nodes,1)
+    g2.add_edges_from([(random.choice(list(g2.nodes())),random.choice(list(g2.nodes()))) for _ in range(10)])
+    g2.remove_edges_from(nx.selfloop_edges(g2))
+
+    #relabel nodes
+    shuffle=random.sample(g2.nodes(),num_nodes)
+    mapping={i:shuffle[i] for i in g2.nodes()}
+    g2=nx.relabel_nodes(g2,mapping)
+
+    g1.add_nodes_from(list(range(num_nodes,2*num_nodes)))
+    g2.add_nodes_from(list(range(num_nodes,2*num_nodes)))
+
+    #overlapping nodes
+    move=int((1-proportion_overlap)*num_nodes)
+    mapping={i:(i+move)%(2*num_nodes) for i in g2.nodes()}
+    g2=nx.relabel_nodes(g2,mapping)
+
+    return [g1,g2]

@@ -4,6 +4,8 @@
 # --- Scientific ---
 import numpy as np
 
+# --- Project source code ---
+from distance.distance import *
 
 # ============= FUNCTIONS =================
 # --- Likelihood models ---
@@ -21,7 +23,7 @@ def arctan_(x): return np.arctan(x)
 # --- Drivers ---
 def likelihood(
     target_distance, *other_distances,
-        likelihood_model: function = inverse_):
+        likelihood_model = inverse_):
     # Calculate likelihood for specified layer (given distance)
     likelihood_of_target = likelihood_model(target_distance)
 
@@ -32,3 +34,31 @@ def likelihood(
     normalization_term = likelihood_of_target + sum(likelihoods_of_others)
 
     return likelihood_of_target / normalization_term
+
+
+def embedded_edge_distance_ratio(
+    edge, vectors_numerator, vectors_denominator,
+        distance_=euclidean_distance):
+    try:
+        ratio = \
+            embedded_edge_distance(edge, vectors_numerator, distance_) \
+                / embedded_edge_distance(edge, vectors_denominator, distance_)
+    except ZeroDivisionError:
+        ratio = np.finfo(np.float64).max
+    finally:
+        return ratio
+
+
+def component_penalized_embedded_edge_distance_ratio(
+    edge,
+    graph_numerator, graph_denominator,
+    vectors_numerator, vectors_denominator,
+        penalty=2**8, distance_=euclidean_distance):
+    try:
+        ratio = \
+            component_penalized_embedded_edge_distance(edge, graph_numerator, vectors_numerator, penalty, distance_) \
+                / component_penalized_embedded_edge_distance(edge, graph_denominator, vectors_denominator, penalty, distance_)
+    except: # ZeroDivisionError:
+        ratio = np.finfo(np.float64).max
+    finally:
+        return ratio

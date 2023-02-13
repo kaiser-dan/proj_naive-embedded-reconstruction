@@ -2,7 +2,7 @@
 """
 # ============= SET-UP =================
 # --- Standard library ---
-import collections import deque
+from collections import deque
 
 # --- Scientific computing ---
 

@@ -3,6 +3,7 @@
 # ============= SET-UP =================
 # --- Scientific computing ---
 from scipy.sparse.linalg import eigsh  # eigensolver
+from scipy.linalg import eigh
 
 # --- Network science ---
 import networkx as nx
@@ -19,7 +20,7 @@ def _reindex_nodes(graph):
 
 
 # --- Driver ---
-def LE(graph, parameters, hyperparameters):
+def LE(graph, parameters, hyperparameters, dense_error=False):
     """Embed `graph` using Laplacian eigenmaps.
 
     Parameters
@@ -29,7 +30,9 @@ def LE(graph, parameters, hyperparameters):
     parameters : dict
         Keyword arguments for LE parameter selection.
     hyperparameters : dict
-        Keyword arguments for ARPACK convergence parameters.
+        Keyword arguments for ARPACK convergence parameters.\
+    dense_error : bool
+        Indicator if graph is dense, i.e., k >= N, by default False.
 
     Returns
     -------
@@ -60,13 +63,16 @@ def LE(graph, parameters, hyperparameters):
     #    eigsh(L, **parameters, **hyperparameters)
     # ! <<< BROKEN <<<
     # ! >>> HOTFIX >>>
-    _, eigenvectors = \
-        eigsh(
-            L, k=parameters["k"],
-            maxiter=hyperparameters["maxiter"],
-            tol=hyperparameters["tol"],
-            ncv=hyperparameters["NCV"]*graph.number_of_nodes()
-        )
+    if dense_error:
+        _, eigenvectors = eigh(L.toarray())
+    else:
+        _, eigenvectors = \
+            eigsh(
+                L, k=parameters["k"],
+                maxiter=hyperparameters["maxiter"],
+                tol=hyperparameters["tol"],
+                ncv=hyperparameters["NCV"]*graph.number_of_nodes()
+            )
     # ! <<< HOTFIX <<<
 
     # Apply node reindexing (thanks networkx :/)
@@ -76,7 +82,7 @@ def LE(graph, parameters, hyperparameters):
     return vectors
 
 
-def LE_per_component(graph, parameters, hyperparameters):
+def LE_per_component(graph, parameters, hyperparameters, dense_error=False):
     # >>> Book-keeping >>>
     vectors_per_component = []  # list of vector embeddings, canonical ordering
     # <<< Book-keeping <<<
@@ -90,7 +96,7 @@ def LE_per_component(graph, parameters, hyperparameters):
     # Embed each component by themselves
     for component_subgraph in component_subgraphs:
         vectors_per_component.append(
-            LE(component_subgraph, parameters, hyperparameters)
+            LE(component_subgraph, parameters, hyperparameters, dense_error=dense_error)
         )
 
     return vectors_per_component

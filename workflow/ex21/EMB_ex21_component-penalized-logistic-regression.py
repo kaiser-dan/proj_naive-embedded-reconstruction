@@ -31,9 +31,11 @@ from datetime import datetime
 from tqdm.auto import tqdm, trange
 from tabulate import tabulate
 
+import warnings
+warnings.filterwarnings("ignore")
 
 # ========== FUNCTIONS ==========
-def experiment(system, layer_pair, parameters, hyperparameters):
+def experiment(system, layer_pair, parameters, hyperparameters, dense_error=False):
     # >>> Book-keeping >>>
     record = {
         "system": system,
@@ -56,8 +58,10 @@ def experiment(system, layer_pair, parameters, hyperparameters):
     R_G, R_H, testset, trainset = partial_information(G, H, parameters["theta"])
 
     # * Step (5) - Embed remnants
-    E_G = LE.LE(R_G, parameters, hyperparameters)
-    E_H = LE.LE(R_H, parameters, hyperparameters)
+    # 'dense_error' indicates when k >= N in LE
+    #  This often occurs in per-component LE since N is quite small for some components
+    E_G = LE.LE_per_component(R_G, parameters, hyperparameters, dense_error=dense_error)
+    E_H = LE.LE_per_component(R_H, parameters, hyperparameters, dense_error=dense_error)
 
     # * Steps (6) and (7) - Calculate distances of nodes incident to edges in both embeddings
     distance_ratios_train = np.array([
@@ -85,7 +89,10 @@ def experiment(system, layer_pair, parameters, hyperparameters):
     labels_test = list(testset.values())
 
     # * Step (8) - Train a logistic regression
-    model = logreg.train_fit_logreg(distance_ratios_train, labels_train)
+    try:
+        model = logreg.train_fit_logreg(distance_ratios_train, labels_train)
+    except ValueError:  # when only one class is available, skip!
+        return record
 
     # * Step (9) - Predict testset with reconstruction
     record["accuracy"] = logreg.get_model_accuracy(model, distance_ratios_test, labels_test)
@@ -120,7 +127,9 @@ def main(systems, parameters, hyperparameters, output_filehandle=None):
                         record = experiment(system, layer_pair, parameters, hyperparameters)
                         records.append(record)
                     except TypeError:
-                        print(f"{system}({layer_pair[0]}, {layer_pair[1]}) - theta = {theta} \t remnant too sparse, k >= N")
+                        # print(f"{system}({layer_pair[0]}, {layer_pair[1]}) - theta = {theta} \t remnant too sparse, k >= N")
+                        record = experiment(system, layer_pair, parameters, hyperparameters, dense_error=True)
+                        records.append(record)
     # <<< Experiment <<<
 
     # >>> Post-processing >>>
@@ -137,7 +146,7 @@ if __name__ == "__main__":
     metadata = {
         "PROJECT_ID": "EMB_ex21",
         "RESEARCHERS": "DK",
-        "CURRENT_VERSION": "v2.1",
+        "CURRENT_VERSION": "v3.0",
         "DATE": datetime.today().strftime("%Y%m%d")
     }
     TAG = "{PROJECT_ID}{CURRENT_VERSION}_{RESEARCHERS}_{DATE}".format(**metadata)
@@ -148,7 +157,7 @@ if __name__ == "__main__":
         # "arxiv": [(2, 6), (2, 7), (6, 7)],
         "celegans": [(1, 2), (1, 3), (2, 3)],
         # "drosophila": [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)],
-        # "london": [(1, 2), (1, 3), (2, 3)],
+        "london": [(1, 2), (1, 3), (2, 3)],
     }
     parameters, hyperparameters = params.set_parameters_LE(theta_num=10)
     # <<< Experiment set-up <<<

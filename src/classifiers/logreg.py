@@ -21,7 +21,7 @@ def get_reconstruction(model, X_test):
     return model.predict(X_test)
 
 def get_scores(model, X_test):
-    return model.predict_proba(X_test)[:, 0]
+    return model.predict_proba(X_test)[:, 1]
 
 # --- Performance measures ---
 def get_model_accuracy(model, X_test, y_test):

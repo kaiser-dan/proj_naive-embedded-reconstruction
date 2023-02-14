@@ -146,7 +146,7 @@ if __name__ == "__main__":
     metadata = {
         "PROJECT_ID": "EMB_ex22",
         "RESEARCHERS": "DK",
-        "CURRENT_VERSION": "v1.0",
+        "CURRENT_VERSION": "v1.1",
         "DATE": datetime.today().strftime("%Y%m%d")
     }
     TAG = "{PROJECT_ID}{CURRENT_VERSION}_{RESEARCHERS}_{DATE}".format(**metadata)
@@ -154,10 +154,9 @@ if __name__ == "__main__":
 
     # Parameter ranges
     systems = {
-        x*100 : np.logspace(start=-3, stop=-1, num=3, base=10)
-        for x in range(1, 10, 2)
+        500 : np.logspace(start=-3, stop=-1, num=10, base=10)
     }
-    parameters, hyperparameters = params.set_parameters_LE(theta_num=6, repeat=3)
+    parameters, hyperparameters = params.set_parameters_LE(theta_num=10)
     # <<< Experiment set-up <<<
 
     # >>> Experiment >>>

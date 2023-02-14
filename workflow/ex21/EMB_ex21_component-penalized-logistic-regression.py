@@ -156,7 +156,7 @@ if __name__ == "__main__":
     # Parameter ranges
     systems = {
         # "arxiv": [(2, 6), (2, 7), (6, 7)],
-        # "celegans": [(1, 2), (1, 3), (2, 3)],
+        "celegans": [(1, 2), (1, 3), (2, 3)],
         # "drosophila": [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)],
         "london": [(1, 2), (1, 3), (2, 3)],
     }
@@ -164,6 +164,7 @@ if __name__ == "__main__":
     # <<< Experiment set-up <<<
 
     # >>> Experiment >>>
+    print("\n", "="*30, TAG, "="*30, "\n\n")
     df = main(systems, parameters, hyperparameters, output_filehandle)
     print(tabulate(df, headers='keys', tablefmt='psql'))
     # <<< Experiment <<<

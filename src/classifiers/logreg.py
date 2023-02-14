@@ -20,8 +20,9 @@ def get_model_fit(model):
 def get_reconstruction(model, X_test):
     return model.predict(X_test)
 
-def get_scores(model, X_test):
-    return model.predict_proba(X_test)[:, 1]
+def get_scores(model, X_test, class_label=1):
+    # class_label = 1 indicates scoring for classification in G.
+    return model.predict_proba(X_test)[:, class_label]
 
 # --- Performance measures ---
 def get_model_accuracy(model, X_test, y_test):

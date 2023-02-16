@@ -24,7 +24,7 @@ def set_parameters_N2V(
         "dimensions": dimensions,  # euclidean dimension to embedd
         "walk_length": walk_length,  # number of nodes in each walk
         "num_walks": num_walks,  # number of walks per node
-
+        "workers": workers,  # for cpu parallel work
         # >>> Simulations <<<
         "theta_min": theta_min,
         "theta_max": theta_max,
@@ -33,7 +33,7 @@ def set_parameters_N2V(
 
     hyperparameters = {
         # >>> Node2Vec embedding <<<
-        "workers": workers,  # for cpu parallel work
+        #"workers": workers,  # for cpu parallel work
         "quiet": quiet,  # verbose printing
         "window": window,  # maximum distance between the current and predicted word within a sentence.
         "min_count": min_count,  # ignores all words with total frequency lower than this

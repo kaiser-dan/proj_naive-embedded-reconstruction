@@ -8,7 +8,7 @@ def set_parameters_N2V(
     dimensions=128,
     walk_length=30,
     num_walks=100,
-    workers=4,
+    workers=8,
     quiet=True,
     window=10,
     min_count=1,
@@ -25,6 +25,7 @@ def set_parameters_N2V(
         "walk_length": walk_length,  # number of nodes in each walk
         "num_walks": num_walks,  # number of walks per node
         "workers": workers,  # for cpu parallel work
+        "quiet": quiet,  # verbose printing
         # >>> Simulations <<<
         "theta_min": theta_min,
         "theta_max": theta_max,
@@ -33,8 +34,6 @@ def set_parameters_N2V(
 
     hyperparameters = {
         # >>> Node2Vec embedding <<<
-        #"workers": workers,  # for cpu parallel work
-        "quiet": quiet,  # verbose printing
         "window": window,  # maximum distance between the current and predicted word within a sentence.
         "min_count": min_count,  # ignores all words with total frequency lower than this
         "batch_words": batch_words,  # [unsure]

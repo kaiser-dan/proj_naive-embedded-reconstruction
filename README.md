@@ -4,20 +4,45 @@ This project provides source code for the reconstruction of multiplex networks f
 
 - _In preparation_
 
-## Getting Started
+# Contents
+
+- [Multiplex Reconstruction via Graph Embeddings](#multiplex-reconstruction-via-graph-embeddings)
+- [Contents](#contents)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installing](#installing)
+  - [Quick Start](#quick-start)
+- [Usage](#usage)
+  - [Repository Structure](#repository-structure)
+  - [Reproducing experiments](#reproducing-experiments)
+- [Documentation](#documentation)
+- [Running the tests](#running-the-tests)
+  - [Test Suite Organization](#test-suite-organization)
+- [Other Information](#other-information)
+  - [Built With](#built-with)
+  - [Contributing](#contributing)
+  - [Versioning](#versioning)
+  - [Authors](#authors)
+  - [License](#license)
+  - [Acknowledgments](#acknowledgments)
+
+
+# Getting Started
 
 The code base for this project is written in Python with package management handled with Conda.
 
 These instructions will give you a copy of the project up and running on
 your local machine for development, testing, and analysis purposes.
 
-### Prerequisites
+## Prerequisites
 
 A compatible Python install is needed to begin - the package management is handled by Conda as described below.
 - [Python \[3.10+\]](https://python.org/downloads/)
-- [Conda \[ 4.14+\]](https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html)
+- [Conda \[4.14+\]](https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html)
 
-### Installing
+A complete list of packages is available in the `environment.yaml` file. Instructions for creating a controlled environment from this manifest is available below, in the [Installing](#installing) section.
+
+## Installing
 
 To (locally) reproduce this project, do the following:
 
@@ -30,20 +55,36 @@ To (locally) reproduce this project, do the following:
 
 This will install all necessary packages for you to be able to run the scripts and everything should work out of the box.
 
-## Usage
+## Quick Start
+
+[Describe makefile and reproduction script]
+
+# Usage
 
 [Usage guide]
 
+## Repository Structure
 
-## Running the tests
+[Describe structure]
+
+## Reproducing experiments
+
+[Describe experimental protocol docs]
+
+# Documentation
+
+[Describe documentation]
+
+
+# Running the tests
 
 All unit tests are written with [XXX test utility]().
 
 
-### Test Suite Organization
+## Test Suite Organization
 
 
-
+# Other Information
 ## Built With
   - [ChooseALicense](https://choosealicense.com/) - Used to choose
     the license

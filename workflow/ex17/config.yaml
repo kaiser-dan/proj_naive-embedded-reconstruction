@@ -1,129 +1,79 @@
-# =============================================================================
-synthetic:
-  meta:
-    project_id: "EMB_ex17-S"
-    current_version: "v1.0"
+# ========================================
+# String templates with Snakemake and YAML
+# ========================================
+# Strings in YAML file with single curly brackets {}
+# must be formatted in Snakefile (read as f-strings)
+# Double curly brackets {{}}, however, are read in
+# the Snakefile as single brackets - the Snakemake wildcard format.
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+global:
+  directories:
+    input:
+      raw: "{root}/data/input/raw"
+      preprocessed: "{root}/data/input/preprocessed"
+    output:
+      raw: "{root}/data/output/raw"
+      preprocessed: "{root}/data/output/processed"
+    results:
+      dataframes: "{root}/results/dataframes"
+      figures: "{root}/results/plots"
+      reports: "{root}/results/reports"
+
+  files:
+    observations: "{in_pcsd_dir}/remnants_{tag}_system={{system}}_pfi={{pfi}}.pkl"
+    embeddings: "{out_raw_dir}/embeddings_{tag}_system={{system}}_pfi={{pfi}}_method={{method}}_walklength={{walk_length}}_numwalks={{num_walks}}_dimensions={{dimensions}}.pkl"
+    distances: "{out_raw_dir}/distances_{tag}_system={{system}}_pfi={{pfi}}_method={{method}}_walklength={{walk_length}}_numwalks={{num_walks}}_dimensions={{dimensions}}_metric={{metric}}.pkl"
+    reconstructions: "{out_pcsd_dir}/reconstruction_{tag}_system={{system}}_pfi={{pfi}}_method={{method}}_walklength={{walk_length}}_numwalks={{num_walks}}_dimensions={{dimensions}}_metric={{metric}}.pkl"
+    records: "{out_pcsd_dir}/XXX"
+    dataframe: "{results_df_dir}/XXX"
+    figures: "{results_fig_dir}/XXX"
+    rulegraphs: "{results_rep_dir}/XXX"
+
+
+ex17:
+  metadata:
+    project_id: "EMB_ex17"
+    current_version: "v2.0-alpha"
     researcher: "DK"
 
-
-  network:
-    avg_k: [20]
-    gamma: [2.1, 2.5, 2.9, 3.5]
-    mu: [0.1] #, 0.2, 0.3, 0.4, 0.5]
-
-
-  experiment:
-    params:
-      pfis: [0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95]
-      metrics: ["inverse", "negexp"]
-      repetitions: 3
-
-    hyperparams:
-      embedding:
-        dimensions: 128
-        walk_length: 30
+  parameters:
+    systems: [
+      "arxiv-2-6",
+      "arxiv-2-7",
+      "arxiv-6-7",
+      "celegans-1-2",
+      "celegans-1-3",
+      "celegans-2-3",
+      "london-1-2",
+      "london-1-3",
+      "london-2-3",
+      "drosophila-1-2",
+      "drosophila-1-3",
+      "drosophila-1-4",
+      "drosophila-2-3",
+      "drosophila-2-4",
+      "drosophila-3-4"]
+    pfis:
+      start: 0.05
+      stop: 0.95
+      num: 50
+    embedding:
+      method: "N2V"
+      parameters:
+        walk_length:
+          start: 2
+          stop: 50
+          num: 48
         num_walks: 100
-        workers: 4
+        dimensions:
+          start: 4
+          stop: 256
+          num: 7
+          base: 2
+        workers: 8
+        quiet: True
+      hyperparameters:
         window: 10
         min_count: 1
         batch_words: 4
-
-
-  workflow:
-    pathing:
-      input:
-        raw: "{root}/data/input/raw"
-        preprocessed: "{root}/data/input/preprocessed/synthetic"
-      output:
-        raw: "{root}/data/output/raw"
-        preprocessed: "{root}/data/output/processed/synthetic"
-      result:
-        dataframe: "{root}/results/dataframes"
-        figures: "{root}/results/plots"
-        reports: "{root}/results/reports"
-      scripts: "./scripts/"
-
-    datafiles:
-      input:
-        duplex: "{dir}/LFR_N=10000_avgk={{avg_k}}_mu={{mu}}_gamma={{gamma}}_tau=1.0_rep={{rep}}.pkl"
-      output:
-        observation: "{dir}/observed_pfi={{pfi}}_LFR_N=10000_avgk={{avg_k}}_mu={{mu}}_gamma={{gamma}}_tau=1.0_rep={{rep}}.pkl"
-        vectors: "{dir}/vectors_pfi={{pfi}}_LFR_N=10000_avgk={{avg_k}}_mu={{mu}}_gamma={{gamma}}_tau=1.0_rep={{rep}}.pkl"
-        distances: "{dir}/distances_pfi={{pfi}}_LFR_N=10000_avgk={{avg_k}}_mu={{mu}}_gamma={{gamma}}_tau=1.0_rep={{rep}}.pkl"
-        reconstruction: "{dir}/reconstruction_metric={{metric}}_pfi={{pfi}}_LFR_N=10000_avgk={{avg_k}}_mu={{mu}}_gamma={{gamma}}_tau=1.0_rep={{rep}}.pkl"
-        record: "{dir}/record_metric={{metric}}_pfi={{pfi}}_LFR_N=10000_avgk={{avg_k}}_mu={{mu}}_gamma={{gamma}}_tau=1.0_rep={{rep}}.pkl"
-      result:
-        dataframe: "{dir}/dataframe_{project_id}{current_version}_{researcher}_{date}.parquet"
-        report: "{dir}/report_{project_id}{current_version}_{researcher}_{date}.html"
-        dag: "{dir}/dag_{project_id}{current_version}_{researcher}_{date}.svg"
-        figures:
-          scatter: "{dir}/scatter_{project_id}{current_version}_{researcher}_{date}.png"
-
-
-# =============================================================================
-real:
-  meta:
-    project_id: "EMB_ex17-R"
-    current_version: "v1.0"
-    researcher: "DK"
-
-
-  network:
-    arxiv:
-      layers: [2, 6, 7] # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
-    celegans:
-      layers: [1, 2, 3]
-    drosophila:
-      layers: [1, 2, 3] # [1, 2, 3, 4, 5, 6, 7]
-    london:
-      layers: [1, 2, 3]
-
-
-  experiment:
-    params:
-      pfis: [0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95]
-      metrics: ["inverse", "negexp"]
-      repetitions: 5
-      dimensions: [120] # [40,80,120]
-
-    hyperparams:
-      embedding:
-        dimensions: 120
-        walk_length: 30
-        num_walks: 100
-        workers: 4
-        window: 10
-        min_count: 1
-        batch_words: 4
-
-
-
-  workflow:
-    pathing:
-      input:
-        raw: "{root}/data/input/raw"
-        preprocessed: "{root}/data/input/preprocessed/real"
-      output:
-        raw: "{root}/data/output/raw"
-        preprocessed: "{root}/data/output/processed/real"
-      result:
-        dataframe: "{root}/results/dataframes"
-        figures: "{root}/results/plots"
-        reports: "{root}/results/reports"
-      scripts: "./scripts/"
-
-    datafiles:
-      input:
-        duplex: "{dir}/duplex_system={{system}}.edgelist"
-      output:
-        observation: "{dir}/observed_pfi={{pfi}}_system={{system}}_alpha={{alpha}}_beta={{beta}}_rep={{rep}}.pkl"
-        vectors: "{dir}/vectors_pfi={{pfi}}_dimension={{dimension}}_system={{system}}_alpha={{alpha}}_beta={{beta}}_rep={{rep}}.pkl"
-        distances: "{dir}/distances_pfi={{pfi}}_dimension={{dimension}}_system={{system}}_alpha={{alpha}}_beta={{beta}}_rep={{rep}}.pkl"
-        reconstruction: "{dir}/reconstruction_metric={{metric}}_pfi={{pfi}}_dimension={{dimension}}_system={{system}}_alpha={{alpha}}_beta={{beta}}_rep={{rep}}.pkl"
-        record: "{dir}/record_metric={{metric}}_pfi={{pfi}}_dimension={{dimension}}_system={{system}}_alpha={{alpha}}_beta={{beta}}_rep={{rep}}.pkl"
-      result:
-        dataframe: "{dir}/dataframe_{project_id}{current_version}_{researcher}_{date}.parquet"
-        report: "{dir}/report_{project_id}{current_version}_{researcher}_{date}.html"
-        dag: "{dir}/dag_{project_id}{current_version}_{researcher}_{date}.svg"
-        figures:
-          scatter: "{dir}/scatter_{project_id}{current_version}_{researcher}_{date}.png"
+    metrics: "inverse"

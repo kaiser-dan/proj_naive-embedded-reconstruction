@@ -1,237 +1,108 @@
-# >>>> Snakefile 'README' >>>>
-# 1. Observe subtensor a priori
-# 2. Embed both the observations and the induced remnants
-# 3. Calculate convex combination distances
-# 4. Reconstruction from scores based on distances
-# <<<< Snakefile 'README' <<<<
+"""
+See protocol.md for a description of the experiment procedure.
+"""
 # ======================================================================
-# ======== IMPORTS/PYTHON PRE-CONFIG ==========
+# ========== SET-UP ==========
+# ----- Python utility -----
 from datetime import datetime
 from itertools import product
+import numpy as np
 
-# ======== CONFIG =========
+# ----- Configuration -----
 configfile: "config.yaml"
-config = config["synthetic"]
+experiment = "ex17"
 
-# Aliases
-_meta = config["meta"]
-_network = config["network"]
-_params = config["experiment"]["params"]
-_hyperparams = config["experiment"]["hyperparams"]
-_pathing = config["workflow"]["pathing"]
-_datafiles = config["workflow"]["datafiles"]
+# Parameters
+_params = config[experiment]["parameters"]
+PFIS = np.linspace(**_params["pfis"])
+METRICS = _params["metrics"]
+
+_params = _params["embedding"]
+METHODS = _params["method"]
+WALKLENGTHS = np.linspace(**_params["walk_length"])
+NUMWALKS = _params["num_walks"]
+DIMENSIONS = np.geomspace(**_params["dimensions"])
 
 # Globals
 DATE = datetime.today().strftime("%Y%m%d")
 ROOT = "../.."
-REPETITIONS = range(1, int(_params["repetitions"]))
+TAG = "{project_id}{current_version}_{researcher}".format(**config[experiment]["metadata"])
+
+# Aliases
+_directories = config["global"]["directories"]
+_files = config["global"]["files"]
+
+_input_raw = _directories["input"]["raw"].format(root=ROOT)
+_input_preprocessed = _directories["input"]["preprocessed"].format(root=ROOT)
+_output_raw = _directories["output"]["raw"].format(root=ROOT)
+_output_processed = _directories["output"]["processed"].format(root=ROOT)
+_dataframes = _directories["results"]["dataframes"].format(root=ROOT)
+_figures = _directories["results"]["dataframes"].format(root=ROOT)
+_reports = _directories["results"]["dataframes"].format(root=ROOT)
+
+
 
 # =========== WORKFLOW ===========
 # ----- All rule ----
 rule all:
     input:
-        # Dataframe
-        _datafiles["result"]["dataframe"].format(
-            dir=_pathing["result"]["dataframe"].format(root=ROOT),
-            project_id=_meta["project_id"], current_version=_meta["current_version"],
-            researcher=_meta["researcher"],
-            date=DATE
-        ),
-        # DAG
-        _datafiles["result"]["dag"].format(
-            dir=_pathing["result"]["reports"].format(root=ROOT),
-            project_id=_meta["project_id"], current_version=_meta["current_version"],
-            researcher=_meta["researcher"],
-            date=DATE
+        # temp input
+        expand(
+            _files["reconstructions"].format(out_pcsd_dir=_output_processed, tag=TAG),
+            system=SYSTEMS,
+            method=METHODS,
+            walk_length=WALKLENGTHS,
+            num_walks=NUMWALKS,
+            dimensions=DIMENSIONS,
+            metric=METRICS
         )
+
+        # Dataframe
+        # DAG
+        # figures
 
 
 # ----- Analysis rules -----
-# - Meta analysis -
-rule meta_report:
-    output:
-        _datafiles["result"]["report"].format(
-            dir=_pathing["result"]["reports"].format(root=ROOT),
-            project_id=_meta["project_id"], current_version=_meta["current_version"],
-            researcher=_meta["researcher"],
-            date=DATE
-        )
-    shell:
-        "snakemake --report {output}"
 
-rule meta_dag:
-    output:
-        _datafiles["result"]["dag"].format(
-            dir=_pathing["result"]["reports"].format(root=ROOT),
-            project_id=_meta["project_id"], current_version=_meta["current_version"],
-            researcher=_meta["researcher"],
-            date=DATE
-        )
-    shell:
-        "snakemake --rulegraph | dot -Tsvg > {output}"
 
-# - Data analysis -
-rule generate_plots:
+
+# ----- Simulation rules ------
+# Step (1)
+rule observe_remnants:
     input:
-        dataframe = _datafiles["result"]["dataframe"].format(
-            dir=_pathing["result"]["dataframe"].format(root=ROOT),
-            project_id=_meta["project_id"], current_version=_meta["current_version"],
-            researcher=_meta["researcher"],
-            date=DATE
-        )
-    output:   # * CAN WE AUTO GENERATE MORE? :/
-        scatter = _datafiles["result"]["figures"]["scatter"].format(
-            dir=_pathing["result"]["figures"].format(root=ROOT),
-            project_id=_meta["project_id"], current_version=_meta["current_version"],
-            researcher=_meta["researcher"],
-            date=DATE
+        preprocessed_multiplex = 
+    output:
+        expand(
+            _files["observations"].format(in_pcsd_dir=_input_preprocessed, tag=TAG),
+            pfi=PFIS
         )
     script:
-        _pathing["scripts"] + "generate_plots.py"
+        "scripts/observe_remnants.py"
 
-# - Data aggregation -
-# rule aggregate_records:
-#     input:
-#         expand(
-#             _datafiles["output"]["record"].format(dir=_pathing["output"]["raw"].format(root=ROOT)),
-#             avg_k=_network["avg_k"],
-#             gamma=_network["gamma"],
-#             mu=_network["mu"],
-#             metric=_params["metrics"],
-#             pfi=_params["pfis"],
-#             rep=REPETITIONS,
-#         )
-#     output:
-#         _datafiles["result"]["dataframe"].format(
-#             dir=_pathing["result"]["dataframe"].format(root=ROOT),
-#             project_id=_meta["project_id"], current_version=_meta["current_version"],
-#             researcher=_meta["researcher"],
-#             date=DATE
-#         )
-#     script:
-#         _pathing["scripts"] + "aggregate_records.py"
 
-rule aggregate_records_real:
+# Step (2)
+rule embed:
     input:
-        [
-            [
-                expand(
-                    _datafiles["output"]["record"].format(dir=_pathing["output"]["raw"].format(root=ROOT)),
-                    system=system_,
-                    alpha=alpha,
-                    beta=beta,
-                    dimension=_params["dimensions"],
-                    metric=_params["metrics"],
-                    pfi=_params["pfis"],
-                    rep=REPETITIONS,
-                )
-                # * Remove symmetric and trivial duplexes
-                for alpha in _network[system_]["layers"] for beta in _network[system_]["layers"] if alpha < beta
-            ]
-            for system_ in _network.keys()
-        ]
+        observations = _files["observations"].format(in_pcsd_dir=_input_preprocessed, tag=TAG)
     output:
-        _datafiles["result"]["dataframe"].format(
-            dir=_pathing["result"]["dataframe"].format(root=ROOT),
-            project_id=_meta["project_id"], current_version=_meta["current_version"],
-            researcher=_meta["researcher"],
-            date=DATE
-        )
+        embeddings = _files["embeddings"].format(out_raw_dir=_output_raw, tag=TAG)
     script:
-        _pathing["scripts"] + "aggregate_records.py"
+        "scripts/embed_remnants.py"
 
-
-rule measure_performance:
-    input:
-        reconstruction = _datafiles["output"]["reconstruction"].format(
-            dir=_pathing["output"]["raw"].format(root=ROOT)
-        )
-    output:
-        temp(_datafiles["output"]["record"].format(
-            dir=_pathing["output"]["raw"].format(root=ROOT)
-        ))
-    params:
-        metric = "{metric}"
-    script:
-        _pathing["scripts"] + "measure_performance_real.py"
-
-
-# ----- Computation rules -----
-# rule observe_subtensor:
-#     input:
-#         multiplex = _datafiles["input"]["duplex"].format(
-#             dir=_pathing["input"]["preprocessed"].format(root=ROOT)
-#         )
-#     output:
-#         temp(_datafiles["output"]["observation"].format(
-#             dir=_pathing["output"]["raw"].format(root=ROOT)
-#         ))
-#     params:
-#         pfi = "{pfi}",
-#         rep = "{rep}"
-#     script:
-#         _pathing["scripts"] + "observe_subtensor.py"
-
-rule observe_subtensor_real:
-    input:
-        duplex_edgelist = _datafiles["input"]["duplex"].format(
-            dir=_pathing["input"]["preprocessed"].format(root=ROOT)
-        )
-    output:
-        temp(_datafiles["output"]["observation"].format(
-            dir=_pathing["output"]["raw"].format(root=ROOT)
-        ))
-    params:
-        alpha = "{alpha}",
-        beta = "{beta}",
-        pfi = "{pfi}",
-        rep = "{rep}"
-    script:
-        _pathing["scripts"] + "observe_subtensor_real.py"
-
-rule embed_remnant:
-    input:
-        _datafiles["output"]["observation"].format(
-            dir=_pathing["output"]["raw"].format(root=ROOT)
-        )
-    output:
-        pipe(_datafiles["output"]["vectors"].format(
-            dir=_pathing["output"]["raw"].format(root=ROOT)
-        ))
-    params:
-        hyperparams = config["experiment"]["hyperparams"]["embedding"]
-    script:
-        _pathing["scripts"] + "embed_remnant.py"
-
+# Step (3)
 rule calculate_distances:
     input:
-        vectors = _datafiles["output"]["vectors"].format(
-            dir=_pathing["output"]["raw"].format(root=ROOT)
-        ),
-        observation = _datafiles["output"]["observation"].format(
-            dir=_pathing["output"]["raw"].format(root=ROOT)
-        )
+        embeddings = _files["embeddings"].format(out_raw_dir=_output_raw, tag=TAG)
     output:
-        temp(_datafiles["output"]["distances"].format(
-            dir=_pathing["output"]["raw"].format(root=ROOT)
-        ))
+        distances = _files["distances"].format(out_raw_dir=_output_raw, tag=TAG)
     script:
-        _pathing["scripts"] + "calculate_distances.py"
+        "scripts/calculate_distances.py"
 
-
-rule reconstruct_tensor:
+# Step (4)
+rule reconstruct_multiplex:
     input:
-        distances = _datafiles["output"]["distances"].format(
-            dir=_pathing["output"]["raw"].format(root=ROOT)
-        ),
-        observation = _datafiles["output"]["observation"].format(
-            dir=_pathing["output"]["raw"].format(root=ROOT)
-        )
+        distances = _files["distances"].format(out_raw_dir=_output_raw, tag=TAG)
     output:
-        _datafiles["output"]["reconstruction"].format(
-            dir=_pathing["output"]["raw"].format(root=ROOT)
-        )
-    params:
-        metric = "{metric}"
+        reconstructions = _files["reconstructions"].format(out_pcsd_dir=_output_processed, tag=TAG)
     script:
-        _pathing["scripts"] + "reconstruct_tensor.py"
+        "scripts/reconstruct_multiplex.py"

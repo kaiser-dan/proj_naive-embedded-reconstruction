@@ -85,6 +85,7 @@ def LE(graph, parameters, hyperparameters, dense_error=False):
 def LE_per_component(graph, parameters, hyperparameters, dense_error=False):
     # >>> Book-keeping >>>
     vectors_per_component = []  # list of vector embeddings, canonical ordering
+    vectors = {}  # amalgamated mapping of nodes to their embedded vectors (by component)
     # <<< Book-keeping <<<
 
     # Retrieve each component as a graph
@@ -99,4 +100,9 @@ def LE_per_component(graph, parameters, hyperparameters, dense_error=False):
             LE(component_subgraph, parameters, hyperparameters, dense_error=dense_error)
         )
 
-    return vectors_per_component
+    # Amalgamate results
+    for component_vectors in vectors_per_component:
+        for node, vector in component_vectors.items():
+            vectors[node] = vector
+
+    return vectors

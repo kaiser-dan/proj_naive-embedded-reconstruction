@@ -95,9 +95,12 @@ def experiment(system, layer_pair, parameters, hyperparameters):
         return record
 
     # * Step (9) - Predict testset with reconstruction
-    record["accuracy"] = logreg.get_model_accuracy(model, distance_ratios_test, labels_test)
-    record["auroc"] = logreg.get_model_auroc(model, distance_ratios_test, labels_test)
-    record["intercept"], record["coef"] = logreg.get_model_fit(model)
+    try:
+        record["accuracy"] = logreg.get_model_accuracy(model, distance_ratios_test, labels_test)
+        record["auroc"] = logreg.get_model_auroc(model, distance_ratios_test, labels_test)
+        record["intercept"], record["coef"] = logreg.get_model_fit(model)
+    except ValueError:  # only one class available, fricken London crap
+        pass
     # <<< Procedure <<<
 
     return record

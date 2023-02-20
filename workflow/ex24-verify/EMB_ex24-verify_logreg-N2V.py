@@ -144,7 +144,7 @@ if __name__ == "__main__":
     metadata = {
         "PROJECT_ID": "EMB_ex24-verify",
         "RESEARCHERS": "DK",
-        "CURRENT_VERSION": "v1.0",
+        "CURRENT_VERSION": "v1.1",
         "DATE": datetime.today().strftime("%Y%m%d")
     }
     TAG = "{PROJECT_ID}{CURRENT_VERSION}_{RESEARCHERS}_{DATE}".format(**metadata)
@@ -152,10 +152,10 @@ if __name__ == "__main__":
 
     # Parameter ranges
     systems = {
-        # "arxiv": [(2, 6), (2, 7), (6, 7)],
-        "celegans": [(1, 2), (1, 3), (2, 3)],
-        # "drosophila": [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)],
-        "london": [(1, 2), (1, 3), (2, 3)],
+        "arxiv": [(2, 6), (2, 7), (6, 7)],
+        # "celegans": [(1, 2), (1, 3), (2, 3)],
+        "drosophila": [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)],
+        # "london": [(1, 2), (1, 3), (2, 3)],
     }
     parameters, hyperparameters = params.set_parameters_N2V(theta_max=0.95)
     # <<< Experiment set-up <<<

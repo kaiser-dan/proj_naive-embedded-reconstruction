@@ -157,7 +157,7 @@ if __name__ == "__main__":
         "drosophila": [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)],
         # "london": [(1, 2), (1, 3), (2, 3)],
     }
-    parameters, hyperparameters = params.set_parameters_N2V(theta_max=0.95)
+    parameters, hyperparameters = params.set_parameters_N2V(theta_max=0.95, workers=32)
     # <<< Experiment set-up <<<
 
     # >>> Experiment >>>

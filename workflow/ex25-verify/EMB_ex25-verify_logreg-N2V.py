@@ -8,7 +8,7 @@ brought preliminary N2V results into question.
 import sys
 
 # --- Scientific computing ---
-from sklearn.metrics import accuracy_score, roc_auc_score
+import numpy as np
 
 # -- Network science ---
 
@@ -20,9 +20,9 @@ import pandas as pd
 sys.path.append("../../src/")
 
 # Primary modules
+from classifiers import logreg  # logistic regression
 from data import dataio, preprocessing  # reading data, form duplex
-from distance.score import likelihood
-from distance.distance import embedded_edge_distance
+from distance.score import embedded_edge_distance_ratio, format_distance_ratios  # Feature calculations for logreg
 from embed.N2V import N2V  # graph embeddings
 from sampling.random import partial_information  # sample training set
 
@@ -56,40 +56,48 @@ def experiment(system, layer_pair, parameters, hyperparameters):
     G, H = preprocessing.duplex_network(D, *layer_pair)
 
     # * Steps (2) thru (4) - Observe a priori information and calculate remnants
-    R_G, R_H, testset, _ = partial_information(G, H, parameters["theta"])
+    R_G, R_H, testset, trainset = partial_information(G, H, parameters["theta"])
 
     # * Step (5) - Embed remnants
     E_G = N2V(R_G, parameters, hyperparameters)
     E_H = N2V(R_H, parameters, hyperparameters)
 
     # * Steps (6) and (7) - Calculate distances of nodes incident to edges in both embeddings
-    distances = {}
-    for edge in testset:
-        d_G = embedded_edge_distance(edge, E_G)
-        d_H = embedded_edge_distance(edge, E_H)
+    distance_ratios_train = -1 * np.ones(len(trainset))
+    distance_ratios_test = -1 * np.ones(len(testset))
+    for idx, edge in enumerate(trainset.keys()):
+        distance_ratios_train[idx] = embedded_edge_distance_ratio(
+            edge,
+            E_G, E_H,
+        )
 
-        distances[edge] = (d_G, d_H)
+    for idx, edge in enumerate(testset.keys()):
+        distance_ratios_test[idx] = embedded_edge_distance_ratio(
+            edge,
+            E_G, E_H,
+        )
 
-    # Get ground truth
-    ground_truth = list(testset.values())
+    # Pre-processing distance ratios for sklearn models
+    distance_ratios_train = format_distance_ratios(distance_ratios_train)
+    distance_ratios_test = format_distance_ratios(distance_ratios_test)
 
-    # Get likelihoods
-    likelihoods = {
-        edge: likelihood(d_G, d_H)
-        for edge, (d_G, d_H) in distances.items()
-    }
+    # Retrieve labels for sklearn model
+    labels_train = list(trainset.values())
+    labels_test = list(testset.values())
 
-    # Get hard classifications
-    classifications = {
-        edge: 1 if likelihood >= 0.5 else 0
-        for edge, likelihood in likelihoods.items()
-    }
-
-    # * Step (8) - Evaluate performance
+    # * Step (8) - Train a logistic regression
     try:
-        record["accuracy"] = accuracy_score(ground_truth, list(classifications.values()))
-        record["auroc"] = roc_auc_score(ground_truth, list(likelihoods.values()))
-    except ValueError:
+        model = logreg.train_fit_logreg(distance_ratios_train, labels_train)
+    except ValueError:  # when only one class is available, happens for some london cases
+        sys.stderr.write(">>> Only one train/test class available")
+        return record
+
+    # * Step (9) - Predict testset with reconstruction
+    try:
+        record["accuracy"] = logreg.get_model_accuracy(model, distance_ratios_test, labels_test)
+        record["auroc"] = logreg.get_model_auroc(model, distance_ratios_test, labels_test)
+        record["intercept"], record["coef"] = logreg.get_model_fit(model)
+    except ValueError:  # only one class available, fricken London crap
         pass
     # <<< Procedure <<<
 
@@ -132,9 +140,9 @@ if __name__ == "__main__":
     # >>> Experiment set-up >>>
     # Metadata
     metadata = {
-        "PROJECT_ID": "EMB_ex23-verify",
+        "PROJECT_ID": "EMB_ex25-verify",
         "RESEARCHERS": "DK",
-        "CURRENT_VERSION": "v1.1.1",
+        "CURRENT_VERSION": "v1.0",
         "DATE": datetime.today().strftime("%Y%m%d")
     }
     TAG = "{PROJECT_ID}{CURRENT_VERSION}_{RESEARCHERS}_{DATE}".format(**metadata)
@@ -142,12 +150,12 @@ if __name__ == "__main__":
 
     # Parameter ranges
     systems = {
-        "arxiv": [(2, 6), (2, 7), (6, 7)],
-        # "celegans": [(1, 2), (1, 3), (2, 3)],
-        "drosophila": [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)],
-        # "london": [(1, 2), (1, 3), (2, 3)],
+        # "arxiv": [(2, 6), (2, 7), (6, 7)],
+        "celegans": [(1, 2), (1, 3), (2, 3)],
+        # "drosophila": [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)],
+        "london": [(1, 2), (1, 3), (2, 3)],
     }
-    parameters, hyperparameters = params.set_parameters_N2V(theta_max=1.0, workers=32)
+    parameters, hyperparameters = params.set_parameters_N2V(theta_max=0.95, workers=8)
     # <<< Experiment set-up <<<
 
     # >>> Experiment >>>

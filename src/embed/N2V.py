@@ -27,10 +27,10 @@ def N2V(graph, parameters, hyperparameters):
         Map of node ids to embedded vectors.
     """
     # Sample random walks
-    embedding_model = Node2Vec(graph, **parameters)
+    embedding_model = Node2Vec(graph, **{k: v for k, v in parameters.items() if k in ["dimensions","walk_length","num_walks","workers","quiet"]})
 
     # Embed walks with word2vec and retrieve model
-    embedding_model = embedding_model.fit(**hyperparameters)
+    embedding_model = embedding_model.fit()#**hyperparameters)
     embedding_model = embedding_model.wv
 
     # Retrieve resultant vectors

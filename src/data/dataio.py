@@ -2,7 +2,7 @@
 """
 # ============= SET-UP =================
 # --- Standard library ---
-import pickle
+from datetime import datetime  # date metadata
 
 # --- Network science ---
 import networkx as nx
@@ -57,5 +57,37 @@ def read_file(file_handle, delimiter=None):
 
     return multiplex
 
+def get_input_filehandle(
+        SYSTEM,
+        ROOT="../../",
+        DIR="data/input/raw/",
+        PREFACE="duplex",
+        POSTFIX=".edgelist"):
+    return f"{ROOT}{DIR}{PREFACE}_system={SYSTEM}{POSTFIX}"
+
 
 # --- Output ---
+def save_df(dataframe, output_filehandle):
+    dataframe.to_csv(output_filehandle)
+    return
+
+def get_output_filehandle(
+        PROJECT_ID, RESEARCHERS="DK",
+        CURRENT_VERSION="v1.0", DATE=None,
+        ROOT="../../",
+        DIR="results/dataframes/",
+        PREFACE="dataframe",
+        POSTFIX=".csv"):
+    # >>> Formatting metadata >>>
+    # Formatting standard date
+    if DATE is None:
+        DATE = datetime.today().strftime("%Y%m%d")
+
+    # Experiment tag
+    TAG = f"{PROJECT_ID}{CURRENT_VERSION}_{RESEARCHERS}_{DATE}"
+
+    # Fill in output filehandle
+    output_filehandle = f"{ROOT}{DIR}{PREFACE}_{TAG}{POSTFIX}"
+    # <<< Formatting metadata <<<
+
+    return output_filehandle, TAG

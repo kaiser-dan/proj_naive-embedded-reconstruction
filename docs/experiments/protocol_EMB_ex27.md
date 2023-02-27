@@ -29,6 +29,8 @@
 | *v0.1* | 2023-02-23    | 2022-02-23     | 2022-02-23    | Prototyped refactored workflow |
 | *v0.2* | 2023-02-23    | 2022-02-23     | 2022-02-23    | Expanded into "trouble" duplexes, tested error handling |
 | **v1.0** | 2023-02-23    | 2022-02-23     | 2022-02-27    | Full run |
+| **v2.0** | 2023-02-27 | 2022-02-27 | 20222-02-27 | Fixed incorrect data split |
+| *v2.1* | 2023-02-27 | 2022-02-27 | 20222-02-27 | Full run |
 
 ## Relevant scripts
 

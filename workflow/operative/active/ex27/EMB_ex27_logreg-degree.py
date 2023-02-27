@@ -20,7 +20,7 @@ import numpy as np
 
 # --- Project source ---
 # PATH adjustments
-ROOT = "../../"
+ROOT = "../../../../"
 sys.path.append(f"{ROOT}/src/")
 
 # Primary modules
@@ -55,34 +55,36 @@ def reconstruct(G, H, theta, parameters, hyperparameters, record):
     # <<< Book-keeping <<<
 
     # >>> Reconstruction procedure >>>
-    R_G, R_H, testset, trainset = partial_information(G, H, theta)
+    R_G, R_H, testset, _ = partial_information(G, H, theta)
 
     # * Step (4) - Embed remnants
     # E_G = N2V(R_G, parameters, hyperparameters)
     # E_H = N2V(R_H, parameters, hyperparameters)
 
     # * Steps (5) - Calculate features
-    # Training features
-    src_degrees, tgt_degrees = features.get_degrees((R_G, R_H), list(trainset.keys()))
-    feature_matrix_train = features.get_configuration_probabilities_feature(src_degrees, tgt_degrees)
-    feature_matrix_train = np.array(feature_matrix_train).reshape(-1, 1)
-
     # Test features
     src_degrees, tgt_degrees = features.get_degrees((R_G, R_H), list(testset.keys()))
     feature_matrix_test = features.get_configuration_probabilities_feature(src_degrees, tgt_degrees)
     feature_matrix_test = np.array(feature_matrix_test).reshape(-1, 1)
 
     # Retrieve labels for sklearn model
-    labels_train = list(trainset.values())
     labels_test = list(testset.values())
 
     # * Step (6) - Train logistic regression classifier
 
     try:
-        model = logreg.train_fit_logreg(feature_matrix_train, labels_train, hyperparameters["classifier"])
+        model = logreg.train_fit_logreg(feature_matrix_test, labels_test, hyperparameters["classifier"])
     except ValueError:  # when only one class is available, happens for some london cases
         sys.stderr.write(">>> Only one train/test class available")
         return record
+
+    intercept, coefs = logreg.get_model_fit(model)
+    try:
+        assert intercept[0] != 0
+    except AssertionError as msg:
+        print(msg)
+
+    print(f"Coefficients: {coefs}")
 
     # * Step (7) - Reconstruct duplex with trained classifier
     try:
@@ -176,7 +178,7 @@ def main(systems, parameters, hyperparameters, experiment_setup, output_filehand
     # <<< Post-processing <<<
 
     # ! >>> DEBUG >>>
-    # print(tabulate(df[["system", "theta", "accuracy", "auroc", "aupr"]], headers='keys', tablefmt='psql'))
+    print(tabulate(df[["system", "theta", "accuracy", "auroc", "aupr"]], headers='keys', tablefmt='psql'))
     # ! <<< DEBUG <<<
 
     dataio.save_df(df, output_filehandle)
@@ -188,7 +190,7 @@ if __name__ == "__main__":
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
             PROJECT_ID="EMB_ex27",
-            CURRENT_VERSION="v1.0",
+            CURRENT_VERSION="v2.2",
             ROOT=ROOT
         )
 
@@ -204,9 +206,9 @@ if __name__ == "__main__":
             # N2V
             workers=8,
             # LogReg
-            fit_intercept=False,
+            fit_intercept=False, penalty="l2",
             # Other
-            theta_max=0.95, theta_num=21, repeat=20)
+            theta_min=0, theta_max=0.9, theta_num=10, repeat=20)
     # <<< Experiment set-up <<<
 
     # >>> Experiment >>>

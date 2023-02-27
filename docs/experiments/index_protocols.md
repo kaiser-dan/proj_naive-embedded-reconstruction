@@ -70,6 +70,10 @@ Completed experiments are settings with generated, analyzed results that are wit
   - Date completed: 2023-02-22
   - Associated experiments: ex23-verify, ex24-verify, ex25-verify
   - Summary: N2V logistic regression with expanded feature set
+- MEC_apply-D-real
+  - Date completed: 2023-02-27
+  - Associated experiments: ex27
+  - Summary: Apply "D" classifier to real multiplexes
 
 ## Planned
 

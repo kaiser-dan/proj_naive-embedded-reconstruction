@@ -29,6 +29,10 @@ Active experiments are settings currently being developed or analyzed.
   - Associated experiments: ex26, ex28, ex29
   - Summary: N2V with configuration-likelihood degree feature alone
 
+- ex28
+  - Associated experiments: ex26, ex27, ex29
+  - Summary: N2V with configuration-likelihood degree and embedding distance features
+
 
 ## Completed
 
@@ -71,9 +75,6 @@ Completed experiments are settings with generated, analyzed results that are wit
 
 Planned experiments are experiments that are planned or actively being designed, but before active development starts.
 
-- ex28
-  - Associated experiments: ex26, ex27, ex29
-  - Summary: N2V with configuration-likelihood degree and embedding distance features
 - ex29
   - Associated experiments: ex26, ex27, ex28
   - Summary: N2V with configuration-likelihood degree, embedding distance features and component biases

@@ -26,7 +26,8 @@
 
 | Version  | Date Designed | Date Conducted | Date Analyzed | Notes                                                        |
 | -------- | ------------- | -------------- | ------------- | ------------------------------------------------------------ |
-| **v1.0** | 2023-02-23    | 2022-02-23     | X    | XXX |
+| *v0.1* | 2023-02-23    | 2022-02-27     | 2022-02-27    | Prototyped workflow |
+| **v1.0** | 2023-02-27    | 2022-02-27     | 2022-02-XX    | XXX |
 
 ## Relevant scripts
 
@@ -46,7 +47,7 @@ Reproduce Naive Bayes paper's results (under "DC" classifier) for real duplexes.
 
 ## Hypotheses (if applicable)
 
-We should see quanlitatively equivalent behavior to the Naive Bayes classifier paper, reproduced below:
+We should see quanlitatively equivalent behavior to the Naive Bayes classifier paper, reproduced below (solid lines):
 
 <center><img src="../../results/plots/previous_results.png" alt="previous results"></center>
 
@@ -73,21 +74,24 @@ Within these multiplexes, we induce a duplex and restrict our attention therein;
 - underground, overground (1, 2)
 
 ## Procedure
-**UPDATE**
-
 1. [**Set-up**] Load dataset
 2. [**Set-up**] Calculate total aggregate $A = \alpha \cup \beta$.
 3. [**Set-up**] Observe training set $\Theta = \theta_{\alpha} \cup \theta_{\beta}$ of relative size (per layer) $\theta$.
 4. [**Set-up**] Form remnants $\mathcal{R}_{\alpha}, \mathcal{R}_{\beta}$ and aggregate $\tilde{A} = A - \Theta$.
-5. [**Feature calculations**] Calculate degrees sequences $k^{\alpha}, k^{\beta}$ of $\mathcal{R}_{\alpha}, \mathcal{R}_{\beta}$.
-6. [**Feature calculations**] Calculate configuration degrees
+5. [**Embedding**] Embed remnants using N2V into vector sets $\mathcal{E}_{\alpha}, \mathcal{E}_{\beta}$
+6. [**Feature calculations**] Calculate degrees sequences $k^{\alpha}, k^{\beta}$ of $\mathcal{R}_{\alpha}, \mathcal{R}_{\beta}$.
+7. [**Feature calculations**] Calculate configuration degrees
    $$
    \forall e = (i, j) \in \tilde{A} \qquad d_e = \frac{k_i^{\alpha}k_j^{\alpha}}{k_i^{\alpha}k_j^{\alpha} + k_i^{\beta}k_j^{\beta}}
    $$
-7. [**Model training**] Train a logistic regression classifier on $\{ d_e \}$.
-8. [**Reconstruction**] Reconstruct $\tilde{A}$.
-9.  [**Measure performance**] Measure performance using accuracy, AUROC and AUPR.
-10. [**Set-up**] Repeat (3) - (9) for some range of $\theta$.
+8. [**Feature calculations**] Calculate edge distances in each embedded remnant
+   $$
+   \forall e = (i, j) \in \tilde{A} \qquad d_e^{\alpha} = \| \mathcal{E}_{\alpha}[i] - \mathcal{E}_{\alpha}[j] \|,\,\, d_e^{\beta} = \| \mathcal{E}_{\beta}[i] - \mathcal{E}_{\beta}[j] \|
+   $$
+10. [**Model training**] Train a logistic regression classifier on $\{ d_e, d_e^{\beta}, d_e^{\beta} \}$.
+11. [**Reconstruction**] Reconstruct $\tilde{A}$.
+12. [**Measure performance**] Measure performance using accuracy, AUROC and AUPR.
+13. [**Set-up**] Repeat (3) - (9) for some range of $\theta$.
 
 ---
 

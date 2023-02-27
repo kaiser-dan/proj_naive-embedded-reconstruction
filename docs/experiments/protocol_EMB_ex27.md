@@ -50,8 +50,7 @@ Reproduce Naive Bayes paper's results (under "D" classifier) for real duplexes.
 
 We should see quantitatively equivalent behavior to the Naive Bayes classifier paper, reproduced below (proxied by dashed lines):
 
-<center><img src="../../results/plots/previous_results.png" alt="previous results"></center>
-
+![Previous Results](results/plots/previous_results.png)
 
 ---
 
@@ -92,10 +91,8 @@ Within these multiplexes, we induce a duplex and restrict our attention therein;
 # Results
 
 
-<center>
-<img src="../../results/plots/line_auroc-pfi_N2V-logreg-configuration-distance_MEC-baseline.png" alt="previous results">
+![ex27 Results](results/plots/line_auroc-pfi_N2V-logreg-configuration-distance_MEC-baseline.png)
 Figure 1: Comparing configuration degree as a logistic regression feature to prior Naive Bayes results.
-</center>
 
 
 ---
@@ -107,9 +104,6 @@ While I currently have ripped the DC results in [Figure 1](#results), it nonethe
 ---
 
 # Future Work
-
-<font color="red">**NOTE**:</font> The D classifiers should be ran on the real networks - here I was just ripping the existant pickled results which only included the modified Wu et al. and DC classifiers.
-
 `EMB_ex28` will expand this analysis to include N2V embedding distance as well.
 
 

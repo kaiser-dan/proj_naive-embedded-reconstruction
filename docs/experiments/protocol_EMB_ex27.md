@@ -28,7 +28,7 @@
 | -------- | ------------- | -------------- | ------------- | ------------------------------------------------------------ |
 | *v0.1* | 2023-02-23    | 2022-02-23     | 2022-02-23    | Prototyped refactored workflow |
 | *v0.2* | 2023-02-23    | 2022-02-23     | 2022-02-23    | Expanded into "trouble" duplexes, tested error handling |
-| **v1.0** | 2023-02-23    | 2022-02-23     | X    | XXX |
+| **v1.0** | 2023-02-23    | 2022-02-23     | 2022-02-27    | Full run |
 
 ## Relevant scripts
 
@@ -39,7 +39,7 @@ The experimental simulations were run through the Python script `workflow/[opera
 # Summary
 ## TL;DR
 
-X
+We appear to be recreating our prior known results for [the systems detailed below](#data) with the exception of the _C. Elegans_ connectome. Right-asympotitic performance does appear to converge to known values.
 
 ## Experimental Goal
 
@@ -48,7 +48,7 @@ Reproduce Naive Bayes paper's results (under "D" classifier) for real duplexes.
 
 ## Hypotheses (if applicable)
 
-We should see quantitatively equivalent behavior to the Naive Bayes classifier paper, reproduced below:
+We should see quantitatively equivalent behavior to the Naive Bayes classifier paper, reproduced below (proxied by dashed lines):
 
 <center><img src="../../results/plots/previous_results.png" alt="previous results"></center>
 
@@ -92,15 +92,23 @@ Within these multiplexes, we induce a duplex and restrict our attention therein;
 # Results
 
 
+<center>
+<img src="../../results/plots/line_auroc-pfi_N2V-logreg-configuration-distance_MEC-baseline.png" alt="previous results">
+Figure 1: Comparing configuration degree as a logistic regression feature to prior Naive Bayes results.
+</center>
+
+
 ---
 
 # Analysis
 
-
+While I currently have ripped the DC results in [Figure 1](#results), it nonetheless does not appear that we are reproducing the behavior observed in prior work specifically for the _C. Elegans_ connectome. The London transportation network, while seemingly very different, is likely explained by the DC classifier being known to perform worse than pure degree approaches on that system.
 
 ---
 
 # Future Work
+
+<font color="red">**NOTE**:</font> The D classifiers should be ran on the real networks - here I was just ripping the existant pickled results which only included the modified Wu et al. and DC classifiers.
 
 `EMB_ex28` will expand this analysis to include N2V embedding distance as well.
 

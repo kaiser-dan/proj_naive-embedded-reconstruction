@@ -26,8 +26,9 @@
 
 | Version  | Date Designed | Date Conducted | Date Analyzed | Notes                                                        |
 | -------- | ------------- | -------------- | ------------- | ------------------------------------------------------------ |
-| *v0.1* | 2023-02-23    | 2022-02-27     | 2022-02-27    | Prototyped workflow |
-| **v1.0** | 2023-02-27    | 2022-02-27     | 2022-02-XX    | XXX |
+| *v0.1* | 2023-02-23    | 2023-02-27     | 2023-02-27    | Prototyped workflow |
+| *v0.2* | 2023-02-27    | 2023-02-27     | 2023-03-XX    | Full Run (without probability adjustment) |
+| **v1.0** | 2023-02-28    | 2023-03-01     | 2023-03-XX    | Full run (with probability adjustment) |
 
 ## Relevant scripts
 

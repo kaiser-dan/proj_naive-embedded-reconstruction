@@ -13,6 +13,7 @@ import sys
 
 # --- Scientific computing ---
 import numpy as np
+from sklearn.metrics import roc_auc_score
 
 # --- Network science ---
 
@@ -55,27 +56,31 @@ def reconstruct(G, H, theta, parameters, hyperparameters, record):
     # <<< Book-keeping <<<
 
     # >>> Reconstruction procedure >>>
-    R_G, R_H, testset, _ = partial_information(G, H, theta)
+    R_G, R_H, testset, trainset = partial_information(G, H, theta)
 
     # * Step (4) - Embed remnants
     # E_G = N2V(R_G, parameters, hyperparameters)
     # E_H = N2V(R_H, parameters, hyperparameters)
 
     # * Steps (5) - Calculate features
+    # Training features
+    src_degrees, tgt_degrees = features.get_degrees((R_G, R_H), list(trainset.keys()))
+    feature_matrix_train = features.get_configuration_probabilities_feature(src_degrees, tgt_degrees)
+    feature_matrix_train = np.array(feature_matrix_train).reshape(-1, 1)
+
     # Test features
     src_degrees, tgt_degrees = features.get_degrees((R_G, R_H), list(testset.keys()))
     feature_matrix_test = features.get_configuration_probabilities_feature(src_degrees, tgt_degrees)
     feature_matrix_test = np.array(feature_matrix_test).reshape(-1, 1)
 
     # Retrieve labels for sklearn model
+    labels_train = list(trainset.values())
     labels_test = list(testset.values())
 
     # * Step (6) - Train logistic regression classifier
-
     try:
-        model = logreg.train_fit_logreg(feature_matrix_test, labels_test, hyperparameters["classifier"])
+        model = logreg.train_fit_logreg(feature_matrix_train, labels_train, hyperparameters["classifier"])
     except ValueError:  # when only one class is available, happens for some london cases
-        sys.stderr.write(">>> Only one train/test class available")
         return record
 
     intercept, coefs = logreg.get_model_fit(model)
@@ -84,9 +89,9 @@ def reconstruct(G, H, theta, parameters, hyperparameters, record):
     except AssertionError as msg:
         print(msg)
 
-    print(f"Coefficients: {coefs}")
+    # print(f"Coefficients: {coefs}")
 
-    # * Step (7) - Reconstruct duplex with trained classifier
+    # # * Step (7) - Reconstruct duplex with trained classifier
     try:
         accuracy = logreg.get_model_accuracy(model, feature_matrix_test, labels_test)
         auroc = logreg.get_model_auroc(model, feature_matrix_test, labels_test)
@@ -94,8 +99,8 @@ def reconstruct(G, H, theta, parameters, hyperparameters, record):
     except ValueError:  # only one class available, fricken London crap
         return record
 
-    # >>> Post-processing >>>
-    # Stop timers
+    # # >>> Post-processing >>>
+    # # Stop timers
     end_time = perf_counter()
     end_wall_time = time()
 
@@ -190,7 +195,7 @@ if __name__ == "__main__":
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
             PROJECT_ID="EMB_ex27",
-            CURRENT_VERSION="v2.2",
+            CURRENT_VERSION="v3.1-FI",
             ROOT=ROOT
         )
 
@@ -206,7 +211,7 @@ if __name__ == "__main__":
             # N2V
             workers=8,
             # LogReg
-            fit_intercept=False, penalty="l2",
+            fit_intercept=True, penalty="l2",
             # Other
             theta_min=0, theta_max=0.9, theta_num=10, repeat=20)
     # <<< Experiment set-up <<<

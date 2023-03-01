@@ -93,7 +93,6 @@ def reconstruct(G, H, theta, parameters, hyperparameters, record):
     try:
         model = logreg.train_fit_logreg(feature_matrix_train, labels_train, hyperparameters["classifier"])
     except ValueError:  # when only one class is available, happens for some london cases
-        sys.stderr.write(">>> Only one train/test class available")
         return record
 
     # * Step (7) - Reconstruct duplex with trained classifier
@@ -200,7 +199,7 @@ if __name__ == "__main__":
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
             PROJECT_ID="EMB_ex28",
-            CURRENT_VERSION="v0.1",
+            CURRENT_VERSION="v1.0",
             ROOT=ROOT
         )
 
@@ -218,7 +217,7 @@ if __name__ == "__main__":
             # LogReg
             fit_intercept=False,
             # Other
-            theta_max=0.95, theta_num=10, repeat=5)
+            theta_min=0, theta_max=0.9, theta_num=10, repeat=5)
     # <<< Experiment set-up <<<
 
     # >>> Experiment >>>

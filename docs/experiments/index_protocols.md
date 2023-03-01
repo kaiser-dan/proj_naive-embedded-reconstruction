@@ -28,6 +28,7 @@ Active experiments are settings currently being developed or analyzed.
 - ex27
   - Associated experiments: ex26, ex28, ex29
   - Summary: N2V with configuration-likelihood degree feature alone
+  - Another with intercept
 
 - ex28
   - Associated experiments: ex26, ex27, ex29

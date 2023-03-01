@@ -31,6 +31,9 @@
 | **v1.0** | 2023-02-23    | 2022-02-23     | 2022-02-27    | Full run |
 | **v2.0** | 2023-02-27 | 2022-02-27 | 20222-02-27 | Fixed incorrect data split |
 | *v2.1* | 2023-02-27 | 2022-02-27 | 20222-02-27 | Full run |
+| *v2.2* | 2023-02-27 | 2022-02-27 | 20222-02-27 | Full run + homogenized theta range |
+| **v3.0** | 2023-02-28 | 2022-02-28 | 2023-02-28 | Revert to train/test split |
+| *v3.1* | 2023-02-28 | 2022-02-28 | 2023-02-28 | Transformed configuration probability into [-1,1] range |
 
 ## Relevant scripts
 

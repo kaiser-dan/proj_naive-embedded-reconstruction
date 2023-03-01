@@ -48,6 +48,8 @@ def get_configuration_probabilities_feature(src_degrees, tgt_degrees):
         denominator = numerator + (src_degrees[1][idx] * tgt_degrees[1][idx])
 
         probability = numerator / denominator
+        probability = 2*probability - 1
+
         configuration_probabilities.append(probability)
     # <<< Calculate configuration probabilities <<<
 

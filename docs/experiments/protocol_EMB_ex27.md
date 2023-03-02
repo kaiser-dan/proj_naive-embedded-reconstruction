@@ -36,6 +36,18 @@
 | *v3.1* | 2023-02-28 | 2023-02-28 | 2023-02-28 | Transformed configuration probability into [-1,1] range |
 | *v3.1-FI* | 2023-02-28 | 2023-03-01 | 2023-03-XX | Fit intercept in logistic regression |
 
+There is a follow-up (sub)experiment, restricting to synthetic networks. Unclear if there is need for a separate document entirely, so for now, details will be included below.
+
+- Project ID: EMB_ex27-S
+- Researchers: Daniel Kaiser
+- Version history:
+
+| Version  | Date Designed | Date Conducted | Date Analyzed | Notes                                                        |
+| -------- | ------------- | -------------- | ------------- | ------------------------------------------------------------ |
+| *v0.1* | 2023-03-02    | 2023-03-02     | 2023-03-02    | Prototyped workflow with synthetic models|
+| **v1.0** | 2023-03-02    | 2023-03-02     | 2023-03-02    | Full run |
+| v1.0.1 | 2023-03-02    | 2023-03-02     | 2023-03-02    | Fixed <k> range bug |
+
 ## Relevant scripts
 
 The experimental simulations were run through the Python script `workflow/[operative/active]/ex27/EMB_ex27_logreg-degree.py`. A dataframe was created within the workflow and the resultant dataframe `results/dataframes/dataframe_EMB_ex27[version]_DK_[date].csv` was treated as the input data to the analysis in `notebooks/viz/analysis_EMB_ex27.ipynb`, a Jupyter notebook.

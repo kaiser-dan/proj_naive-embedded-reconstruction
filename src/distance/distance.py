@@ -5,7 +5,7 @@
 import numpy as np
 
 # --- Network science ---
-from networkx import node_connected_component as component
+from networkx import connected_components
 
 
 # ============= FUNCTIONS =================
@@ -21,7 +21,7 @@ def embedded_edge_distance(edge, vectors, distance_=euclidean_distance):
 
     return distance_(vectors[src], vectors[tgt]) + 1e-16
 
-def component_penalized_embedded_edge_distance(edge, graph, vectors, penalty=2**8, distance_=euclidean_distance):
+def component_penalized_embedded_edge_distance(edge, vectors, components, penalty=2**8, distance_=euclidean_distance):
     src, tgt = edge
 
     try:
@@ -29,7 +29,20 @@ def component_penalized_embedded_edge_distance(edge, graph, vectors, penalty=2**
     except ValueError:  # Dimension mismatch when per-component embedding applied
         dist = 1e-16
 
-    if component(graph, src) != component(graph, tgt):
+    if components[src] != components[tgt]:
         dist += penalty
 
     return dist
+
+
+
+# --- Helpers ---
+def get_component_mapping(graph):
+    mapping = {}
+    components = connected_components(graph)
+
+    for component_id, component_nodes in enumerate(components):
+        for node in component_nodes:
+            mapping[node] = component_id
+
+    return mapping

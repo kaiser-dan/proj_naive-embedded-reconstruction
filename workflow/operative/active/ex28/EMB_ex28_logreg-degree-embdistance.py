@@ -213,7 +213,7 @@ if __name__ == "__main__":
     parameters, hyperparameters, experiment_setup = \
         params.set_parameters_N2V(
             # N2V
-            workers=8,
+            workers=48,
             # LogReg
             fit_intercept=False,
             # Other

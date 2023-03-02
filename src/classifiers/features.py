@@ -9,7 +9,7 @@ import numpy as np
 
 # --- Project source ---
 sys.path.append("../")
-from distance.distance import embedded_edge_distance
+from distance.distance import embedded_edge_distance, component_penalized_embedded_edge_distance
 
 
 # ========== FUNCTIONS ==========
@@ -59,7 +59,7 @@ def get_configuration_probabilities_feature(src_degrees, tgt_degrees):
 # > Distance >
 def get_distances(vectors, edges):
     # >>> Book-keeping >>>
-    G, H = vectors  # alias input layer graphs
+    G, H = vectors  # alias input layer embedded node vectors
     # <<< Book-keeping <<<
 
     # >>> Distance calculations >>>
@@ -69,6 +69,18 @@ def get_distances(vectors, edges):
 
     return G_distances, H_distances
 
+def get_biased_distances(vectors, edges, components):
+    # >>> Book-keeping >>>
+    G, H = vectors  # alias input layer embedded node vectors
+    G_components, H_components = components  # alias component mapping of remnants
+    # <<< Book-keeping <<<
+
+    # >>> Distance calculations >>>
+    G_distances = [component_penalized_embedded_edge_distance(edge, G, G_components) for edge in edges]
+    H_distances = [component_penalized_embedded_edge_distance(edge, H, H_components) for edge in edges]
+    # <<< Distance calculations
+
+    return G_distances, H_distances
 # < Distance <
 
 

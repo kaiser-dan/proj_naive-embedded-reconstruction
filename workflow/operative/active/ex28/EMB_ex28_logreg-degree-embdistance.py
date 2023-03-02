@@ -199,7 +199,7 @@ if __name__ == "__main__":
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
             PROJECT_ID="EMB_ex28",
-            CURRENT_VERSION="v1.0",
+            CURRENT_VERSION="v1.0-FI",
             ROOT=ROOT
         )
 
@@ -215,7 +215,7 @@ if __name__ == "__main__":
             # N2V
             workers=48,
             # LogReg
-            fit_intercept=False,
+            fit_intercept=True,
             # Other
             theta_min=0, theta_max=0.9, theta_num=10, repeat=5)
     # <<< Experiment set-up <<<

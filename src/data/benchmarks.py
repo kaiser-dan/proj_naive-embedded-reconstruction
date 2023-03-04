@@ -132,11 +132,11 @@ def generate_configuration_model (degree):
 # --- LFR model ---
 # * NOTE: I swapped out `os.system` for the safer, more controllable `subprocess.check_call`
 # * This also allows me to suppress that super annoying LFR generation logging to stdout
-def LFR(n,t1,t2,mu,avg_k,max_k):
+def LFR(n,t1,t2,mu,avg_k,max_k, ROOT="../../"):
     # Call LFR generation, wait for completion, propogate bash exit codes
     subprocess.call(
         " ".join([
-            "../../bin/LFR/benchmark.sh",
+            f"{ROOT}/bin/LFR/benchmark.sh",
             "-N", f"{n}",
             "-k", f"{avg_k}",
             "-maxk", f"{max_k}",
@@ -144,18 +144,18 @@ def LFR(n,t1,t2,mu,avg_k,max_k):
             "-t2", f"{t2}",
             "-mu", f"{mu}"
         ]),
-        stdout=open(os.devnull, 'w'),
-        stderr=open(os.devnull, 'w'),
+        # stdout=open(os.devnull, 'w'),
+        # stderr=open(os.devnull, 'w'),
         shell=True
     )
 
     # Format resultant network as networkx Graph
-    x=np.loadtxt('../../bin/LFR/network.dat')
+    x=np.loadtxt(f'{ROOT}/network.dat')
     edges=[(int(x[i][0])-1,int(x[i][1])-1) for i in range(len(x))]
     g=nx.Graph(edges)
 
     # Format resultant node partition as dict
-    x=np.loadtxt('../../bin/LFR/community.dat')
+    x=np.loadtxt(f'{ROOT}/community.dat')
     coms={int(x[i][0])-1:int(x[i][1]) for i in range(len(x))}
 
     return g, coms

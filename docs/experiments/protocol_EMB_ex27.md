@@ -47,6 +47,9 @@ There is a follow-up (sub)experiment, restricting to synthetic networks. Unclear
 | *v0.1* | 2023-03-02    | 2023-03-02     | 2023-03-02    | Prototyped workflow with synthetic models|
 | **v1.0** | 2023-03-02    | 2023-03-02     | 2023-03-02    | Full run |
 | v1.0.1 | 2023-03-02    | 2023-03-02     | 2023-03-02    | Fixed <k> range bug |
+| *v0.2* | 2023-03-02    | 2023-03-02     | 2023-03-02    | Examine kmax parametrization |
+| *v0.3* | 2023-03-02    | 2023-03-02     | 2023-03-02    | Examine ER graphs |
+| *v0.3* | 2023-03-02    | 2023-03-02     | 2023-03-02    | Examine LFR graphs with large mixing parameter |
 
 ## Relevant scripts
 

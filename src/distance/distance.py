@@ -11,7 +11,7 @@ from networkx import node_connected_component as component
 # ============= FUNCTIONS =================
 # --- Metrics ---
 def euclidean_distance(x, y): return np.linalg.norm(x - y)
-def cosine_similarity(x, y): return np.arccos(np.dot(x, y) / (np.norm(x) * np.norm(y)))
+def cosine_similarity(x, y): return np.dot(x, y) / (np.linalg.norm(x) * np.linalg.norm(y))
 def poincare_disk_distance(x, y): raise NotImplementedError("Hyperbolic distance not yet implemented!")
 
 

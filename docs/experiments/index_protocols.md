@@ -25,16 +25,6 @@ Experiments are considered "operative" if they are actively being developed or r
 
 Active experiments are settings currently being developed or analyzed.
 
-- ex27
-  - Associated experiments: ex26, ex28, ex29
-  - Summary: N2V with configuration-likelihood degree feature alone
-  - Another with intercept
-
-- ex28
-  - Associated experiments: ex26, ex27, ex29
-  - Summary: N2V with configuration-likelihood degree and embedding distance features
-
-
 ## Completed
 
 Completed experiments are settings with generated, analyzed results that are without question.
@@ -75,14 +65,16 @@ Completed experiments are settings with generated, analyzed results that are wit
   - Date completed: 2023-02-27
   - Associated experiments: ex27
   - Summary: Apply "D" classifier to real multiplexes
+- ex27
+  - Date completed: 2023-03-02
+  - Associated experiments: ex26, ex28, ex29
+  - Summary: N2V with configuration-likelihood degree feature alone
+
 
 ## Planned
 
 Planned experiments are experiments that are planned or actively being designed, but before active development starts.
 
-- ex29
-  - Associated experiments: ex26, ex27, ex28
-  - Summary: N2V with configuration-likelihood degree, embedding distance features and component biases
 
 
 # Inoperative Experiments
@@ -109,3 +101,4 @@ Depreciated experiments may, unlike failed experiments, be reproduced as is but 
 - ex11
 - ex12
 - ex17
+- ex28

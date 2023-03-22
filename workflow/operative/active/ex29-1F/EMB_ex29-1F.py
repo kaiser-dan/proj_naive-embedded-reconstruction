@@ -1,5 +1,5 @@
-"""Experiment script to explore incrementally more sophisticated
-feature sets to logistic regression with N2V embeddings.
+"""Experiment script to explore one feature logistic regression reconstructions
+from layer remnant embeddings
 
 Broadly speaking, we have the following "workflow":
 
@@ -7,12 +7,24 @@ Broadly speaking, we have the following "workflow":
 2. experiment() -> For single data instance, sweep over _parameters_ (Theta, classifier parameters, etc.)
 3. reconstruct() -> For single data instance and parameter instance, actually _do_ reconstruction task.
 """
+
+"""
+TDD
+
+1. Load data
+2. Fix feature
+3. Experiment over PFI with given data and feature
+4. Record performance and coefficients
+5. Repeat for all fixtures
+6. Repeat for all data
+"""
 # ========== SET-UP ==========
 # --- Standard library ---
 import sys
 
 # --- Scientific computing ---
 import numpy as np
+from sklearn.metrics import roc_auc_score
 
 # --- Network science ---
 
@@ -30,10 +42,6 @@ from data import preprocessing, postprocessing
 from sampling.random import partial_information  # sample training set
 
 ## Embedding
-from embed.N2V import N2V
-
-## Distance/Graph calculations
-from distance.distance import get_component_mapping
 
 ## Classifiers
 from classifiers import features  # feature set helpers
@@ -51,7 +59,7 @@ import warnings
 warnings.filterwarnings("ignore")  # remove sklearn depreciation warnings
 
 # ========== FUNCTIONS ==========
-def reconstruct(G, H, theta, parameters, hyperparameters, record):
+def reconstruct(G, H, feature_set, theta, parameters, hyperparameters, record):
     # >>> Book-keeping >>>
     # Start timers
     start_wall_time = time()  # start wall timer
@@ -61,62 +69,68 @@ def reconstruct(G, H, theta, parameters, hyperparameters, record):
     # >>> Reconstruction procedure >>>
     R_G, R_H, testset, trainset = partial_information(G, H, theta)
 
-    # * Step (4) - Embed remnants
-    E_G = N2V(R_G, parameters, hyperparameters)
-    E_H = N2V(R_H, parameters, hyperparameters)
+    # * Calculate features
+    # & Imbalance
+    if "imb" in feature_set:
+        hyperparameters["classifier"]["fit_intercept"] = True
 
-    # * Step (4.5) - Retrieve node -> component mappings
-    components = (get_component_mapping(R_G), get_component_mapping(R_H))
+    # & Embedding
+    if "emb" in feature_set:
+        E_G = N2V(R_G, parameters, hyperparameters)
+        E_H = N2V(R_H, parameters, hyperparameters)
 
-    # * Steps (5) - Calculate features
-    vectors = (E_G, E_H)
-    graphs = (R_G, R_H)
+        distances_G_train = 
+        distances_H_train = 
+        distances_train = 
 
-    ## Training features
-    edges = list(trainset.keys())
-    configuration_degrees = \
-        features.get_configuration_probabilities_feature(
-            *features.get_degrees(graphs, edges)
-        )
-    distances = features.get_biased_distances(vectors, edges, components)
-    feature_matrix_train = features.prepare_feature_matrix_confdeg_dist(configuration_degrees, distances)
+        distances_G_test = 
+        distances_H_test = 
+        distances_test = 
 
-    ## Test features
-    edges = list(testset.keys())
-    configuration_degrees = \
-        features.get_configuration_probabilities_feature(
-            *features.get_degrees(graphs, edges)
-        )
-    distances = features.get_biased_distances(vectors, edges, components)
-    feature_matrix_test = features.prepare_feature_matrix_confdeg_dist(configuration_degrees, distances)
+    # & Degrees
+    if "deg" in feature_set:
+        src_degrees_train, tgt_degrees_train = features.get_degrees((R_G, R_H), list(trainset.keys()))
+        src_degrees_test, tgt_degrees_test = features.get_degrees((R_G, R_H), list(testset.keys()))
 
-    ## Retrieve labels for sklearn model
+    # Training features
+    feature_matrix_train = features.get_configuration_probabilities_feature(src_degrees, tgt_degrees)
+    feature_matrix_train = np.array(feature_matrix_train).reshape(-1, 1)
+
+    # Test features
+    feature_matrix_test = features.get_configuration_probabilities_feature(src_degrees, tgt_degrees)
+    feature_matrix_test = np.array(feature_matrix_test).reshape(-1, 1)
+
+    # Retrieve labels for sklearn model
     labels_train = list(trainset.values())
     labels_test = list(testset.values())
 
-    # * Step (6) - Train logistic regression classifier
-
+    # * Train logistic regression classifier
     try:
         model = logreg.train_fit_logreg(feature_matrix_train, labels_train, hyperparameters["classifier"])
     except ValueError:  # when only one class is available, happens for some london cases
         return record
 
-    # * Step (7) - Reconstruct duplex with trained classifier
+
+    # * Reconstruct duplex with trained classifier
     try:
         accuracy = logreg.get_model_accuracy(model, feature_matrix_test, labels_test)
         auroc = logreg.get_model_auroc(model, feature_matrix_test, labels_test)
         aupr = logreg.get_model_aupr(model, feature_matrix_test, labels_test)
+        intercept, coefs = logreg.get_model_fit(model)
     except ValueError:  # only one class available, fricken London crap
         return record
 
-    # >>> Post-processing >>>
-    # Stop timers
+    # # >>> Post-processing >>>
+    # # Stop timers
     end_time = perf_counter()
     end_wall_time = time()
 
     # Update record
     record.update({
+        "features": feature_set,
         "theta": theta,
+        "intercept": intercept,
+        "coefficients": coefs,
         "accuracy": accuracy,
         "auroc": auroc,
         "aupr": aupr,
@@ -127,7 +141,7 @@ def reconstruct(G, H, theta, parameters, hyperparameters, record):
 
     return record
 
-def experiment(system, layer_pair, parameters, hyperparameters, experiment_setup):
+def experiment(system, feature_set, layer_pair, parameters, hyperparameters, experiment_setup):
     # >>> Book-keeping >>>
     # Specify input data filehandle
     input_data = dataio.get_input_filehandle(system, ROOT=ROOT)
@@ -137,12 +151,15 @@ def experiment(system, layer_pair, parameters, hyperparameters, experiment_setup
         "system": system,
         "l1": layer_pair[0],
         "l2": layer_pair[1],
-        "theta": -np.inf,
-        "accuracy": -np.inf,
-        "auroc": -np.inf,
-        "aupr": -np.inf,
-        "process_time": np.inf,
-        "wall_time": np.inf
+        "features": None,
+        "theta": None,
+        "intercept": None,
+        "coefficients": None,
+        "accuracy": None,
+        "auroc": None,
+        "aupr": None,
+        "process_time": None,
+        "wall_time": None
     }
 
     # Build theta range
@@ -161,14 +178,15 @@ def experiment(system, layer_pair, parameters, hyperparameters, experiment_setup
 
     # >>> Sweep theta >>>
     for theta in progbar_thetas:
-        record = reconstruct(G, H, theta, parameters, hyperparameters, empty_record.copy())
+        record = reconstruct(G, H, feature_set, theta, parameters, hyperparameters, empty_record.copy())
         records.append(record)
     # <<< Sweep theta >>>
 
     return records
 
 # ========== MAIN ==========
-def main(systems, parameters, hyperparameters, experiment_setup, output_filehandle=None):
+# TODO: Cleanup nested loops with Cartesian product on parameter basis
+def main(systems, feature_sets, parameters, hyperparameters, experiment_setup, output_filehandle=None):
     # >>> Book-keeping >>>
     records = []  # initialize records
     # <<< Book-keeping <<<
@@ -181,20 +199,19 @@ def main(systems, parameters, hyperparameters, experiment_setup, output_filehand
         ## Induced duplexes
         progbar_layers = tqdm(layers, desc="Layer pairs", position=1, leave=False, colour="green")
         for layer_pair in progbar_layers:
-            ## Repeat for statistics
-            progbar_repetitions = trange(experiment_setup["repeat"], desc="Repetitions", position=2, leave=False, colour="yellow")
-            for _ in progbar_repetitions:
-                records_ = experiment(system, layer_pair, parameters, hyperparameters, experiment_setup)
-                records.extend(records_)
+            ## Feature sets
+            progbar_featuresets = tqdm(feature_sets, desc="Feature sets", position=2, leave=False, colour="yellow")
+            for feature_set in progbar_featuresets:
+                ## Repeat for statistics
+                progbar_repetitions = trange(experiment_setup["repeat"], desc="Repetitions", position=2, leave=False, colour="red")
+                for _ in progbar_repetitions:
+                    records_ = experiment(system, feature_set, layer_pair, parameters, hyperparameters, experiment_setup)
+                    records.extend(records_)
     # <<< Experiment <<<
 
     # >>> Post-processing >>>
     df = postprocessing.df_from_records(records)
     # <<< Post-processing <<<
-
-    # ! >>> DEBUG >>>
-    print(tabulate(df[["system", "theta", "accuracy", "auroc", "aupr"]], headers='keys', tablefmt='psql'))
-    # ! <<< DEBUG <<<
 
     dataio.save_df(df, output_filehandle)
 
@@ -204,37 +221,39 @@ if __name__ == "__main__":
     # >>> Experiment set-up >>>
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
-            PROJECT_ID="EMB_ex29",
+            PROJECT_ID="EMB_ex29-1F",
             CURRENT_VERSION="v0.1",
             ROOT=ROOT
         )
 
     # Parameter ranges
     systems = {
-        # "arxiv": [(2, 6)],
-        # "celegans": [(1, 2)],
-        # "drosophila": [(1, 2)],
+        "arxiv": [(2, 6)],
+        "celegans": [(1, 2)],
+        "drosophila": [(1, 2)],
         "london": [(1, 2)],
     }
+    feature_sets = (
+        {"imb"},
+        {"emb"},
+        {"deg"}
+    )
     parameters, hyperparameters, experiment_setup = \
         params.set_parameters_N2V(
-            # N2V
-            workers=8,
-            # LogReg
-            fit_intercept=True,
-            # Other
-            theta_min=0, theta_max=0.9, theta_num=10, repeat=1)
+            fit_intercept=False,  # logreg
+            theta_min=0, theta_max=0.9, theta_num=10, repeat=20  # other
+        )
     # <<< Experiment set-up <<<
 
     # >>> Experiment >>>
-    print("\n", "="*30, TAG, "="*30, "\n\n")
-    start_wall_time = time()
+    print("\n", "="*30, TAG, "="*30, "\n\n")  # print stdout preface
+    start_wall_time = time()  # start timers
     start_time = perf_counter()
 
-    main(systems, parameters, hyperparameters, experiment_setup, output_filehandle)
+    main(systems, feature_sets, parameters, hyperparameters, experiment_setup, output_filehandle)  # run simulations
 
-    end_time = perf_counter()
+    end_time = perf_counter()  # lap timers
     end_wall_time = time()
-    print(f"Total process time: {(end_time - start_time):.4f} \t Total wall time: {(end_wall_time - start_wall_time):.4f}")
+    print(f"Total process time: {(end_time - start_time):.4f} \t Total wall time: {(end_wall_time - start_wall_time):.4f}")  # print stdout postface
     print("\n", "="*60, "\n\n")
     # <<< Experiment <<<

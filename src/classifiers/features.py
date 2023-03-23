@@ -10,6 +10,7 @@ import numpy as np
 # --- Project source ---
 sys.path.append("../")
 from distance.distance import embedded_edge_distance, component_penalized_embedded_edge_distance
+from distance.score import likelihood
 
 
 # ========== FUNCTIONS ==========
@@ -57,7 +58,33 @@ def get_configuration_probabilities_feature(src_degrees, tgt_degrees):
 # < Degrees <
 
 # > Distance >
+def get_distances(vectors, edges):
+    # >>> Book-keeping >>>
+    G, H = vectors  # alias input layer graphs
+    # <<< Book-keeping <<<
 
+    # >>> Distance calculations >>>
+    distances_G = [embedded_edge_distance(edge, G) for edge in edges]
+    distances_H = [embedded_edge_distance(edge, H) for edge in edges]
+    # <<< Distance calculations
+
+    return distances_G, distances_H
+
+def get_configuration_distances_feature(distances_G, distances_H):
+    # >>> Book-keeping >>>
+    M = len(distances_G)  # get number of observations in dataset
+    configuration_probabilities = []  # initialize feature set
+    # <<< Book-keeping <<<
+
+    # >>> Calculate configuration probabilities >>>
+    for idx in range(M):
+        probability = likelihood(distances_G[idx], distances_H[idx])
+        probability = 2*probability - 1
+
+        configuration_probabilities.append(probability)
+    # <<< Calculate configuration probabilities <<<
+
+    return configuration_probabilities
 # < Distance <
 
 

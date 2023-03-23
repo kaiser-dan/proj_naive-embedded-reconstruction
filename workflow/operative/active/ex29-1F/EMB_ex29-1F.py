@@ -42,6 +42,7 @@ from data import preprocessing, postprocessing
 from sampling.random import partial_information  # sample training set
 
 ## Embedding
+from embed.N2V import N2V
 
 ## Classifiers
 from classifiers import features  # feature set helpers
@@ -79,26 +80,54 @@ def reconstruct(G, H, feature_set, theta, parameters, hyperparameters, record):
         E_G = N2V(R_G, parameters, hyperparameters)
         E_H = N2V(R_H, parameters, hyperparameters)
 
-        distances_G_train = 
-        distances_H_train = 
-        distances_train = 
+        distances_G_train, distances_H_train = features.get_distances((E_G, E_H), list(trainset.keys()))
+        distances_G_test, distances_H_test = features.get_distances((E_G, E_H), list(testset.keys()))
 
-        distances_G_test = 
-        distances_H_test = 
-        distances_test = 
+        feature_distances_train = features.get_configuration_distances_feature(distances_G_train, distances_H_train)
+        feature_distances_test = features.get_configuration_distances_feature(distances_G_test, distances_H_test)
 
     # & Degrees
     if "deg" in feature_set:
         src_degrees_train, tgt_degrees_train = features.get_degrees((R_G, R_H), list(trainset.keys()))
         src_degrees_test, tgt_degrees_test = features.get_degrees((R_G, R_H), list(testset.keys()))
 
-    # Training features
-    feature_matrix_train = features.get_configuration_probabilities_feature(src_degrees, tgt_degrees)
-    feature_matrix_train = np.array(feature_matrix_train).reshape(-1, 1)
+        feature_degrees_train = features.get_configuration_probabilities_feature(src_degrees_train, tgt_degrees_train)
+        feature_degrees_test = features.get_configuration_probabilities_feature(src_degrees_test, tgt_degrees_test)
 
-    # Test features
-    feature_matrix_test = features.get_configuration_probabilities_feature(src_degrees, tgt_degrees)
-    feature_matrix_test = np.array(feature_matrix_test).reshape(-1, 1)
+    # * Format feature matrix
+    if len(feature_set) == 1:
+        if feature_set == {"imb"}:  # imbalance alone needs special formatting
+            feature_matrix_train = np.array([0]*len(trainset)).reshape(-1,1)
+            feature_matrix_test = np.array([0]*len(testset)).reshape(-1,1)
+        elif feature_set == {"emb"}:
+            feature_matrix_train = np.array(feature_distances_train).reshape(-1,1)
+            feature_matrix_test = np.array(feature_distances_test).reshape(-1,1)
+        elif feature_set == {"deg"}:
+            feature_matrix_train = np.array(feature_degrees_train).reshape(-1,1)
+            feature_matrix_test = np.array(feature_degrees_test).reshape(-1,1)
+    elif len(feature_set) == 2:
+        if "imb" not in feature_set:
+            feature_matrix_train = np.empty((len(trainset), 2))
+            feature_matrix_train[:, 0] = feature_distances_train
+            feature_matrix_train[:, 1] = feature_degrees_train
+
+            feature_matrix_test = np.empty((len(testset), 2))
+            feature_matrix_test[:, 0] = feature_distances_test
+            feature_matrix_test[:, 1] = feature_degrees_test
+        elif "emb" in feature_set:
+            feature_matrix_train = np.array(feature_distances_train).reshape(-1,1)
+            feature_matrix_test = np.array(feature_distances_test).reshape(-1,1)
+        elif "deg" in feature_set:
+            feature_matrix_train = np.array(feature_degrees_train).reshape(-1,1)
+            feature_matrix_test = np.array(feature_degrees_test).reshape(-1,1)
+    elif len(feature_set) == 3:
+        feature_matrix_train = np.empty((len(trainset), 2))
+        feature_matrix_train[:, 0] = feature_distances_train
+        feature_matrix_train[:, 1] = feature_degrees_train
+
+        feature_matrix_test = np.empty((len(testset), 2))
+        feature_matrix_test[:, 0] = feature_distances_test
+        feature_matrix_test[:, 1] = feature_degrees_test
 
     # Retrieve labels for sklearn model
     labels_train = list(trainset.values())
@@ -107,7 +136,10 @@ def reconstruct(G, H, feature_set, theta, parameters, hyperparameters, record):
     # * Train logistic regression classifier
     try:
         model = logreg.train_fit_logreg(feature_matrix_train, labels_train, hyperparameters["classifier"])
-    except ValueError:  # when only one class is available, happens for some london cases
+    except ValueError as err:  # when only one class is available, happens for some london cases
+        print(feature_set)
+        print(err)
+        print(feature_matrix_train[:3])
         return record
 
 
@@ -127,7 +159,6 @@ def reconstruct(G, H, feature_set, theta, parameters, hyperparameters, record):
 
     # Update record
     record.update({
-        "features": feature_set,
         "theta": theta,
         "intercept": intercept,
         "coefficients": coefs,
@@ -151,7 +182,7 @@ def experiment(system, feature_set, layer_pair, parameters, hyperparameters, exp
         "system": system,
         "l1": layer_pair[0],
         "l2": layer_pair[1],
-        "features": None,
+        "features": feature_set,
         "theta": None,
         "intercept": None,
         "coefficients": None,
@@ -221,27 +252,34 @@ if __name__ == "__main__":
     # >>> Experiment set-up >>>
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
-            PROJECT_ID="EMB_ex29-1F",
-            CURRENT_VERSION="v0.1",
+            PROJECT_ID="EMB_ex29",
+            CURRENT_VERSION="v1.1",
             ROOT=ROOT
         )
 
     # Parameter ranges
     systems = {
         "arxiv": [(2, 6)],
-        "celegans": [(1, 2)],
+        # "celegans": [(1, 2)],
         "drosophila": [(1, 2)],
-        "london": [(1, 2)],
+        # "london": [(1, 2)],
     }
     feature_sets = (
+        # Single features
         {"imb"},
         {"emb"},
-        {"deg"}
+        {"deg"},
+        # Feature pairs
+        {"imb", "emb"},
+        {"imb", "deg"},
+        {"emb", "deg"},
+        # All features
+        {"imb", "emb", "deg"}
     )
     parameters, hyperparameters, experiment_setup = \
         params.set_parameters_N2V(
             fit_intercept=False,  # logreg
-            theta_min=0, theta_max=0.9, theta_num=10, repeat=20  # other
+            theta_min=0.05, theta_max=0.95, theta_num=10, repeat=1  # other
         )
     # <<< Experiment set-up <<<
 

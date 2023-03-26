@@ -41,6 +41,7 @@ sys.path.append(f"{ROOT}/src/")
 ## Data
 from data import dataio
 from data import preprocessing, postprocessing
+from data import observations
 from sampling.random import partial_information  # sample training set
 
 ## Embedding
@@ -63,7 +64,7 @@ warnings.filterwarnings("ignore")  # remove sklearn depreciation warnings
 
 # ========== FUNCTIONS ==========
 def main(
-        system_layers_sets: set[tuple[str, int, int]],
+        system_layer_sets: set[tuple[str, int, int]],
         feature_sets: set[set[str]],
         parameters: dict[str, object], hyperparameters: dict[str, object],
         experiment_setup: dict[str, object],
@@ -122,8 +123,11 @@ def experiment(
         parameters: dict[str, object],
         hyperparameters: dict[str, object]) -> dict[str, object]:
     # >>> Book-keeping >>>
-    # * Load remnants from file
-    # * Load embeddings from file
+    preprocessed_data = observations.get_preprocessed_data(
+        system_layers[0],
+        (system_layers[1], system_layers[2]),
+        theta, repetition
+    )
     # <<< Book-keeping <<<
 
     # >>> Calculations >>>

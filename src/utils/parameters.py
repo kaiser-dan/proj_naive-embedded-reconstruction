@@ -1,4 +1,9 @@
 """Project source code for controlling implicit correlations in synthetic multiplexes.
+
+Throughout, `parameters` are independent variables controlling embedding behavior.
+They have a theoretical motivation for accepting different values.
+In contrast, `hyperparameters` are independent variables for embedding or regression
+that have less convincing theoretical reasons to be altered (with respect to the original analysis).
 """
 # ============= SET-UP =================
 from numpy import linspace

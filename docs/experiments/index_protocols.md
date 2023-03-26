@@ -25,6 +25,10 @@ Experiments are considered "operative" if they are actively being developed or r
 
 Active experiments are settings currently being developed or analyzed.
 
+- ex29
+  - Associated experiments: ex27, ex28
+  - Summary: Full factorial experiment on logistic regression features
+
 ## Completed
 
 Completed experiments are settings with generated, analyzed results that are without question.
@@ -67,7 +71,7 @@ Completed experiments are settings with generated, analyzed results that are wit
   - Summary: Apply "D" classifier to real multiplexes
 - ex27
   - Date completed: 2023-03-02
-  - Associated experiments: ex26, ex28, ex29
+  - Associated experiments: ex26, ex28
   - Summary: N2V with configuration-likelihood degree feature alone
 
 

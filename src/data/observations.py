@@ -28,14 +28,17 @@ class PreprocessedData:
     layers: tuple[int, int]
     theta: float
     remnants: tuple[nx.Graph, nx.Graph]
-    embeddings: tuple[np.array, np.array]
+    embeddings: tuple[dict, dict]
     observed_edges: dict[tuple[int, int], int]
     unobserved_edges: dict[tuple[int, int], int]
 
 
 
 # =================== FUNCTIONS ===================
-def get_preprocessed_data(system, layers, theta, repetition, ROOT="../../data/input/preprocessed/"):
+def get_preprocessed_data(
+        system, layers,
+        theta, repetition,
+        ROOT="../../data/input/preprocessed/"):
     filename = \
         f"{ROOT}/cache_system={system}_layers={layers[0]}-{layers[1]}_theta={theta:.2f}_rep={repetition}.pkl"
 
@@ -44,7 +47,12 @@ def get_preprocessed_data(system, layers, theta, repetition, ROOT="../../data/in
 
     return preprocessed_data
 
-def calculate_preprocessed_data(G, H, system, layers, theta, repetition, embedding_parameters, embedding_hyperparameters, ROOT="../../data/input/preprocessed/"):
+def calculate_preprocessed_data(
+        G, H,
+        system, layers,
+        theta, repetition,
+        embedding_parameters, embedding_hyperparameters,
+        ROOT="../../data/input/preprocessed/"):
     filename = \
         f"{ROOT}/cache_system={system}_layers={layers[0]}-{layers[1]}_theta={theta:.2f}_rep={repetition}.pkl"
 
@@ -54,13 +62,12 @@ def calculate_preprocessed_data(G, H, system, layers, theta, repetition, embeddi
     # Embed remnants
     E_G = N2V(R_G, embedding_parameters, embedding_hyperparameters)
     E_H = N2V(R_H, embedding_parameters, embedding_hyperparameters)
-    # ! RENORMALIZE
 
     # Format class
     preprocessed_data = PreprocessedData(
         system, layers, theta,
         (R_G, R_H), (E_G, E_H),
-        unobserved_edges, observed_edges
+        observed_edges, unobserved_edges
     )
 
     # Save to disk

@@ -13,6 +13,7 @@ from distance.distance import *
 # ============= FUNCTIONS =================
 # --- Likelihood models ---
 # Basic convex models
+def identity(x): return x
 def inverse_(x): return 1/x
 def negexp_(x): return np.exp(-x)
 

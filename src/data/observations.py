@@ -32,6 +32,59 @@ class PreprocessedData:
     observed_edges: dict[tuple[int, int], int]
     unobserved_edges: dict[tuple[int, int], int]
 
+    def renormalize(self):
+        # Retrieve components
+        R_G_components = [
+            self.remnants[0].subgraph(component).copy()
+            for component in nx.connected_components(self.remnants[0])
+        ]
+        R_H_components = [
+            self.remnants[1].subgraph(component).copy()
+            for component in nx.connected_components(self.remnants[1])
+        ]
+        R_G_components = sorted(R_G_components, key=len, reverse=True)
+        R_H_components = sorted(R_H_components, key=len, reverse=True)
+
+        # Identify GCC and it's mean norm
+        R_G_GCC = R_G_components[0]
+        R_H_GCC = R_H_components[0]
+
+        R_G_GCC_norm = np.mean([
+            np.linalg.norm(self.embeddings[0][node])
+            for node in R_G_GCC.nodes()
+        ])
+        R_H_GCC_norm = np.mean([
+            np.linalg.norm(self.embeddings[1][node])
+            for node in R_H_GCC.nodes()
+        ])
+
+
+        # Renormalize components by mean GCC norm
+        for component in R_G_components[1:]:
+            component_norm = np.mean([
+                np.linalg.norm(self.embeddings[0][node])
+                for node in component.nodes()
+            ])
+            if np.equal(component_norm, 0):
+                component_norm += 1e-12
+
+            renormalization_factor = R_G_GCC_norm / component_norm
+            for node in component.nodes():
+                self.embeddings[0][node] *= renormalization_factor
+
+        for component in R_H_components[1:]:
+            component_norm = np.mean([
+                np.linalg.norm(self.embeddings[1][node])
+                for node in component.nodes()
+            ])
+            if np.equal(component_norm, 0):
+                component_norm += 1e-12
+
+            renormalization_factor = R_H_GCC_norm / component_norm
+            for node in component.nodes():
+                self.embeddings[1][node] *= renormalization_factor
+
+        return
 
 
 # =================== FUNCTIONS ===================

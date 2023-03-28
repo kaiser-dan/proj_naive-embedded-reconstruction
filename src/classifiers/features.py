@@ -9,7 +9,7 @@ import numpy as np
 
 # --- Project source ---
 sys.path.append("../")
-from distance.distance import embedded_edge_distance, component_penalized_embedded_edge_distance
+from distance.distance import embedded_edge_distance
 from distance.score import likelihood
 
 
@@ -89,3 +89,42 @@ def get_configuration_distances_feature(distances_G, distances_H):
 
 
 # --- Formatters ---
+def format_feature_matrix(
+        feature_set, M_train, M_test,
+        feature_distances_train=None,
+        feature_distances_test=None,
+        feature_degrees_train=None,
+        feature_degrees_test=None,
+):
+    if feature_set == {"imb"}:
+        feature_matrix_train = np.array([0]*M_train).reshape(-1,1)
+        feature_matrix_test = np.array([0]*M_test).reshape(-1,1)
+    elif feature_set == {"emb"}:
+        feature_matrix_train = np.array(feature_distances_train).reshape(-1,1)
+        feature_matrix_test = np.array(feature_distances_test).reshape(-1,1)
+    elif feature_set == {"deg"}:
+        feature_matrix_train = np.array(feature_degrees_train).reshape(-1,1)
+        feature_matrix_test = np.array(feature_degrees_test).reshape(-1,1)
+    elif feature_set == {"imb", "emb"}:
+        feature_matrix_train = np.array(feature_distances_train).reshape(-1,1)
+        feature_matrix_test = np.array(feature_distances_test).reshape(-1,1)
+    elif feature_set == {"imb", "deg"}:
+        feature_matrix_train = np.array(feature_degrees_train).reshape(-1,1)
+        feature_matrix_test = np.array(feature_degrees_test).reshape(-1,1)
+    elif feature_set == {"emb", "deg"} or feature_set == {"emb", "deg", "imb"}:
+        feature_matrix_train = np.empty((M_train, 2))
+        feature_matrix_train[:, 0] = feature_distances_train
+        feature_matrix_train[:, 1] = feature_degrees_train
+
+        feature_matrix_test = np.empty((M_test, 2))
+        feature_matrix_test[:, 0] = feature_distances_test
+        feature_matrix_test[:, 1] = feature_degrees_test
+
+    return feature_matrix_train, feature_matrix_test
+
+
+# --- Helpers ---
+def get_labels(trainset, testset):
+    labels_train = list(trainset.values())
+    labels_test = list(testset.values())
+    return labels_train, labels_test

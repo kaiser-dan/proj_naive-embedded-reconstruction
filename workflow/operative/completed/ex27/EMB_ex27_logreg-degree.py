@@ -99,8 +99,8 @@ def reconstruct(G, H, theta, parameters, hyperparameters, record):
     except ValueError:  # only one class available, fricken London crap
         return record
 
-    # # >>> Post-processing >>>
-    # # Stop timers
+    # >>> Post-processing >>>
+    # Stop timers
     end_time = perf_counter()
     end_wall_time = time()
 

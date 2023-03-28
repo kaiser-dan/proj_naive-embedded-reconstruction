@@ -23,14 +23,14 @@ from tqdm import tqdm
 def main():
     # >>> Book-keeping >>>
     systems = [
-        #("arxiv", 2, 6, preprocessing.duplex_network(dataio.read_file(dataio.get_input_filehandle("arxiv", ROOT=ROOT).format(system="arxiv")), *[2, 6])),
+        ("arxiv", 2, 6, preprocessing.duplex_network(dataio.read_file(dataio.get_input_filehandle("arxiv", ROOT=ROOT).format(system="arxiv")), *[2, 6])),
         ("celegans", 1, 2, preprocessing.duplex_network(dataio.read_file(dataio.get_input_filehandle("celegans", ROOT=ROOT).format(system="celegans")), *[1, 2])),
-        #("drosophila", 1, 2, preprocessing.duplex_network(dataio.read_file(dataio.get_input_filehandle("drosophila", ROOT=ROOT).format(system="drosophila")), *[1, 2])),
+        ("drosophila", 1, 2, preprocessing.duplex_network(dataio.read_file(dataio.get_input_filehandle("drosophila", ROOT=ROOT).format(system="drosophila")), *[1, 2])),
         ("london", 1, 2, preprocessing.duplex_network(dataio.read_file(dataio.get_input_filehandle("london", ROOT=ROOT).format(system="london")), *[1, 2]))
     ]
     reps = range(1, 11)
     thetas = np.linspace(0.05, 0.95, 11, endpoint=True)
-    parameters, hyperparameters, _ = params.set_parameters_N2V()
+    parameters, hyperparameters, _ = params.set_parameters_N2V(workers=32)
     # <<< Book-keeping <<<
 
     grid = product(systems, thetas, reps)

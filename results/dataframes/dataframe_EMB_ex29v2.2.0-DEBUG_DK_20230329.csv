@@ -1,0 +1,5 @@
+,system,l1,l2,features,theta,intercept,coefficients,accuracy,auroc,aupr
+0,london,1,2,{'emb'},0.05,,,,,
+1,london,1,2,{'emb'},0.22999999999999998,,,,,
+2,london,1,2,{'emb'},0.49999999999999994,,,,,
+3,london,1,2,{'emb'},0.77,,,,,

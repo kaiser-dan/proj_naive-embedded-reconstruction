@@ -4,7 +4,11 @@ Wrapper for node2vec package with
 additional post-processing for non-consecutive node ids.
 """
 # ============= SET-UP =================
+# --- Scientific computing ---
+import numpy as np
+
 # --- Network science ---
+import networkx as nx
 from node2vec import Node2Vec
 
 
@@ -47,3 +51,24 @@ def N2V(graph, parameters, hyperparameters):
     }
 
     return embedding
+
+
+def N2V_per_component(graph, parameters, hyperparameters):
+    vectors_per_component = []  # list of vector embeddings, canonical ordering
+    vectors = {}  # amalgamated mapping of nodes to their embedded vectors (by component)
+    # Retrieve each component as a graph
+    component_subgraphs = sorted([ graph.subgraph(component).copy() for component in nx.connected_components(graph)], key=len,reverse=True)
+    # Embed each component by themselves
+    for component_subgraph in component_subgraphs:
+        vectors_per_component.append(N2V(component_subgraph, parameters, hyperparameters))
+    # #scale results
+    # average_norm_gcc=np.mean([np.linalg.norm(i) for i in vectors_per_component[0].values()])
+    # for n,component_subgraph in enumerate(vectors_per_component[1:]):
+    #     average_norm_multiplier=average_norm_gcc/np.mean([np.linalg.norm(i) for i in component_subgraph.values()])
+    #     for node in component_subgraph:
+    #         component_subgraph[node]=average_norm_multiplier*(component_subgraph[node])
+    # Amalgamate results
+    for component_vectors in vectors_per_component:
+        for node, vector in component_vectors.items():
+            vectors[node] = vector
+    return vectors

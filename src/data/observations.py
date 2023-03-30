@@ -70,7 +70,7 @@ class PreprocessedData:
 
             renormalization_factor = R_G_GCC_norm / component_norm
             for node in component.nodes():
-                self.embeddings[0][node] *= renormalization_factor
+                self.embeddings[0][node] = renormalization_factor * self.embeddings[0][node]
 
         for component in R_H_components[1:]:
             component_norm = np.mean([
@@ -82,9 +82,9 @@ class PreprocessedData:
 
             renormalization_factor = R_H_GCC_norm / component_norm
             for node in component.nodes():
-                self.embeddings[1][node] *= renormalization_factor
+                self.embeddings[1][node] = renormalization_factor * self.embeddings[1][node]
 
-        return
+        return self.embeddings
 
 
 # =================== FUNCTIONS ===================

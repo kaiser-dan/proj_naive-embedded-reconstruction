@@ -24,6 +24,7 @@ import sys
 from itertools import product
 
 # --- Scientific computing ---
+import numpy as np
 
 # --- Network science ---
 
@@ -32,7 +33,8 @@ import pandas as pd
 
 # --- Project source ---
 # PATH adjustments
-ROOT = "../../../../"
+# ROOT = "../../../../"
+ROOT = "./"
 sys.path.append(f"{ROOT}/src/")
 
 # Primary modules
@@ -45,12 +47,16 @@ from data import observations
 from classifiers import features  # feature set helpers
 from classifiers import logreg  # logistic regression
 
+## Embeddings
+from embed.N2V import N2V_per_component
+
 ## Utilities
 from utils import parameters as params  # helpers for experiment parameters
 
 # --- Miscellaneous ---
 from time import perf_counter, time
 from tqdm.auto import tqdm  # progress bars
+from tabulate import tabulate
 
 import warnings
 warnings.filterwarnings("ignore")  # remove sklearn depreciation warnings
@@ -69,19 +75,25 @@ def main(
 
     # >>> Experiment >>>
     # Process parameter grid
+    # ! >>>
     thetas = params.build_theta_range(experiment_setup)
+    # thetas = [0.05, 0.23, 0.5, 0.77]
+    # ! <<<
+
     repetitions = range(1, experiment_setup["repeat"]+1)
     parameter_grid = list(product(system_layer_sets, feature_sets, thetas, repetitions))
 
     # Run experiment
     for parameter_grid_vertex in tqdm(parameter_grid, desc="Experiment"):
         system_layers, feature_set, theta, repetition = parameter_grid_vertex
-        record = experiment(
-            system_layers, feature_set,
-            theta, repetition,
-            hyperparameters
-        )
-        records.append(record)
+        for penalty in np.logspace(-12, -3, num=5):
+            record = experiment(
+                system_layers, feature_set,
+                theta, repetition,
+                hyperparameters,
+                penalty
+            )
+            records.append(record)
     # <<< Experiment <<<
 
     # >>> Post-processing >>>
@@ -98,7 +110,8 @@ def experiment(
         feature_set: set[str],
         theta: float,
         repetition: int,
-        hyperparameters: dict[str, object]) -> dict[str, object]:
+        hyperparameters: dict[str, object],
+        penalty: float=1e-9) -> dict[str, object]:
     # >>> Book-keeping >>>
     cache = observations.get_preprocessed_data(
         system_layers[0],
@@ -118,10 +131,13 @@ def experiment(
         "accuracy": None,
         "auroc": None,
         "aupr": None,
+        "log_penalty": np.log10(penalty)
     }
 
     if "imb" in feature_set:
         hyperparameters["classifier"]["fit_intercept"] = True
+    else:
+        hyperparameters["classifier"]["fit_intercept"] = False
     # <<< Book-keeping <<<
 
     # >>> Calculations >>>
@@ -131,16 +147,24 @@ def experiment(
     feature_degrees_train = None
     feature_degrees_test = None
     if "emb" in feature_set:
+        # ! v2.1.0-DEBUG --- d, PC, 2x-1
+        # ! >>> Re-embed _per component_ >>>
+        # cache.embeddings = [
+        #     N2V_per_component(cache.remnants[0], {"quiet":True}, dict()),
+        #     N2V_per_component(cache.remnants[1], {"quiet":True}, dict()),
+        # ]
+        # ! <<< Re-embed _per component_ <<<
+
         # & Renormalize embeddings
-        cache.renormalize()
+        cache.embeddings = cache.renormalize()
 
         distances_G_train, distances_H_train = \
             features.get_distances(cache.embeddings, list(cache.observed_edges.keys()))
         distances_G_test, distances_H_test = \
             features.get_distances(cache.embeddings, list(cache.unobserved_edges.keys()))
 
-        feature_distances_train = features.get_configuration_distances_feature(distances_G_train, distances_H_train)
-        feature_distances_test = features.get_configuration_distances_feature(distances_G_test, distances_H_test)
+        feature_distances_train = features.get_configuration_distances_feature(distances_G_train, distances_H_train, zde_penalty = penalty)
+        feature_distances_test = features.get_configuration_distances_feature(distances_G_test, distances_H_test, zde_penalty = penalty)
 
     if "deg" in feature_set:
         src_degrees_train, tgt_degrees_train = \
@@ -197,6 +221,7 @@ def experiment(
 
     return record
 
+
 # ========== MAIN ==========
 if __name__ == "__main__":
     # >>> Experiment set-up >>>
@@ -204,35 +229,35 @@ if __name__ == "__main__":
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
             PROJECT_ID="EMB_ex29",
-            CURRENT_VERSION="v2.0.3",
+            CURRENT_VERSION="v2.5.1",
             ROOT=ROOT
         )
 
     # Parameter grid
     system_layer_sets = {
         # Large systems
-        ("arxiv", 2, 6),
-        ("drosophila", 1, 2),
+        # ("arxiv", 2, 6),
+        # ("drosophila", 1, 2),
         # Small systems
-        ("celegans", 1, 2),
+        # ("celegans", 1, 2),
         ("london", 1, 2),
     }
     feature_sets = (
         # Single features
-        {"imb"},
-        {"emb"},
-        {"deg"},
+        # {"imb"},
+        # {"emb"},
+        # {"deg"},
         # Feature pairs
         {"imb", "emb"},
-        {"imb", "deg"},
-        {"emb", "deg"},
+        # {"imb", "deg"},
+        # {"emb", "deg"},
         # All features
-        {"imb", "emb", "deg"}
+        # {"imb", "emb", "deg"}
     )
     _, hyperparameters, experiment_setup = \
         params.set_parameters_N2V(
             fit_intercept=False,  # logreg
-            theta_min=0.05, theta_max=0.95, theta_num=11, repeat=10  # other
+            theta_min=0.05, theta_max=0.95, theta_num=11, repeat=1  # other
         )
     # <<< Experiment set-up <<<
 
@@ -246,6 +271,8 @@ if __name__ == "__main__":
         hyperparameters,
         experiment_setup, output_filehandle
     )  # run simulations
+
+    print(tabulate(df[["theta", "coefficients", "auroc"]], headers="keys", tablefmt="psql"))
 
     end_time = perf_counter()  # lap timers
     end_wall_time = time()

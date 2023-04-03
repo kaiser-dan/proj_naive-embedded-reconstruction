@@ -70,7 +70,7 @@ def get_distances(vectors, edges):
 
     return distances_G, distances_H
 
-def get_configuration_distances_feature(distances_G, distances_H, zde_penalty = 1e-9):
+def get_configuration_distances_feature(distances_G, distances_H, tilde=False, zde_penalty = 1e-9):
     # >>> Book-keeping >>>
     M = len(distances_G)  # get number of observations in dataset
     configuration_probabilities = []  # initialize feature set
@@ -78,20 +78,15 @@ def get_configuration_distances_feature(distances_G, distances_H, zde_penalty = 
 
     # >>> Calculate configuration probabilities >>>
     for idx in range(M):
-        # ! >>> Feature >>>
-        # * d
-        probability = likelihood(distances_G[idx], distances_H[idx])
+        # Base feature form
+        if not tilde:
+            probability = likelihood(distances_G[idx], distances_H[idx])
+        else:
+            probability = distances_G[idx] / (distances_H[idx] + zde_penalty)
 
-        # * d tilde
-        # probability = distances_G[idx] / (distances_H[idx] + zde_penalty)
-        # ! <<< Feature <<<
-
-        # ! >>> Transformation >>>
-        # * 2d-1
-        probability = 2*probability - 1
-
-        # * d (uncomment above, no additional functional needed)
-        # ! <<< Transformation <<<
+        # Feature transformation
+        if not tilde:
+            probability = 2*probability - 1
 
         configuration_probabilities.append(probability)
     # <<< Calculate configuration probabilities <<<

@@ -86,8 +86,50 @@ class PreprocessedData:
 
         return self.embeddings
 
+    def align_centers(self):
+        # Retrieve components
+        R_G_components = [
+            list(component)
+            for component in nx.connected_components(self.remnants[0])
+        ]
+        R_H_components = [
+            list(component)
+            for component in nx.connected_components(self.remnants[1])
+        ]
+        R_G_components = sorted(R_G_components, key=len, reverse=True)
+        R_H_components = sorted(R_H_components, key=len, reverse=True)
+
+        # Get vectors for each component
+        R_G_components_vectors = [
+            [self.embeddings[0][node] for node in component]
+            for component in R_G_components
+        ]
+        R_H_components_vectors = [
+            [self.embeddings[1][node] for node in component]
+            for component in R_H_components
+        ]
+
+        # Align each vector set to GCC center
+        R_G_shifted_components_vectors = [R_G_components_vectors[0]]
+        for V in R_G_components_vectors[1:]:
+            R_G_shifted_components_vectors.append(_align_centers(R_G_components_vectors[0], V))
+        R_H_shifted_components_vectors = [R_H_components_vectors[0]]
+        for V in R_H_components_vectors[1:]:
+            R_H_shifted_components_vectors.append(_align_centers(R_H_components_vectors[0], V))
+
+        # Replace old vector with shifted vector
+        for component_id, component_vectors in enumerate(R_G_shifted_components_vectors):
+            for node_index, shifted_vector in enumerate(component_vectors):
+                self.embeddings[0][R_G_components[component_id][node_index]] = shifted_vector
+        for component_id, component_vectors in enumerate(R_H_shifted_components_vectors):
+            for node_index, shifted_vector in enumerate(component_vectors):
+                self.embeddings[1][R_H_components[component_id][node_index]] = shifted_vector
+
+        return self.embeddings
+
 
 # =================== FUNCTIONS ===================
+# --- Precomputing and File I/O ---
 def get_preprocessed_data(
         system, layers,
         theta, repetition,
@@ -126,3 +168,18 @@ def calculate_preprocessed_data(
     # Save to disk
     with open(filename, "wb") as _fh:
         pickle.dump(preprocessed_data, _fh, pickle.HIGHEST_PROTOCOL)
+
+
+# --- Helpers ---
+def _get_center_of_mass(vectors):
+    return np.mean(vectors, axis=0)
+
+def _align_centers(U, V):
+    ubar = _get_center_of_mass(U)
+    vbar = _get_center_of_mass(V)
+
+    delta = ubar - vbar
+
+    Vprime = [v + delta for v in V]
+
+    return Vprime

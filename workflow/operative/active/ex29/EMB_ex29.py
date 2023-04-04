@@ -1,5 +1,4 @@
-"""Experiment script to explore one feature logistic regression reconstructions
-from layer remnant embeddings
+"""Experiment script to explore one feature logistic regression reconstructions from layer remnant embeddings
 
 Broadly speaking, we have the following "workflow":
 

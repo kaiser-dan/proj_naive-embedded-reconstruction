@@ -80,12 +80,14 @@ def main(
     # Run experiment
     for parameter_grid_vertex in tqdm(parameter_grid, desc="Experiment"):
         system_layers, feature_set, theta, repetition = parameter_grid_vertex
-        record = experiment(
-            system_layers, feature_set,
-            theta, repetition,
-            hyperparameters
-        )
-        records.append(record)
+        for penalty in [0.1]:
+            record = experiment(
+                system_layers, feature_set,
+                theta, repetition,
+                hyperparameters,
+                penalty
+            )
+            records.append(record)
     # <<< Experiment <<<
 
     # >>> Post-processing >>>
@@ -150,8 +152,8 @@ def experiment(
         distances_G_test, distances_H_test = \
             features.get_distances(cache.embeddings, list(cache.unobserved_edges.keys()))
 
-        feature_distances_train = features.get_configuration_distances_feature(distances_G_train, distances_H_train)
-        feature_distances_test = features.get_configuration_distances_feature(distances_G_test, distances_H_test)
+        feature_distances_train = features.get_configuration_distances_feature(distances_G_train, distances_H_train, zde_penalty=penalty)
+        feature_distances_test = features.get_configuration_distances_feature(distances_G_test, distances_H_test, zde_penalty=penalty)
 
     if "emb_r" in feature_set:
         # & Renormalize embeddings
@@ -165,8 +167,8 @@ def experiment(
         distances_G_test, distances_H_test = \
             features.get_distances(cache.embeddings, list(cache.unobserved_edges.keys()))
 
-        feature_distances_train = features.get_distance_ratios_feature(distances_G_train, distances_H_train)
-        feature_distances_test = features.get_distance_ratios_feature(distances_G_test, distances_H_test)
+        feature_distances_train = features.get_distance_ratios_feature(distances_G_train, distances_H_train, zde_penalty=penalty)
+        feature_distances_test = features.get_distance_ratios_feature(distances_G_test, distances_H_test, zde_penalty=penalty)
 
     if "deg" in feature_set:
         src_degrees_train, tgt_degrees_train = \
@@ -230,45 +232,45 @@ if __name__ == "__main__":
     # Metadata
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
-            PROJECT_ID="EMB_ex29",
-            CURRENT_VERSION="v4.0",
+            PROJECT_ID="EMB_ex30",
+            CURRENT_VERSION="v1.3",
             ROOT=ROOT
         )
 
     # Parameter grid
     system_layer_sets = {
         # Large systems
-        ("arxiv", 2, 6),
+        # ("arxiv", 2, 6),
         ("drosophila", 1, 2),
         # Small systems
-        ("celegans", 1, 2),
-        ("london", 1, 2),
+        # ("celegans", 1, 2),
+        # ("london", 1, 2),
     }
     feature_sets = (
         # # Single features
-        {"imb"},
+        # {"imb"},
         {"emb_c"},
-        {"emb_r"},
-        {"deg"},
+        # {"emb_r"},
+        # {"deg"},
         # Feature pairs
         {"imb", "emb_c"},
-        {"imb", "emb_r"},
-        {"imb", "deg"},
+        # {"imb", "emb_r"},
+        # {"imb", "deg"},
         {"emb_c", "deg"},
-        {"emb_r", "deg"},
+        # {"emb_r", "deg"},
         # All features
         {"imb", "emb_c", "deg"},
-        {"imb", "emb_r", "deg"}
+        # {"imb", "emb_r", "deg"}
     )
     _, hyperparameters, experiment_setup = \
         params.set_parameters_N2V(
-            fit_intercept=False,  # logreg
+            fit_intercept=False,  solver="newton-cholesky", class_weight="balanced", # logreg
             theta_min=0.05, theta_max=0.95, theta_num=11, repeat=10  # other
         )
     # <<< Experiment set-up <<<
 
     # >>> Experiment >>>
-    sys.stderr.write("\n", "="*30, TAG, "="*30, "\n\n")  # print stdout preface
+    sys.stderr.write("\n"+"="*30+TAG+"="*30+"\n\n")  # print stdout preface
     start_wall_time = time()  # start timers
     start_time = perf_counter()
 
@@ -281,5 +283,5 @@ if __name__ == "__main__":
     end_time = perf_counter()  # lap timers
     end_wall_time = time()
     sys.stderr.write(f"Total process time: {(end_time - start_time):.4f} \t Total wall time: {(end_wall_time - start_wall_time):.4f}")  # print stdout postface
-    sys.stderr.write("\n", "="*60, "\n\n")
+    sys.stderr.write("\n"+"="*60+"\n\n")
     # <<< Experiment <<<

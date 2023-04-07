@@ -50,12 +50,12 @@ def main(args):
         ]
 
 
-    reps = range(1, 1)
-    thetas = np.linspace(0.05, 0.95, 11, endpoint=True)
-    parameters, hyperparameters, _ = params.set_parameters_N2V(workers=32)
+    reps = range(1, 3+1)
+    thetas = np.linspace(0.05, 0.95, 19, endpoint=True)
+    parameters, hyperparameters, _ = params.set_parameters_N2V(workers=16)
     # <<< Book-keeping <<<
 
-    grid = product(systems, thetas, reps)
+    grid = list(product(systems, thetas, reps))
 
     for system_, theta, rep in tqdm(grid, desc="Caching observational data..."):
         system, l1, l2, (G, H) = system_

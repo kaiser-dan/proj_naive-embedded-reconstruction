@@ -3,6 +3,7 @@
 # ============= SET-UP =================
 # --- Standard library ---
 import sys
+import os
 import pickle
 from dataclasses import dataclass
 
@@ -110,12 +111,12 @@ class PreprocessedData:
         ]
 
         # Align each vector set to GCC center
-        R_G_shifted_components_vectors = [R_G_components_vectors[0]]
-        for V in R_G_components_vectors[1:]:
-            R_G_shifted_components_vectors.append(_align_centers(R_G_components_vectors[0], V))
-        R_H_shifted_components_vectors = [R_H_components_vectors[0]]
-        for V in R_H_components_vectors[1:]:
-            R_H_shifted_components_vectors.append(_align_centers(R_H_components_vectors[0], V))
+        R_G_shifted_components_vectors = []
+        for V in R_G_components_vectors:
+            R_G_shifted_components_vectors.append(_center_to_origin(V))
+        R_H_shifted_components_vectors = []
+        for V in R_H_components_vectors:
+            R_H_shifted_components_vectors.append(_center_to_origin(V))
 
         # Replace old vector with shifted vector
         for component_id, component_vectors in enumerate(R_G_shifted_components_vectors):
@@ -151,6 +152,10 @@ def calculate_preprocessed_data(
     filename = \
         f"{ROOT}/cache_system={system}_layers={layers[0]}-{layers[1]}_theta={theta:.2f}_rep={repetition}.pkl"
 
+    if os.path.isfile(filename):
+        print(f"File already exists, skipping cache (if you want to force re-run, move or delete {filename} first)")
+        return
+
     # Calculate remnants
     R_G, R_H, unobserved_edges, observed_edges = partial_information(G, H, theta)
 
@@ -181,5 +186,12 @@ def _align_centers(U, V):
     delta = ubar - vbar
 
     Vprime = [v + delta for v in V]
+
+    return Vprime
+
+def _center_to_origin(V):
+    vbar = _get_center_of_mass(V)
+
+    Vprime = [v - vbar for v in V]
 
     return Vprime

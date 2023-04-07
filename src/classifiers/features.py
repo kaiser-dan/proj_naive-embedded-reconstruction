@@ -10,7 +10,7 @@ import numpy as np
 # --- Project source ---
 sys.path.append("../")
 from distance.distance import embedded_edge_distance
-from distance.score import likelihood
+from distance.score import likelihood, scale_probability
 
 
 # ========== FUNCTIONS ==========
@@ -70,7 +70,7 @@ def get_distances(vectors, edges):
 
     return distances_G, distances_H
 
-def get_configuration_distances_feature(distances_G, distances_H, tilde=False, zde_penalty = 1e-9):
+def get_configuration_distances_feature(distances_G, distances_H, zde_penalty = 1e-12):
     # >>> Book-keeping >>>
     M = len(distances_G)  # get number of observations in dataset
     configuration_probabilities = []  # initialize feature set
@@ -78,20 +78,34 @@ def get_configuration_distances_feature(distances_G, distances_H, tilde=False, z
 
     # >>> Calculate configuration probabilities >>>
     for idx in range(M):
-        # Base feature form
-        if not tilde:
-            probability = likelihood(distances_G[idx], distances_H[idx])
-        else:
-            probability = distances_G[idx] / (distances_H[idx] + zde_penalty)
+        s_G = 1 / (distances_G[idx] + zde_penalty)
+        s_H = 1 / (distances_H[idx] + zde_penalty)
+        probability = likelihood(s_G, s_H)
 
         # Feature transformation
-        if not tilde:
-            probability = 2*probability - 1
+        probability = scale_probability(probability)
 
         configuration_probabilities.append(probability)
     # <<< Calculate configuration probabilities <<<
 
     return configuration_probabilities
+
+def get_distance_ratios_feature(distances_G, distances_H, zde_penalty=1e-12):
+    # >>> Book-keeping >>>
+    M = len(distances_G)  # get number of observations in dataset
+    distance_ratios = []  # initialize feature set
+    # <<< Book-keeping <<<
+
+    # >>> Calculate distance ratios >>>
+    for idx in range(M):
+        s_G = 1 / (distances_G[idx] + zde_penalty)
+        s_H = 1 / (distances_H[idx] + zde_penalty)
+        probability = s_G / s_H
+
+        distance_ratios.append(probability)
+    # <<< Calculate distance ratios <<<
+
+    return distance_ratios
 # < Distance <
 
 
@@ -106,19 +120,21 @@ def format_feature_matrix(
     if feature_set == {"imb"}:
         feature_matrix_train = np.array([0]*M_train).reshape(-1,1)
         feature_matrix_test = np.array([0]*M_test).reshape(-1,1)
-    elif feature_set == {"emb"}:
+    elif feature_set == {"emb_c"} or feature_set == {"emb_r"} or feature_set == {"emb"}:
         feature_matrix_train = np.array(feature_distances_train).reshape(-1,1)
         feature_matrix_test = np.array(feature_distances_test).reshape(-1,1)
     elif feature_set == {"deg"}:
         feature_matrix_train = np.array(feature_degrees_train).reshape(-1,1)
         feature_matrix_test = np.array(feature_degrees_test).reshape(-1,1)
-    elif feature_set == {"imb", "emb"}:
+    elif feature_set == {"imb", "emb_c"} or feature_set == {"imb", "emb_r"} or feature_set == {"imb", "emb"}:
         feature_matrix_train = np.array(feature_distances_train).reshape(-1,1)
         feature_matrix_test = np.array(feature_distances_test).reshape(-1,1)
     elif feature_set == {"imb", "deg"}:
         feature_matrix_train = np.array(feature_degrees_train).reshape(-1,1)
         feature_matrix_test = np.array(feature_degrees_test).reshape(-1,1)
-    elif feature_set == {"emb", "deg"} or feature_set == {"emb", "deg", "imb"}:
+    elif feature_set == {"emb_c", "deg"} or feature_set == {"emb_c", "deg", "imb"} or \
+            feature_set == {"emb_r", "deg"} or feature_set == {"emb_r", "deg", "imb"} or \
+            feature_set == {"emb", "deg"} or feature_set == {"emb", "deg", "imb"}:
         feature_matrix_train = np.empty((M_train, 2))
         feature_matrix_train[:, 0] = feature_distances_train
         feature_matrix_train[:, 1] = feature_degrees_train

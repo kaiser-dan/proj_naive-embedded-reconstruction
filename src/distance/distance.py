@@ -34,8 +34,6 @@ def component_penalized_embedded_edge_distance(edge, vectors, components, penalt
 
     return dist
 
-
-
 # --- Helpers ---
 def get_component_mapping(graph):
     mapping = {}

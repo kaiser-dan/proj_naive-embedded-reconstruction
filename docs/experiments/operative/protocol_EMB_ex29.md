@@ -20,24 +20,26 @@
 
 
 ## Metadata
-- Project ID: EMB_ex27
+- Project ID: EMB_ex29
 - Researchers: Daniel Kaiser
 - Version history:
 
-| Version  | Date Designed | Date Conducted | Date Analyzed | Notes                                                                     |
-| -------- | ------------- | -------------- | ------------- | ------------------------------------------------------------------------- |
-| *v0.1*   | 2023-03-21    | 2023-03-22     | 2023-03-22    | Prototyped workflow                                                       |
-| **v1.0** | 2023-03-21    | 2023-03-22     | 2023-03-23    | C. Elegans and London                                                     |
-| *v1.1*   | 2023-03-21    | 2023-03-22     | 2023-03-23    | arXiv and Drosophila                                                      |
-| **v2.0** | 2023-03-23    | XXX            | XXX           | Refactored workflow to use cached network data                            |
-| *v2.1*   |               |                |               |                                                                           |
-| *v2.2*   |               |                |               |                                                                           |
-| *v2.3*   |               |                |               |                                                                           |
-| *v2.4*   |               |                |               |                                                                           |
-| *v2.5*   |               |                |               |                                                                           |
-| **v3.0** | 2023-03-31    | 2023-04-03     | 2023-04-03    | Added embedding center of mass alignment to source code and ex29 workflow |
-| v3.0.1.  | 2023-04-03    | 2023-04-03     | 2023-04-03    | Attempted hot fix of realigned vector formatting                          |
-| v3.0.2   | 2023-04-03    | 2023-04-03     | 2023-04-03    | Fix realigned vector assignment to cache; begin analysis on real networks |
+| Version  | Date Designed | Date Conducted | Date Analyzed | Notes                                                                          |
+| -------- | ------------- | -------------- | ------------- | ------------------------------------------------------------------------------ |
+| *v0.1*   | 2023-03-21    | 2023-03-22     | 2023-03-22    | Prototyped workflow                                                            |
+| **v1.0** | 2023-03-21    | 2023-03-22     | 2023-03-23    | C. Elegans and London                                                          |
+| *v1.1*   | 2023-03-21    | 2023-03-22     | 2023-03-23    | arXiv and Drosophila                                                           |
+| **v2.0** | 2023-03-23    | XXX            | XXX           | Refactored workflow to use cached network data                                 |
+| *v2.1*   |               |                |               |                                                                                |
+| *v2.2*   |               |                |               |                                                                                |
+| *v2.3*   |               |                |               |                                                                                |
+| *v2.4*   |               |                |               |                                                                                |
+| *v2.5*   |               |                |               |                                                                                |
+| **v3.0** | 2023-03-31    | 2023-04-03     | 2023-04-03    | Added embedding center of mass alignment to source code and ex29 workflow      |
+| v3.0.1.  | 2023-04-03    | 2023-04-03     | 2023-04-03    | Attempted hot fix of realigned vector formatting                               |
+| v3.0.2   | 2023-04-03    | 2023-04-03     | 2023-04-03    | Fix realigned vector assignment to cache; begin analysis on real networks      |
+| **v4.0** | 2023-04-04    | 2023-04-04     | XXX           | Modified alignment to origin, prefaced scaling; exploring both embedding forms |
+|          |               |                |               |                                                                                |
 
 
 

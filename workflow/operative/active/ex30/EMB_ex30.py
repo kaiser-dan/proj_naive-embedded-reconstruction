@@ -140,7 +140,7 @@ def experiment(
     feature_distances_test = None
     feature_degrees_train = None
     feature_degrees_test = None
-    if "emb_c" in feature_set:
+    if "emb" in feature_set:
         # & Renormalize embeddings
         cache.embeddings = cache.renormalize()
 
@@ -154,21 +154,6 @@ def experiment(
 
         feature_distances_train = features.get_configuration_distances_feature(distances_G_train, distances_H_train, zde_penalty=penalty)
         feature_distances_test = features.get_configuration_distances_feature(distances_G_test, distances_H_test, zde_penalty=penalty)
-
-    if "emb_r" in feature_set:
-        # & Renormalize embeddings
-        cache.embeddings = cache.renormalize()
-
-        # & Align centers
-        cache.embeddings = cache.align_centers()
-
-        distances_G_train, distances_H_train = \
-            features.get_distances(cache.embeddings, list(cache.observed_edges.keys()))
-        distances_G_test, distances_H_test = \
-            features.get_distances(cache.embeddings, list(cache.unobserved_edges.keys()))
-
-        feature_distances_train = features.get_distance_ratios_feature(distances_G_train, distances_H_train, zde_penalty=penalty)
-        feature_distances_test = features.get_distance_ratios_feature(distances_G_test, distances_H_test, zde_penalty=penalty)
 
     if "deg" in feature_set:
         src_degrees_train, tgt_degrees_train = \
@@ -194,7 +179,8 @@ def experiment(
     # * Train classifier
     try:
         model = logreg.train_fit_logreg(feature_matrix_train, labels_train, hyperparameters["classifier"])
-    except ValueError:  # when only one class is available, happens for some london cases
+    except ValueError as err:  # when only one class is available, happens for some london cases
+        sys.stderr.write(str(err))
         return record
 
     intercept, coefficients = logreg.get_model_fit(model)
@@ -233,38 +219,34 @@ if __name__ == "__main__":
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
             PROJECT_ID="EMB_ex30",
-            CURRENT_VERSION="v1.3",
+            CURRENT_VERSION="v2.0",
             ROOT=ROOT
         )
 
     # Parameter grid
     system_layer_sets = {
-        # Large systems
+        # & Large systems
         # ("arxiv", 2, 6),
         ("drosophila", 1, 2),
-        # Small systems
+        # & Small systems
         # ("celegans", 1, 2),
         # ("london", 1, 2),
     }
     feature_sets = (
-        # # Single features
-        # {"imb"},
-        {"emb_c"},
-        # {"emb_r"},
-        # {"deg"},
-        # Feature pairs
-        {"imb", "emb_c"},
-        # {"imb", "emb_r"},
-        # {"imb", "deg"},
-        {"emb_c", "deg"},
-        # {"emb_r", "deg"},
-        # All features
-        {"imb", "emb_c", "deg"},
-        # {"imb", "emb_r", "deg"}
+        # & Single features
+        {"imb"},
+        {"emb"},
+        {"deg"},
+        # & Feature pairs
+        {"imb", "emb"},
+        {"imb", "deg"},
+        {"emb", "deg"},
+        # & All features
+        {"imb", "emb", "deg"},
     )
     _, hyperparameters, experiment_setup = \
         params.set_parameters_N2V(
-            fit_intercept=False,  solver="newton-cholesky", class_weight="balanced", # logreg
+            fit_intercept=False,  solver="newton-cholesky", penalty=None, # logreg
             theta_min=0.05, theta_max=0.95, theta_num=11, repeat=10  # other
         )
     # <<< Experiment set-up <<<

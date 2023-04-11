@@ -219,18 +219,18 @@ if __name__ == "__main__":
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
             PROJECT_ID="EMB_ex30",
-            CURRENT_VERSION="v2.0",
+            CURRENT_VERSION="v2.1",
             ROOT=ROOT
         )
 
     # Parameter grid
     system_layer_sets = {
         # & Large systems
-        # ("arxiv", 2, 6),
+        ("arxiv", 2, 6),
         ("drosophila", 1, 2),
         # & Small systems
-        # ("celegans", 1, 2),
-        # ("london", 1, 2),
+        ("celegans", 1, 2),
+        ("london", 1, 2),
     }
     feature_sets = (
         # & Single features
@@ -247,7 +247,7 @@ if __name__ == "__main__":
     _, hyperparameters, experiment_setup = \
         params.set_parameters_N2V(
             fit_intercept=False,  solver="newton-cholesky", penalty=None, # logreg
-            theta_min=0.05, theta_max=0.95, theta_num=11, repeat=10  # other
+            theta_min=0.05, theta_max=0.95, theta_num=19, repeat=1  # other
         )
     # <<< Experiment set-up <<<
 

@@ -24,13 +24,14 @@
 - Researchers: Daniel Kaiser
 - Version history:
 
-| Version  | Date Designed | Date Conducted | Date Analyzed | Notes                                      |
-| -------- | ------------- | -------------- | ------------- | ------------------------------------------ |
-| **v1.0** | 2023-04-06    | 2023-04-06     | 2023-04-06    | Sweep penalty                              |
-| *v1.1*   | 2023-04-06    | 2023-04-06     | 2023-04-06    | Static 0.1 penalty                         |
-| v1.1.1   | 2023-04-06    | 2023-04-06     | 2023-04-06    | Removed ratio feature                      |
-| *v1.2*   | 2023-04-06    | 2023-04-06     | 2023-04-06    | Replaced LBFGS solver with Newton-Cholesky |
-|          |               |                |               |                                            |
+| Version  | Date Designed | Date Conducted | Date Analyzed | Notes                                                   |
+| -------- | ------------- | -------------- | ------------- | ------------------------------------------------------- |
+| **v1.0** | 2023-04-06    | 2023-04-06     | 2023-04-06    | Sweep penalty                                           |
+| *v1.1*   | 2023-04-06    | 2023-04-06     | 2023-04-06    | Static 0.1 penalty                                      |
+| v1.1.1   | 2023-04-06    | 2023-04-06     | 2023-04-06    | Removed ratio feature                                   |
+| *v1.2*   | 2023-04-06    | 2023-04-06     | 2023-04-06    | Replaced LBFGS solver with Newton-Cholesky              |
+| **v2.0** | 2023-04-09    | 2023-04-10     | 2023-04-10    | Removed penalty, expanded iterations, ran on Drosophila |
+| *v2.1*   | 2023-04-10    | 2023-04-11     | XXX           | Ran on core corpus |
 
 
 

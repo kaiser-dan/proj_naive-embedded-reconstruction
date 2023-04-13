@@ -25,9 +25,9 @@ Experiments are considered "operative" if they are actively being developed or r
 
 Active experiments are settings currently being developed or analyzed.
 
-- ex29
-  - Associated experiments: ex27, ex28
-  - Summary: Full factorial experiment on logistic regression features
+- ex32
+  - Associated experiments: ex31, ex32
+  - Summary: Full factorial experiment on logistic regression features with configuration embedded distance form and adjusted renormalization procedure on synthetic networks.
 
 ## Completed
 
@@ -73,6 +73,18 @@ Completed experiments are settings with generated, analyzed results that are wit
   - Date completed: 2023-03-02
   - Associated experiments: ex26, ex28
   - Summary: N2V with configuration-likelihood degree feature alone
+- ex29
+  - Date completed: 2023-03-XX
+  - Associated experiments: ex27, ex28
+  - Summary: Full factorial experiment on logistic regression features
+- ex30
+  - Date completed: 2023-04-08
+  - Associated experiments: ex31, ex32
+  - Summary: Full factorial experiment on logistic regression features with several feature forms.
+- ex31
+  - Date completed: 2023-04-02
+  - Associated experiments: ex30, ex32
+  - Summary: Full factorial experiment on logistic regression features with configuration embedded distance form and adjusted renormalization procedure.
 
 
 ## Planned

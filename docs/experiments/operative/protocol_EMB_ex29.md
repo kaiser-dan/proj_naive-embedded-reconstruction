@@ -45,7 +45,7 @@
 
 ## Relevant scripts
 
-The experimental simulations were run through the Python script `workflow/[operative/active]/ex29/EMB_ex29.py`. A dataframe was created within the workflow and the resultant dataframe `results/dataframes/dataframe_EMB_ex29[version]_DK_[date].csv` was treated as the input data to the analysis in `notebooks/viz/analysis_EMB_ex29.ipynb`, a Jupyter notebook.
+The experimental simulations were run through the Python script `workflow/[operative/active]/ex29/EMB_ex29.py`. A dataframe was created within the workflow and the resultant dataframe `results/dataframes/dataframe_EMB_ex29[version]_DK_[date].csv` was treated as the input data to the analysis in `notebooks/viz/viz_EMB_ex29.ipynb`, a Jupyter notebook.
 
 ---
 

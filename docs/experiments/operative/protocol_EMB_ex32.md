@@ -1,8 +1,8 @@
-# Embedding Reconstruction - Experiment 30
+# Embedding Reconstruction - Experiment 32
 # Preface
 ## Contents
 
-- [Embedding Reconstruction - Experiment 30](#embedding-reconstruction---experiment-30)
+- [Embedding Reconstruction - Experiment 32](#embedding-reconstruction---experiment-32)
 - [Preface](#preface)
 	- [Contents](#contents)
 	- [Metadata](#metadata)
@@ -20,25 +20,19 @@
 
 
 ## Metadata
-- Project ID: EMB_ex30
+- Project ID: EMB_ex32
 - Researchers: Daniel Kaiser
 - Version history:
 
 | Version  | Date Designed | Date Conducted | Date Analyzed | Notes                                                   |
 | -------- | ------------- | -------------- | ------------- | ------------------------------------------------------- |
 | **v1.0** | 2023-04-06    | 2023-04-06     | 2023-04-06    | Sweep penalty                                           |
-| *v1.1*   | 2023-04-06    | 2023-04-06     | 2023-04-06    | Static 0.1 penalty                                      |
-| v1.1.1   | 2023-04-06    | 2023-04-06     | 2023-04-06    | Removed ratio feature                                   |
-| *v1.2*   | 2023-04-06    | 2023-04-06     | 2023-04-06    | Replaced LBFGS solver with Newton-Cholesky              |
-| **v2.0** | 2023-04-09    | 2023-04-10     | 2023-04-10    | Removed penalty, expanded iterations, ran on Drosophila |
-| *v2.1*   | 2023-04-10    | 2023-04-11     | 2023-04-11             | Ran on core corpus                                      |
-
 
 
 
 ## Relevant scripts
 
-The experimental simulations were run through the Python script `workflow/[operative/active]/ex30/EMB_ex30.py`. A dataframe was created within the workflow and the resultant dataframe `results/dataframes/dataframe_EMB_ex30[version]_DK_[date].csv` was treated as the input data to the analysis in `notebooks/viz/viz_EMB_ex30.ipynb`, a Jupyter notebook.
+The experimental simulations were run through the Python script `workflow/[operative/active]/ex29/EMB_ex29.py`. A dataframe was created within the workflow and the resultant dataframe `results/dataframes/dataframe_EMB_ex29[version]_DK_[date].csv` was treated as the input data to the analysis in `notebooks/viz/analysis_EMB_ex29.ipynb`, a Jupyter notebook.
 
 ---
 

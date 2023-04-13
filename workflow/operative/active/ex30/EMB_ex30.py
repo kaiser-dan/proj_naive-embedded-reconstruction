@@ -24,11 +24,6 @@ from itertools import product
 
 # --- Scientific computing ---
 import numpy as np
-from sklearn.metrics import accuracy_score, roc_auc_score, precision_recall_curve, auc
-
-from patsy import dmatrices
-import statsmodels.api as sm
-from statsmodels.tools.sm_exceptions import PerfectSeparationError as PSE
 
 # --- Network science ---
 
@@ -49,7 +44,8 @@ from data import observations
 
 ## Classifiers
 from classifiers import features  # feature set helpers
-# from classifiers import logreg  # logistic regression
+from classifiers import logreg  # logistic regression
+
 
 ## Utilities
 from utils import parameters as params  # helpers for experiment parameters
@@ -145,11 +141,11 @@ def experiment(
     feature_degrees_train = None
     feature_degrees_test = None
     if "emb" in feature_set:
-        # & Align centers
-        cache.embeddings = cache.align_centers()
-
         # & Renormalize embeddings
         cache.embeddings = cache.renormalize()
+
+        # & Align centers
+        cache.embeddings = cache.align_centers()
 
         distances_G_train, distances_H_train = \
             features.get_distances(cache.embeddings, list(cache.observed_edges.keys()))
@@ -180,68 +176,24 @@ def experiment(
         cache.observed_edges, cache.unobserved_edges
     )
 
-    # ^ Convert feature matrix to dataframe
-    if "emb" in feature_set and "deg" in feature_set:
-        df = pd.DataFrame({
-            "label": labels_train,
-            "distance": feature_matrix_train[:, 0],
-            "degree": feature_matrix_train[:, 1]
-        })
-        df_test = pd.DataFrame({
-            "label": labels_test,
-            "distance": feature_matrix_test[:, 0],
-            "degree": feature_matrix_test[:, 1]
-        })
-        y, X = dmatrices("label ~ distance + degree", data=df, return_type="dataframe")
-        _, X_test = dmatrices("label ~ distance + degree", data=df_test, return_type="dataframe")
-    elif "emb" in feature_set and "deg" not in feature_set:
-        df = pd.DataFrame({
-            "label": labels_train,
-            "distance": feature_matrix_train[:, 0],
-        })
-        df_test = pd.DataFrame({
-            "label": labels_test,
-            "distance": feature_matrix_test[:, 0],
-        })
-        y, X = dmatrices("label ~ distance", data=df, return_type="dataframe")
-        _, X_test = dmatrices("label ~ distance", data=df_test, return_type="dataframe")
-    elif "emb" not in feature_set and "deg" in feature_set:
-        df = pd.DataFrame({
-            "label": labels_train,
-            "degree": feature_matrix_train[:, 0],
-        })
-        df_test = pd.DataFrame({
-            "label": labels_test,
-            "degree": feature_matrix_test[:, 0]
-        })
-        y, X = dmatrices("label ~ degree", data=df, return_type="dataframe")
-        _, X_test = dmatrices("label ~ degree", data=df_test, return_type="dataframe")
-
     # * Train classifier
     try:
-        model = sm.Logit(y, X)
-        results = model.fit()
+        model = logreg.train_fit_logreg(feature_matrix_train, labels_train, hyperparameters["classifier"])
     except ValueError as err:  # when only one class is available, happens for some london cases
         sys.stderr.write(str(err))
         return record
-    except np.linalg.LinAlgError as err:
-        sys.stderr.write(str(err))
-        return record
-    except PSE as err:
-        sys.stderr.write("Perfect Separability!")
-        return record
 
-    intercept = list(results.params)[0]
-    coefficients = list(results.params)[1:]
-    scores = results.predict(X_test)
-    classes = [1 if score >= 0.5 else 0 for score in scores]
-    pr_curve = precision_recall_curve(labels_test, scores)
+    intercept, coefficients = logreg.get_model_fit(model)
+    try:
+        assert intercept[0] != 0
+    except AssertionError as msg:
+        print(msg)
 
     # * Reconstruct
     try:
-        accuracy = accuracy_score(labels_test, classes)
-        auroc = roc_auc_score(labels_test, scores)
-        aupr = auc(pr_curve[1], pr_curve[0])
+        accuracy = logreg.get_model_accuracy(model, feature_matrix_test, labels_test)
+        auroc = logreg.get_model_auroc(model, feature_matrix_test, labels_test)
+        aupr = logreg.get_model_aupr(model, feature_matrix_test, labels_test)
     except ValueError:  # only one class available, fricken London crap
         return record
     # <<< Calculations <<<
@@ -249,8 +201,8 @@ def experiment(
     # >>> Post-processing >>>
     # Update record
     record.update({
-        "intercept": intercept,
-        "coefficients": coefficients,
+        "intercept": intercept[0],
+        "coefficients": coefficients[0],
         "accuracy": accuracy,
         "auroc": auroc,
         "aupr": aupr,
@@ -266,8 +218,8 @@ if __name__ == "__main__":
     # Metadata
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
-            PROJECT_ID="EMB_ex31",
-            CURRENT_VERSION="v1.1",
+            PROJECT_ID="EMB_ex30",
+            CURRENT_VERSION="v2.1",
             ROOT=ROOT
         )
 

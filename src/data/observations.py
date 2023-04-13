@@ -61,27 +61,33 @@ class PreprocessedData:
 
 
         # Renormalize components by mean GCC norm
-        for component in R_G_components[1:]:
-            component_norm = np.mean([
+        for component in R_G_components:
+        # for component in R_G_components[1:]:
+            # component_norm = np.mean([
+            component_norm = np.sum([
                 np.linalg.norm(self.embeddings[0][node])
                 for node in component.nodes()
             ])
             if np.equal(component_norm, 0):
                 component_norm += 1e-12
 
-            renormalization_factor = R_G_GCC_norm / component_norm
+            renormalization_factor = 1 / component_norm
+            # renormalization_factor = R_G_GCC_norm / component_norm
             for node in component.nodes():
                 self.embeddings[0][node] = renormalization_factor * self.embeddings[0][node]
 
-        for component in R_H_components[1:]:
-            component_norm = np.mean([
+        for component in R_H_components:
+        # for component in R_H_components[1:]:
+            # component_norm = np.mean([
+            component_norm = np.sum([
                 np.linalg.norm(self.embeddings[1][node])
                 for node in component.nodes()
             ])
             if np.equal(component_norm, 0):
                 component_norm += 1e-12
 
-            renormalization_factor = R_H_GCC_norm / component_norm
+            renormalization_factor = 1 / component_norm
+            # renormalization_factor = R_H_GCC_norm / component_norm
             for node in component.nodes():
                 self.embeddings[1][node] = renormalization_factor * self.embeddings[1][node]
 
@@ -120,9 +126,27 @@ class PreprocessedData:
 
         # Replace old vector with shifted vector
         for component_id, component_vectors in enumerate(R_G_shifted_components_vectors):
+            if len(component_vectors) == 1:
+                # print("AHHH")
+                # print(component_vectors)
+                R_G_shifted_components_vectors[component_id] = \
+                    _align_centers(
+                        R_G_shifted_components_vectors[0],
+                        component_vectors
+                    )
+                component_vectors = R_G_shifted_components_vectors[component_id]
+                # print()
+
             for node_index, shifted_vector in enumerate(component_vectors):
                 self.embeddings[0][R_G_components[component_id][node_index]] = shifted_vector
         for component_id, component_vectors in enumerate(R_H_shifted_components_vectors):
+            if len(component_vectors) == 1:
+                R_H_shifted_components_vectors[component_id] = \
+                    _align_centers(
+                        R_H_shifted_components_vectors[0],
+                        component_vectors
+                    )
+                component_vectors = R_H_shifted_components_vectors[component_id]
             for node_index, shifted_vector in enumerate(component_vectors):
                 self.embeddings[1][R_H_components[component_id][node_index]] = shifted_vector
 

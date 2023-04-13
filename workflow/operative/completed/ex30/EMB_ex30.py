@@ -234,13 +234,13 @@ if __name__ == "__main__":
     }
     feature_sets = (
         # & Single features
-        {"imb"},
-        {"emb"},
-        {"deg"},
+        # {"imb"},
+        # {"emb"},
+        # {"deg"},
         # & Feature pairs
         {"imb", "emb"},
         {"imb", "deg"},
-        {"emb", "deg"},
+        # {"emb", "deg"},
         # & All features
         {"imb", "emb", "deg"},
     )

@@ -7,6 +7,12 @@ import sys
 # --- Scientific computing ---
 import numpy as np
 
+from patsy import dmatrices
+import statsmodels.api as sm
+
+# --- Data handling ---
+import pandas as pd
+
 # --- Project source ---
 sys.path.append("../")
 from distance.distance import embedded_edge_distance
@@ -144,6 +150,83 @@ def format_feature_matrix(
         feature_matrix_test[:, 1] = feature_degrees_test
 
     return feature_matrix_train, feature_matrix_test
+
+def format_feature_matrix_statsmodels(
+        feature_set, M_train, M_test,
+        observed_edges, unobserved_edges,
+        feature_distances_train=None,
+        feature_distances_test=None,
+        feature_degrees_train=None,
+        feature_degrees_test=None,
+):
+    if feature_set == {"imb"}:
+        feature_matrix_train = np.array([0]*M_train).reshape(-1,1)
+        feature_matrix_test = np.array([0]*M_test).reshape(-1,1)
+    elif feature_set == {"emb_c"} or feature_set == {"emb_r"} or feature_set == {"emb"}:
+        feature_matrix_train = np.array(feature_distances_train).reshape(-1,1)
+        feature_matrix_test = np.array(feature_distances_test).reshape(-1,1)
+    elif feature_set == {"deg"}:
+        feature_matrix_train = np.array(feature_degrees_train).reshape(-1,1)
+        feature_matrix_test = np.array(feature_degrees_test).reshape(-1,1)
+    elif feature_set == {"imb", "emb_c"} or feature_set == {"imb", "emb_r"} or feature_set == {"imb", "emb"}:
+        feature_matrix_train = np.array(feature_distances_train).reshape(-1,1)
+        feature_matrix_test = np.array(feature_distances_test).reshape(-1,1)
+    elif feature_set == {"imb", "deg"}:
+        feature_matrix_train = np.array(feature_degrees_train).reshape(-1,1)
+        feature_matrix_test = np.array(feature_degrees_test).reshape(-1,1)
+    elif feature_set == {"emb_c", "deg"} or feature_set == {"emb_c", "deg", "imb"} or \
+            feature_set == {"emb_r", "deg"} or feature_set == {"emb_r", "deg", "imb"} or \
+            feature_set == {"emb", "deg"} or feature_set == {"emb", "deg", "imb"}:
+        feature_matrix_train = np.empty((M_train, 2))
+        feature_matrix_train[:, 0] = feature_distances_train
+        feature_matrix_train[:, 1] = feature_degrees_train
+
+        feature_matrix_test = np.empty((M_test, 2))
+        feature_matrix_test[:, 0] = feature_distances_test
+        feature_matrix_test[:, 1] = feature_degrees_test
+
+    labels_train, labels_test = get_labels(
+        observed_edges, unobserved_edges
+    )
+
+    # ^ Convert feature matrix to dataframe
+    if "emb" in feature_set and "deg" in feature_set:
+        df = pd.DataFrame({
+            "label": labels_train,
+            "distance": feature_matrix_train[:, 0],
+            "degree": feature_matrix_train[:, 1]
+        })
+        df_test = pd.DataFrame({
+            "label": labels_test,
+            "distance": feature_matrix_test[:, 0],
+            "degree": feature_matrix_test[:, 1]
+        })
+        y, X = dmatrices("label ~ distance + degree", data=df, return_type="dataframe")
+        _, X_test = dmatrices("label ~ distance + degree", data=df_test, return_type="dataframe")
+    elif "emb" in feature_set and "deg" not in feature_set:
+        df = pd.DataFrame({
+            "label": labels_train,
+            "distance": feature_matrix_train[:, 0],
+        })
+        df_test = pd.DataFrame({
+            "label": labels_test,
+            "distance": feature_matrix_test[:, 0],
+        })
+        y, X = dmatrices("label ~ distance", data=df, return_type="dataframe")
+        _, X_test = dmatrices("label ~ distance", data=df_test, return_type="dataframe")
+    elif "emb" not in feature_set and "deg" in feature_set:
+        df = pd.DataFrame({
+            "label": labels_train,
+            "degree": feature_matrix_train[:, 0],
+        })
+        df_test = pd.DataFrame({
+            "label": labels_test,
+            "degree": feature_matrix_test[:, 0]
+        })
+        y, X = dmatrices("label ~ degree", data=df, return_type="dataframe")
+        _, X_test = dmatrices("label ~ degree", data=df_test, return_type="dataframe")
+
+    return y, X, X_test
 
 
 # --- Helpers ---

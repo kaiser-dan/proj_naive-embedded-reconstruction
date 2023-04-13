@@ -28,7 +28,7 @@ from sklearn.metrics import accuracy_score, roc_auc_score, precision_recall_curv
 
 from patsy import dmatrices
 import statsmodels.api as sm
-from statsmodels.tools.sm_exceptions import PerfectSeparationError as PSE
+from statsmodels.tools.sm_exceptions import PerfectSeparationError
 
 # --- Network science ---
 
@@ -169,66 +169,39 @@ def experiment(
         feature_degrees_test = features.get_configuration_probabilities_feature(src_degrees_test, tgt_degrees_test)
 
     # ^ Format feature matrix
-    feature_matrix_train, feature_matrix_test = \
-        features.format_feature_matrix(
+    y, X, X_test = \
+        features.format_feature_matrix_statsmodels(
             feature_set,
             len(cache.observed_edges), len(cache.unobserved_edges),
+            cache.observed_edges, cache.unobserved_edges,
             feature_distances_train, feature_distances_test,
             feature_degrees_train, feature_degrees_test
         )
-    labels_train, labels_test = features.get_labels(
+    _, labels_test = features.get_labels(
         cache.observed_edges, cache.unobserved_edges
     )
-
-    # ^ Convert feature matrix to dataframe
-    if "emb" in feature_set and "deg" in feature_set:
-        df = pd.DataFrame({
-            "label": labels_train,
-            "distance": feature_matrix_train[:, 0],
-            "degree": feature_matrix_train[:, 1]
-        })
-        df_test = pd.DataFrame({
-            "label": labels_test,
-            "distance": feature_matrix_test[:, 0],
-            "degree": feature_matrix_test[:, 1]
-        })
-        y, X = dmatrices("label ~ distance + degree", data=df, return_type="dataframe")
-        _, X_test = dmatrices("label ~ distance + degree", data=df_test, return_type="dataframe")
-    elif "emb" in feature_set and "deg" not in feature_set:
-        df = pd.DataFrame({
-            "label": labels_train,
-            "distance": feature_matrix_train[:, 0],
-        })
-        df_test = pd.DataFrame({
-            "label": labels_test,
-            "distance": feature_matrix_test[:, 0],
-        })
-        y, X = dmatrices("label ~ distance", data=df, return_type="dataframe")
-        _, X_test = dmatrices("label ~ distance", data=df_test, return_type="dataframe")
-    elif "emb" not in feature_set and "deg" in feature_set:
-        df = pd.DataFrame({
-            "label": labels_train,
-            "degree": feature_matrix_train[:, 0],
-        })
-        df_test = pd.DataFrame({
-            "label": labels_test,
-            "degree": feature_matrix_test[:, 0]
-        })
-        y, X = dmatrices("label ~ degree", data=df, return_type="dataframe")
-        _, X_test = dmatrices("label ~ degree", data=df_test, return_type="dataframe")
 
     # * Train classifier
     try:
         model = sm.Logit(y, X)
         results = model.fit()
-    except ValueError as err:  # when only one class is available, happens for some london cases
-        sys.stderr.write(str(err))
+    except ValueError:
+        # ! Should be fixed, happens in extreme London cases (removed from caches)
+        sys.stderr.write("ValueError")
+        with open("debug-value.log", "a") as fh:
+            print(record, file=fh)
         return record
-    except np.linalg.LinAlgError as err:
-        sys.stderr.write(str(err))
+    except np.linalg.LinAlgError:
+        # ! Convergence issues, may be amenable to hyperparameter-based fix?
+        sys.stderr.write("np.linalg.LinAlgError")
+        with open("debug-linalg.log", "a") as fh:
+            print(record, file=fh)
         return record
-    except PSE as err:
+    except PerfectSeparationError:
+        # ! One independent variable is perfect classifier (a good problem to have)
         sys.stderr.write("Perfect Separability!")
+        with open("debug-PSE.log", "a") as fh:
+            print(record, file=fh)
         return record
 
     intercept = list(results.params)[0]
@@ -238,12 +211,9 @@ def experiment(
     pr_curve = precision_recall_curve(labels_test, scores)
 
     # * Reconstruct
-    try:
-        accuracy = accuracy_score(labels_test, classes)
-        auroc = roc_auc_score(labels_test, scores)
-        aupr = auc(pr_curve[1], pr_curve[0])
-    except ValueError:  # only one class available, fricken London crap
-        return record
+    accuracy = accuracy_score(labels_test, classes)
+    auroc = roc_auc_score(labels_test, scores)
+    aupr = auc(pr_curve[1], pr_curve[0])
     # <<< Calculations <<<
 
     # >>> Post-processing >>>
@@ -267,7 +237,7 @@ if __name__ == "__main__":
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
             PROJECT_ID="EMB_ex31",
-            CURRENT_VERSION="v1.1",
+            CURRENT_VERSION="v1.2.2",
             ROOT=ROOT
         )
 

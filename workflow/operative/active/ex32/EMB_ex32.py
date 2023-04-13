@@ -4,18 +4,6 @@ Broadly speaking, we have the following "workflow":
 
 1. main() -> Sweep over _data_ (Systems \& induced duplexes)
 2. experiment() -> For single data instance, sweep over _parameters_ (Theta, classifier parameters, etc.)
-3. reconstruct() -> For single data instance and parameter instance, actually _do_ reconstruction task.
-"""
-
-"""
-TDD
-
-1. Load data
-2. Fix feature
-3. Experiment over PFI with given data and feature
-4. Record performance and coefficients
-5. Repeat for all fixtures
-6. Repeat for all data
 """
 # ========== SET-UP ==========
 # --- Standard library ---
@@ -24,6 +12,11 @@ from itertools import product
 
 # --- Scientific computing ---
 import numpy as np
+from sklearn.metrics import accuracy_score, roc_auc_score, precision_recall_curve, auc
+
+from patsy import dmatrices
+import statsmodels.api as sm
+from statsmodels.tools.sm_exceptions import PerfectSeparationError as PSE
 
 # --- Network science ---
 
@@ -44,8 +37,7 @@ from data import observations
 
 ## Classifiers
 from classifiers import features  # feature set helpers
-from classifiers import logreg  # logistic regression
-
+# from classifiers import logreg  # logistic regression
 
 ## Utilities
 from utils import parameters as params  # helpers for experiment parameters
@@ -95,7 +87,6 @@ def main(
     dataio.save_df(df, output_filehandle)
     # <<< Post-processing <<<
 
-
     return df
 
 
@@ -141,11 +132,11 @@ def experiment(
     feature_degrees_train = None
     feature_degrees_test = None
     if "emb" in feature_set:
-        # & Renormalize embeddings
-        cache.embeddings = cache.renormalize()
-
         # & Align centers
         cache.embeddings = cache.align_centers()
+
+        # & Renormalize embeddings
+        cache.embeddings = cache.renormalize()
 
         distances_G_train, distances_H_train = \
             features.get_distances(cache.embeddings, list(cache.observed_edges.keys()))
@@ -176,24 +167,68 @@ def experiment(
         cache.observed_edges, cache.unobserved_edges
     )
 
+    # ^ Convert feature matrix to dataframe
+    if "emb" in feature_set and "deg" in feature_set:
+        df = pd.DataFrame({
+            "label": labels_train,
+            "distance": feature_matrix_train[:, 0],
+            "degree": feature_matrix_train[:, 1]
+        })
+        df_test = pd.DataFrame({
+            "label": labels_test,
+            "distance": feature_matrix_test[:, 0],
+            "degree": feature_matrix_test[:, 1]
+        })
+        y, X = dmatrices("label ~ distance + degree", data=df, return_type="dataframe")
+        _, X_test = dmatrices("label ~ distance + degree", data=df_test, return_type="dataframe")
+    elif "emb" in feature_set and "deg" not in feature_set:
+        df = pd.DataFrame({
+            "label": labels_train,
+            "distance": feature_matrix_train[:, 0],
+        })
+        df_test = pd.DataFrame({
+            "label": labels_test,
+            "distance": feature_matrix_test[:, 0],
+        })
+        y, X = dmatrices("label ~ distance", data=df, return_type="dataframe")
+        _, X_test = dmatrices("label ~ distance", data=df_test, return_type="dataframe")
+    elif "emb" not in feature_set and "deg" in feature_set:
+        df = pd.DataFrame({
+            "label": labels_train,
+            "degree": feature_matrix_train[:, 0],
+        })
+        df_test = pd.DataFrame({
+            "label": labels_test,
+            "degree": feature_matrix_test[:, 0]
+        })
+        y, X = dmatrices("label ~ degree", data=df, return_type="dataframe")
+        _, X_test = dmatrices("label ~ degree", data=df_test, return_type="dataframe")
+
     # * Train classifier
     try:
-        model = logreg.train_fit_logreg(feature_matrix_train, labels_train, hyperparameters["classifier"])
+        model = sm.Logit(y, X)
+        results = model.fit()
     except ValueError as err:  # when only one class is available, happens for some london cases
         sys.stderr.write(str(err))
         return record
+    except np.linalg.LinAlgError as err:
+        sys.stderr.write(str(err))
+        return record
+    except PSE as err:
+        sys.stderr.write("Perfect Separability!")
+        return record
 
-    intercept, coefficients = logreg.get_model_fit(model)
-    try:
-        assert intercept[0] != 0
-    except AssertionError as msg:
-        print(msg)
+    intercept = list(results.params)[0]
+    coefficients = list(results.params)[1:]
+    scores = results.predict(X_test)
+    classes = [1 if score >= 0.5 else 0 for score in scores]
+    pr_curve = precision_recall_curve(labels_test, scores)
 
     # * Reconstruct
     try:
-        accuracy = logreg.get_model_accuracy(model, feature_matrix_test, labels_test)
-        auroc = logreg.get_model_auroc(model, feature_matrix_test, labels_test)
-        aupr = logreg.get_model_aupr(model, feature_matrix_test, labels_test)
+        accuracy = accuracy_score(labels_test, classes)
+        auroc = roc_auc_score(labels_test, scores)
+        aupr = auc(pr_curve[1], pr_curve[0])
     except ValueError:  # only one class available, fricken London crap
         return record
     # <<< Calculations <<<
@@ -201,8 +236,8 @@ def experiment(
     # >>> Post-processing >>>
     # Update record
     record.update({
-        "intercept": intercept[0],
-        "coefficients": coefficients[0],
+        "intercept": intercept,
+        "coefficients": coefficients,
         "accuracy": accuracy,
         "auroc": auroc,
         "aupr": aupr,
@@ -218,19 +253,16 @@ if __name__ == "__main__":
     # Metadata
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
-            PROJECT_ID="EMB_ex30",
-            CURRENT_VERSION="v2.1",
+            PROJECT_ID="EMB_ex32",
+            CURRENT_VERSION="v1.0",
             ROOT=ROOT
         )
 
     # Parameter grid
     system_layer_sets = {
-        # & Large systems
-        ("arxiv", 2, 6),
-        ("drosophila", 1, 2),
-        # & Small systems
-        ("celegans", 1, 2),
-        ("london", 1, 2),
+        # & Synthetic systems
+        (f"LFR_mu-0.1_prob-{prob}", 1, 2)
+        for prob in [0.0, 0.25, 0.5, 0.75, 1.0]
     }
     feature_sets = (
         # & Single features
@@ -247,7 +279,7 @@ if __name__ == "__main__":
     _, hyperparameters, experiment_setup = \
         params.set_parameters_N2V(
             fit_intercept=False,  solver="newton-cholesky", penalty=None, # logreg
-            theta_min=0.05, theta_max=0.95, theta_num=19, repeat=1  # other
+            theta_min=0.05, theta_max=0.95, theta_num=11, repeat=1  # other
         )
     # <<< Experiment set-up <<<
 

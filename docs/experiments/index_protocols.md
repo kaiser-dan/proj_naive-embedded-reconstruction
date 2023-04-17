@@ -26,8 +26,13 @@ Experiments are considered "operative" if they are actively being developed or r
 Active experiments are settings currently being developed or analyzed.
 
 - ex32
+  - Associated experiments: ex31, 33
+  - Summary: Full factorial experiment on logistic regression features with configuration embedded distance form and adjusted renormalization procedure on synthetic networks.
+  - Details: LFR duplexes with varying $\mu$ and _prob_ parameters, fixed $\gamma$
+- ex33
   - Associated experiments: ex31, ex32
   - Summary: Full factorial experiment on logistic regression features with configuration embedded distance form and adjusted renormalization procedure on synthetic networks.
+  - Details: LFR duplexes with varying $\gamma$ , fixed _prob_ and $\mu$ parameters. Initially on smaller $N = 1000$ for speed.
 
 ## Completed
 

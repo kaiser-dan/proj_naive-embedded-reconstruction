@@ -16,7 +16,7 @@ from sklearn.metrics import accuracy_score, roc_auc_score, precision_recall_curv
 
 from patsy import dmatrices
 import statsmodels.api as sm
-from statsmodels.tools.sm_exceptions import PerfectSeparationError as PSE
+from statsmodels.tools.sm_exceptions import PerfectSeparationError
 
 # --- Network science ---
 
@@ -37,7 +37,7 @@ from data import observations
 
 ## Classifiers
 from classifiers import features  # feature set helpers
-# from classifiers import logreg  # logistic regression
+from classifiers import logreg  # logistic regression
 
 ## Utilities
 from utils import parameters as params  # helpers for experiment parameters
@@ -102,7 +102,7 @@ def experiment(
         system_layers[0],
         (system_layers[1], system_layers[2]),
         theta, repetition,
-        ROOT = ROOT + "data/input/preprocessed"
+        ROOT = ROOT + "data/input/preprocessed/synthetic"
     )
 
     record = {
@@ -118,11 +118,6 @@ def experiment(
         "aupr": None,
         "log_penalty": np.log10(penalty)
     }
-
-    if "imb" in feature_set:
-        hyperparameters["classifier"]["fit_intercept"] = True
-    else:
-        hyperparameters["classifier"]["fit_intercept"] = False
     # <<< Book-keeping <<<
 
     # >>> Calculations >>>
@@ -156,6 +151,53 @@ def experiment(
         feature_degrees_test = features.get_configuration_probabilities_feature(src_degrees_test, tgt_degrees_test)
 
     # ^ Format feature matrix
+    # ! >>> statsmodels package >>>
+    # y, X, X_test = \
+    #     features.format_feature_matrix_statsmodels(
+    #         feature_set,
+    #         len(cache.observed_edges), len(cache.unobserved_edges),
+    #         cache.observed_edges, cache.unobserved_edges,
+    #         feature_distances_train, feature_distances_test,
+    #         feature_degrees_train, feature_degrees_test
+    #     )
+    #     _, labels_test = features.get_labels(
+    #     cache.observed_edges, cache.unobserved_edges
+    # )
+    # # * Train classifier
+    # try:
+    #     model = sm.Logit(y, X)
+    #     results = model.fit()
+    # except ValueError:
+    #     # ! Should be fixed, happens in extreme London cases (removed from caches)
+    #     sys.stderr.write("ValueError")
+    #     with open("debug-value.log", "a") as fh:
+    #         print(record, file=fh)
+    #     return record
+    # except np.linalg.LinAlgError:
+    #     # ! Convergence issues, may be amenable to hyperparameter-based fix?
+    #     sys.stderr.write("np.linalg.LinAlgError")
+    #     with open("debug-linalg.log", "a") as fh:
+    #         print(record, file=fh)
+    #     return record
+    # except PerfectSeparationError:
+    #     # ! One independent variable is perfect classifier (a good problem to have)
+    #     sys.stderr.write("Perfect Separability!")
+    #     with open("debug-PSE.log", "a") as fh:
+    #         print(record, file=fh)
+    #     return record
+
+    # intercept = list(results.params)[0]
+    # coefficients = list(results.params)[1:]
+    # scores = results.predict(X_test)
+    # classes = [1 if score >= 0.5 else 0 for score in scores]
+    # pr_curve = precision_recall_curve(labels_test, scores)
+
+    # # * Reconstruct
+    # accuracy = accuracy_score(labels_test, classes)
+    # auroc = roc_auc_score(labels_test, scores)
+    # aupr = auc(pr_curve[1], pr_curve[0])
+    # ! <<< statsmodels package <<<
+    # ! >>> scikit-learn package >>>
     feature_matrix_train, feature_matrix_test = \
         features.format_feature_matrix(
             feature_set,
@@ -166,78 +208,33 @@ def experiment(
     labels_train, labels_test = features.get_labels(
         cache.observed_edges, cache.unobserved_edges
     )
-
-    # ^ Convert feature matrix to dataframe
-    if "emb" in feature_set and "deg" in feature_set:
-        df = pd.DataFrame({
-            "label": labels_train,
-            "distance": feature_matrix_train[:, 0],
-            "degree": feature_matrix_train[:, 1]
-        })
-        df_test = pd.DataFrame({
-            "label": labels_test,
-            "distance": feature_matrix_test[:, 0],
-            "degree": feature_matrix_test[:, 1]
-        })
-        y, X = dmatrices("label ~ distance + degree", data=df, return_type="dataframe")
-        _, X_test = dmatrices("label ~ distance + degree", data=df_test, return_type="dataframe")
-    elif "emb" in feature_set and "deg" not in feature_set:
-        df = pd.DataFrame({
-            "label": labels_train,
-            "distance": feature_matrix_train[:, 0],
-        })
-        df_test = pd.DataFrame({
-            "label": labels_test,
-            "distance": feature_matrix_test[:, 0],
-        })
-        y, X = dmatrices("label ~ distance", data=df, return_type="dataframe")
-        _, X_test = dmatrices("label ~ distance", data=df_test, return_type="dataframe")
-    elif "emb" not in feature_set and "deg" in feature_set:
-        df = pd.DataFrame({
-            "label": labels_train,
-            "degree": feature_matrix_train[:, 0],
-        })
-        df_test = pd.DataFrame({
-            "label": labels_test,
-            "degree": feature_matrix_test[:, 0]
-        })
-        y, X = dmatrices("label ~ degree", data=df, return_type="dataframe")
-        _, X_test = dmatrices("label ~ degree", data=df_test, return_type="dataframe")
-
-    # * Train classifier
+    model = logreg.train_fit_logreg(feature_matrix_train, labels_train, hyperparameters["classifier"])
+    intercept, coefficients = logreg.get_model_fit(model)
+    intercept = intercept[0]
+    coefficients = coefficients[0]
     try:
-        model = sm.Logit(y, X)
-        results = model.fit()
-    except ValueError as err:  # when only one class is available, happens for some london cases
-        sys.stderr.write(str(err))
+        accuracy = logreg.get_model_accuracy(model, feature_matrix_test, labels_test)
+        auroc = logreg.get_model_auroc(model, feature_matrix_test, labels_test)
+        aupr = logreg.get_model_aupr(model, feature_matrix_test, labels_test)
+    except ValueError:
         return record
-    except np.linalg.LinAlgError as err:
-        sys.stderr.write(str(err))
-        return record
-    except PSE as err:
-        sys.stderr.write("Perfect Separability!")
-        return record
-
-    intercept = list(results.params)[0]
-    coefficients = list(results.params)[1:]
-    scores = results.predict(X_test)
-    classes = [1 if score >= 0.5 else 0 for score in scores]
-    pr_curve = precision_recall_curve(labels_test, scores)
-
-    # * Reconstruct
-    try:
-        accuracy = accuracy_score(labels_test, classes)
-        auroc = roc_auc_score(labels_test, scores)
-        aupr = auc(pr_curve[1], pr_curve[0])
-    except ValueError:  # only one class available, fricken London crap
-        return record
+    # ! <<< scikit-learn package <<<
     # <<< Calculations <<<
 
     # >>> Post-processing >>>
     # Update record
+    coef_emb = coefficients[0] if "emb" in feature_set else None
+    if "deg" in feature_set and "emb" not in feature_set:
+        coef_deg = coefficients[0]
+    elif "deg" in feature_set and "emb" in feature_set:
+        coef_deg = coefficients[1]
+    else:
+        coef_deg = None
     record.update({
         "intercept": intercept,
         "coefficients": coefficients,
+        "coef_emb": coef_emb,
+        "coef_deg": coef_deg,
         "accuracy": accuracy,
         "auroc": auroc,
         "aupr": aupr,
@@ -254,14 +251,15 @@ if __name__ == "__main__":
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
             PROJECT_ID="EMB_ex32",
-            CURRENT_VERSION="v1.0",
+            CURRENT_VERSION="v2.0",
             ROOT=ROOT
         )
 
     # Parameter grid
     system_layer_sets = {
         # & Synthetic systems
-        (f"LFR_mu-0.1_prob-{prob}", 1, 2)
+        (f"LFR_mu-{mu}_prob-{prob}", 1, 2)
+        for mu in [0.1, 0.2, 0.3, 0.4, 0.5]
         for prob in [0.0, 0.25, 0.5, 0.75, 1.0]
     }
     feature_sets = (
@@ -278,8 +276,8 @@ if __name__ == "__main__":
     )
     _, hyperparameters, experiment_setup = \
         params.set_parameters_N2V(
-            fit_intercept=False,  solver="newton-cholesky", penalty=None, # logreg
-            theta_min=0.05, theta_max=0.95, theta_num=11, repeat=1  # other
+            fit_intercept=True,  solver="newton-cholesky", penalty="l2", # logreg
+            theta_min=0.05, theta_max=0.95, theta_num=37, repeat=1  # other
         )
     # <<< Experiment set-up <<<
 

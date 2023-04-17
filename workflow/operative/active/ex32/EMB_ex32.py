@@ -141,6 +141,20 @@ def experiment(
         feature_distances_train = features.get_configuration_distances_feature(distances_G_train, distances_H_train, zde_penalty=penalty)
         feature_distances_test = features.get_configuration_distances_feature(distances_G_test, distances_H_test, zde_penalty=penalty)
 
+        # ! >>> Additional scaling >>>
+        normalizer = max(
+            np.abs(min(feature_distances_train)),
+            np.abs(max(feature_distances_train)),
+        )
+        feature_distances_train = [x / normalizer for x in feature_distances_train]
+
+        normalizer = max(
+            np.abs(min(feature_distances_test)),
+            np.abs(max(feature_distances_test)),
+        )
+        feature_distances_test = [x / normalizer for x in feature_distances_test]
+        # ! <<< Additional scaling <<<
+
     if "deg" in feature_set:
         src_degrees_train, tgt_degrees_train = \
             features.get_degrees(cache.remnants, list(cache.observed_edges.keys()))
@@ -251,7 +265,7 @@ if __name__ == "__main__":
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
             PROJECT_ID="EMB_ex32",
-            CURRENT_VERSION="v2.0",
+            CURRENT_VERSION="v2.1",
             ROOT=ROOT
         )
 

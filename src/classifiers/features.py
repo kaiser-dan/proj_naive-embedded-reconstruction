@@ -7,9 +7,16 @@ import sys
 # --- Scientific computing ---
 import numpy as np
 
+from patsy import dmatrices
+import statsmodels.api as sm
+
+# --- Data handling ---
+import pandas as pd
+
 # --- Project source ---
 sys.path.append("../")
-from distance.distance import embedded_edge_distance, component_penalized_embedded_edge_distance
+from distance.distance import embedded_edge_distance
+from distance.score import likelihood, scale_probability
 
 
 # ========== FUNCTIONS ==========
@@ -59,46 +66,171 @@ def get_configuration_probabilities_feature(src_degrees, tgt_degrees):
 # > Distance >
 def get_distances(vectors, edges):
     # >>> Book-keeping >>>
-    G, H = vectors  # alias input layer embedded node vectors
+    G, H = vectors  # alias input layer graphs
     # <<< Book-keeping <<<
 
     # >>> Distance calculations >>>
-    G_distances = [embedded_edge_distance(edge, G) for edge in edges]
-    H_distances = [embedded_edge_distance(edge, H) for edge in edges]
+    distances_G = [embedded_edge_distance(edge, G) for edge in edges]
+    distances_H = [embedded_edge_distance(edge, H) for edge in edges]
     # <<< Distance calculations
 
-    return G_distances, H_distances
+    return distances_G, distances_H
 
-def get_biased_distances(vectors, edges, components):
+def get_configuration_distances_feature(distances_G, distances_H, zde_penalty = 1e-12):
     # >>> Book-keeping >>>
-    G, H = vectors  # alias input layer embedded node vectors
-    G_components, H_components = components  # alias component mapping of remnants
+    M = len(distances_G)  # get number of observations in dataset
+    configuration_probabilities = []  # initialize feature set
     # <<< Book-keeping <<<
 
-    # >>> Distance calculations >>>
-    G_distances = [component_penalized_embedded_edge_distance(edge, G, G_components) for edge in edges]
-    H_distances = [component_penalized_embedded_edge_distance(edge, H, H_components) for edge in edges]
-    # <<< Distance calculations
+    # >>> Calculate configuration probabilities >>>
+    for idx in range(M):
+        s_G = 1 / (distances_G[idx] + zde_penalty)
+        s_H = 1 / (distances_H[idx] + zde_penalty)
+        probability = likelihood(s_G, s_H)
 
-    return G_distances, H_distances
+        # Feature transformation
+        probability = scale_probability(probability)
+
+        configuration_probabilities.append(probability)
+    # <<< Calculate configuration probabilities <<<
+
+    return configuration_probabilities
+
+def get_distance_ratios_feature(distances_G, distances_H, zde_penalty=1e-12):
+    # >>> Book-keeping >>>
+    M = len(distances_G)  # get number of observations in dataset
+    distance_ratios = []  # initialize feature set
+    # <<< Book-keeping <<<
+
+    # >>> Calculate distance ratios >>>
+    for idx in range(M):
+        s_G = 1 / (distances_G[idx] + zde_penalty)
+        s_H = 1 / (distances_H[idx] + zde_penalty)
+        probability = s_G / s_H
+
+        distance_ratios.append(probability)
+    # <<< Calculate distance ratios <<<
+
+    return distance_ratios
 # < Distance <
 
 
 # --- Formatters ---
-def prepare_feature_matrix_confdeg_dist(configuration_degrees, distances):
-    # >>> Book-keeping >>>
-    N = len(configuration_degrees)
-    NUM_FEATURES = 3
+def format_feature_matrix(
+        feature_set, M_train, M_test,
+        feature_distances_train=None,
+        feature_distances_test=None,
+        feature_degrees_train=None,
+        feature_degrees_test=None,
+):
+    if feature_set == {"imb"}:
+        feature_matrix_train = np.array([0]*M_train).reshape(-1,1)
+        feature_matrix_test = np.array([0]*M_test).reshape(-1,1)
+    elif feature_set == {"emb_c"} or feature_set == {"emb_r"} or feature_set == {"emb"}:
+        feature_matrix_train = np.array(feature_distances_train).reshape(-1,1)
+        feature_matrix_test = np.array(feature_distances_test).reshape(-1,1)
+    elif feature_set == {"deg"}:
+        feature_matrix_train = np.array(feature_degrees_train).reshape(-1,1)
+        feature_matrix_test = np.array(feature_degrees_test).reshape(-1,1)
+    elif feature_set == {"imb", "emb_c"} or feature_set == {"imb", "emb_r"} or feature_set == {"imb", "emb"}:
+        feature_matrix_train = np.array(feature_distances_train).reshape(-1,1)
+        feature_matrix_test = np.array(feature_distances_test).reshape(-1,1)
+    elif feature_set == {"imb", "deg"}:
+        feature_matrix_train = np.array(feature_degrees_train).reshape(-1,1)
+        feature_matrix_test = np.array(feature_degrees_test).reshape(-1,1)
+    elif feature_set == {"emb_c", "deg"} or feature_set == {"emb_c", "deg", "imb"} or \
+            feature_set == {"emb_r", "deg"} or feature_set == {"emb_r", "deg", "imb"} or \
+            feature_set == {"emb", "deg"} or feature_set == {"emb", "deg", "imb"}:
+        feature_matrix_train = np.empty((M_train, 2))
+        feature_matrix_train[:, 0] = feature_distances_train
+        feature_matrix_train[:, 1] = feature_degrees_train
 
-    G_distances, H_distances = distances
+        feature_matrix_test = np.empty((M_test, 2))
+        feature_matrix_test[:, 0] = feature_distances_test
+        feature_matrix_test[:, 1] = feature_degrees_test
 
-    feature_matrix = np.empty((N, NUM_FEATURES))
-    # <<< Book-keeping <<<
+    return feature_matrix_train, feature_matrix_test
 
-    # >>> Format feature matrix >>>
-    feature_matrix[:, 0] = configuration_degrees
-    feature_matrix[:, 1] = G_distances
-    feature_matrix[:, 2] = H_distances
-    # <<< Format feature matrix <<<
+def format_feature_matrix_statsmodels(
+        feature_set, M_train, M_test,
+        observed_edges, unobserved_edges,
+        feature_distances_train=None,
+        feature_distances_test=None,
+        feature_degrees_train=None,
+        feature_degrees_test=None,
+):
+    if feature_set == {"imb"}:
+        feature_matrix_train = np.array([0]*M_train).reshape(-1,1)
+        feature_matrix_test = np.array([0]*M_test).reshape(-1,1)
+    elif feature_set == {"emb_c"} or feature_set == {"emb_r"} or feature_set == {"emb"}:
+        feature_matrix_train = np.array(feature_distances_train).reshape(-1,1)
+        feature_matrix_test = np.array(feature_distances_test).reshape(-1,1)
+    elif feature_set == {"deg"}:
+        feature_matrix_train = np.array(feature_degrees_train).reshape(-1,1)
+        feature_matrix_test = np.array(feature_degrees_test).reshape(-1,1)
+    elif feature_set == {"imb", "emb_c"} or feature_set == {"imb", "emb_r"} or feature_set == {"imb", "emb"}:
+        feature_matrix_train = np.array(feature_distances_train).reshape(-1,1)
+        feature_matrix_test = np.array(feature_distances_test).reshape(-1,1)
+    elif feature_set == {"imb", "deg"}:
+        feature_matrix_train = np.array(feature_degrees_train).reshape(-1,1)
+        feature_matrix_test = np.array(feature_degrees_test).reshape(-1,1)
+    elif feature_set == {"emb_c", "deg"} or feature_set == {"emb_c", "deg", "imb"} or \
+            feature_set == {"emb_r", "deg"} or feature_set == {"emb_r", "deg", "imb"} or \
+            feature_set == {"emb", "deg"} or feature_set == {"emb", "deg", "imb"}:
+        feature_matrix_train = np.empty((M_train, 2))
+        feature_matrix_train[:, 0] = feature_distances_train
+        feature_matrix_train[:, 1] = feature_degrees_train
 
-    return feature_matrix
+        feature_matrix_test = np.empty((M_test, 2))
+        feature_matrix_test[:, 0] = feature_distances_test
+        feature_matrix_test[:, 1] = feature_degrees_test
+
+    labels_train, labels_test = get_labels(
+        observed_edges, unobserved_edges
+    )
+
+    # ^ Convert feature matrix to dataframe
+    if "emb" in feature_set and "deg" in feature_set:
+        df = pd.DataFrame({
+            "label": labels_train,
+            "distance": feature_matrix_train[:, 0],
+            "degree": feature_matrix_train[:, 1]
+        })
+        df_test = pd.DataFrame({
+            "label": labels_test,
+            "distance": feature_matrix_test[:, 0],
+            "degree": feature_matrix_test[:, 1]
+        })
+        y, X = dmatrices("label ~ distance + degree", data=df, return_type="dataframe")
+        _, X_test = dmatrices("label ~ distance + degree", data=df_test, return_type="dataframe")
+    elif "emb" in feature_set and "deg" not in feature_set:
+        df = pd.DataFrame({
+            "label": labels_train,
+            "distance": feature_matrix_train[:, 0],
+        })
+        df_test = pd.DataFrame({
+            "label": labels_test,
+            "distance": feature_matrix_test[:, 0],
+        })
+        y, X = dmatrices("label ~ distance", data=df, return_type="dataframe")
+        _, X_test = dmatrices("label ~ distance", data=df_test, return_type="dataframe")
+    elif "emb" not in feature_set and "deg" in feature_set:
+        df = pd.DataFrame({
+            "label": labels_train,
+            "degree": feature_matrix_train[:, 0],
+        })
+        df_test = pd.DataFrame({
+            "label": labels_test,
+            "degree": feature_matrix_test[:, 0]
+        })
+        y, X = dmatrices("label ~ degree", data=df, return_type="dataframe")
+        _, X_test = dmatrices("label ~ degree", data=df_test, return_type="dataframe")
+
+    return y, X, X_test
+
+
+# --- Helpers ---
+def get_labels(trainset, testset):
+    labels_train = list(trainset.values())
+    labels_test = list(testset.values())
+    return labels_train, labels_test

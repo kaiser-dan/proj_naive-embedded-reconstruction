@@ -1,4 +1,9 @@
 """Project source code for controlling implicit correlations in synthetic multiplexes.
+
+Throughout, `parameters` are independent variables controlling embedding behavior.
+They have a theoretical motivation for accepting different values.
+In contrast, `hyperparameters` are independent variables for embedding or regression
+that have less convincing theoretical reasons to be altered (with respect to the original analysis).
 """
 # ============= SET-UP =================
 from numpy import linspace
@@ -17,6 +22,8 @@ def set_parameters_N2V(
         # LogReg
         penalty="l2",
         fit_intercept=True,
+        solver="lbfgs",
+        class_weight=None,
         # Other
         theta_min=0.05,
         theta_max=0.5,
@@ -42,7 +49,7 @@ def set_parameters_N2V(
         _description_, by default 1
     batch_words : int, optional
         _description_, by default 4
-    penalty: dict, default='l2'
+    penalty: str, default='l2'
         Specify the norm of the penalty:
         - `None`: no penalty is added;
         - `'l2'`: add a L2 penalty term and it is the default choice;
@@ -54,6 +61,13 @@ def set_parameters_N2V(
            solver.
     fit_intercept : bool, optional
         Specifies if a constant (a.k.a. bias or intercept) should be added to the decision function, by default True
+    solver: str, default='lbfgs'
+        Algorithm to use in the optimization problem. Default is ‘lbfgs’. To choose a solver, you might want to consider the following aspects:
+            - For small datasets, ‘liblinear’ is a good choice, whereas ‘sag’ and ‘saga’ are faster for large ones;
+            - For multiclass problems, only ‘newton-cg’, ‘sag’, ‘saga’ and ‘lbfgs’ handle multinomial loss;
+            - ‘liblinear’ is limited to one-versus-rest schemes.
+            - ‘newton-cholesky’ is a good choice for n_samples >> n_features, especially with one-hot encoded categorical features with rare categories. Note that it is limited to binary classification and the one-versus-rest reduction for multiclass classification. Be aware that the memory usage of this solver has a quadratic dependency on n_features because it explicitly computes the Hessian matrix.
+    class_weight: ! FILL IN LATER
     theta_min : float, optional
         Minimum relative size of training set (inclusive), by default 0.05
     theta_max : float, optional
@@ -91,7 +105,9 @@ def set_parameters_N2V(
         "classifier": {
             # >>> Logistic regression <<<
             "penalty": penalty,  # L2 regularization
-            "fit_intercept": fit_intercept,   # whether to fit an intercept
+            "fit_intercept": fit_intercept,   # whether to fit an intercept,
+            "solver": solver,  # !
+            "class_weight": class_weight
         }
     }
 

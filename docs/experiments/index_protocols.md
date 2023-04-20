@@ -25,15 +25,14 @@ Experiments are considered "operative" if they are actively being developed or r
 
 Active experiments are settings currently being developed or analyzed.
 
-- ex27
-  - Associated experiments: ex26, ex28, ex29
-  - Summary: N2V with configuration-likelihood degree feature alone
-  - Another with intercept
-
-- ex28
-  - Associated experiments: ex26, ex27, ex29
-  - Summary: N2V with configuration-likelihood degree and embedding distance features
-
+- ex32
+  - Associated experiments: ex31, 33
+  - Summary: Full factorial experiment on logistic regression features with configuration embedded distance form and adjusted renormalization procedure on synthetic networks.
+  - Details: LFR duplexes with varying $\mu$ and _prob_ parameters, fixed $\gamma$
+- ex33
+  - Associated experiments: ex31, ex32
+  - Summary: Full factorial experiment on logistic regression features with configuration embedded distance form and adjusted renormalization procedure on synthetic networks.
+  - Details: LFR duplexes with varying $\gamma$ , fixed _prob_ and $\mu$ parameters. Initially on smaller $N = 1000$ for speed.
 
 ## Completed
 
@@ -75,14 +74,28 @@ Completed experiments are settings with generated, analyzed results that are wit
   - Date completed: 2023-02-27
   - Associated experiments: ex27
   - Summary: Apply "D" classifier to real multiplexes
+- ex27
+  - Date completed: 2023-03-02
+  - Associated experiments: ex26, ex28
+  - Summary: N2V with configuration-likelihood degree feature alone
+- ex29
+  - Date completed: 2023-03-XX
+  - Associated experiments: ex27, ex28
+  - Summary: Full factorial experiment on logistic regression features
+- ex30
+  - Date completed: 2023-04-08
+  - Associated experiments: ex31, ex32
+  - Summary: Full factorial experiment on logistic regression features with several feature forms.
+- ex31
+  - Date completed: 2023-04-02
+  - Associated experiments: ex30, ex32
+  - Summary: Full factorial experiment on logistic regression features with configuration embedded distance form and adjusted renormalization procedure.
+
 
 ## Planned
 
 Planned experiments are experiments that are planned or actively being designed, but before active development starts.
 
-- ex29
-  - Associated experiments: ex26, ex27, ex28
-  - Summary: N2V with configuration-likelihood degree, embedding distance features and component biases
 
 
 # Inoperative Experiments
@@ -109,3 +122,4 @@ Depreciated experiments may, unlike failed experiments, be reproduced as is but 
 - ex11
 - ex12
 - ex17
+- ex28

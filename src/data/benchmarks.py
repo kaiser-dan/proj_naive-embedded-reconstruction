@@ -150,12 +150,12 @@ def LFR(n,t1,t2,mu,avg_k,max_k, ROOT="../../"):
     )
 
     # Format resultant network as networkx Graph
-    x=np.loadtxt(f'{ROOT}/network.dat')
+    x=np.loadtxt("./network.dat")
     edges=[(int(x[i][0])-1,int(x[i][1])-1) for i in range(len(x))]
     g=nx.Graph(edges)
 
     # Format resultant node partition as dict
-    x=np.loadtxt(f'{ROOT}/community.dat')
+    x=np.loadtxt("./community.dat")
     coms={int(x[i][0])-1:int(x[i][1]) for i in range(len(x))}
 
     return g, coms
@@ -169,7 +169,7 @@ def lfr_multiplex (N, tau1, tau2, mu, average_degree, max_degree, min_community,
 
     # >>> Experimental data sampling >>>
     # Generate LFR network (one layer)
-    H, comm = LFR(n=N, t1=tau1, t2=tau2, mu=mu, avg_k=average_degree, max_k = max_degree, min_community=min_community)
+    H, comm = LFR(n=N, t1=tau1, t2=tau2, mu=mu, avg_k=average_degree, max_k = max_degree)#, min_community=min_community)
 
     # Create list of communities
     for n in comm:

@@ -1,0 +1,17 @@
+{'system': 'london', 'l1': 1, 'l2': 2, 'features': {'imb', 'emb', 'deg'}, 'theta': 0.75, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}
+{'system': 'celegans', 'l1': 1, 'l2': 2, 'features': {'emb', 'deg', 'imb'}, 'theta': 0.1, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}
+{'system': 'london', 'l1': 1, 'l2': 2, 'features': {'deg', 'imb'}, 'theta': 0.15, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}
+{'system': 'london', 'l1': 1, 'l2': 2, 'features': {'deg', 'imb'}, 'theta': 0.39999999999999997, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}
+{'system': 'london', 'l1': 1, 'l2': 2, 'features': {'deg', 'imb'}, 'theta': 0.75, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}
+{'system': 'london', 'l1': 1, 'l2': 2, 'features': {'deg', 'imb'}, 'theta': 0.7999999999999999, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}
+{'system': 'london', 'l1': 1, 'l2': 2, 'features': {'emb', 'deg', 'imb'}, 'theta': 0.1, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}
+{'system': 'london', 'l1': 1, 'l2': 2, 'features': {'emb', 'deg', 'imb'}, 'theta': 0.15, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}
+{'system': 'london', 'l1': 1, 'l2': 2, 'features': {'emb', 'deg', 'imb'}, 'theta': 0.2, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}
+{'system': 'london', 'l1': 1, 'l2': 2, 'features': {'emb', 'deg', 'imb'}, 'theta': 0.75, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}
+{'system': 'drosophila', 'l1': 1, 'l2': 2, 'features': {'emb', 'deg', 'imb'}, 'theta': 0.05, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}
+{'system': 'drosophila', 'l1': 1, 'l2': 2, 'features': {'emb', 'deg', 'imb'}, 'theta': 0.1, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}
+{'system': 'drosophila', 'l1': 1, 'l2': 2, 'features': {'emb', 'deg', 'imb'}, 'theta': 0.15, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}
+{'system': 'drosophila', 'l1': 1, 'l2': 2, 'features': {'emb', 'deg', 'imb'}, 'theta': 0.2, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}
+{'system': 'drosophila', 'l1': 1, 'l2': 2, 'features': {'emb', 'deg', 'imb'}, 'theta': 0.25, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}
+{'system': 'drosophila', 'l1': 1, 'l2': 2, 'features': {'emb', 'deg', 'imb'}, 'theta': 0.3, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}
+{'system': 'drosophila', 'l1': 1, 'l2': 2, 'features': {'emb', 'deg', 'imb'}, 'theta': 0.35, 'intercept': None, 'coefficients': None, 'accuracy': None, 'auroc': None, 'aupr': None, 'log_penalty': -1.0}

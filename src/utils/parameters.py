@@ -129,12 +129,12 @@ def set_parameters_LE(
         maxiter=100,
         tol=-8,
         # LogReg
-        penalty="l2",
+        penalty=None,
         fit_intercept=True,
         # Other
         theta_min=0.05,
-        theta_max=0.5,
-        theta_num=10,
+        theta_max=0.95,
+        theta_num=11,
         repeat=5):
     """Prepare parameters for LE-based reconstruction experiments.
 
@@ -146,7 +146,7 @@ def set_parameters_LE(
         _description_, by default 100
     tol : int, optional
         _description_, by default -8
-    penalty: dict, default='l2'
+    penalty: dict, default='None'
         Specify the norm of the penalty:
         - `None`: no penalty is added;
         - `'l2'`: add a L2 penalty term and it is the default choice;

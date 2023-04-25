@@ -106,7 +106,7 @@ def set_parameters_N2V(
             # >>> Logistic regression <<<
             "penalty": penalty,  # L2 regularization
             "fit_intercept": fit_intercept,   # whether to fit an intercept,
-            "solver": solver,  # !
+            "solver": solver,
             "class_weight": class_weight
         }
     }
@@ -126,7 +126,7 @@ def set_parameters_N2V(
 def set_parameters_LE(
         # LE
         dimensions=128,
-        maxiter=100,
+        maxiter=1000,
         tol=-8,
         # LogReg
         penalty=None,
@@ -143,7 +143,7 @@ def set_parameters_LE(
     dimensions : int, optional
         _description_, by default 128
     maxiter : int, optional
-        _description_, by default 100
+        _description_, by default 1000
     tol : int, optional
         _description_, by default -8
     penalty: dict, default='None'
@@ -187,7 +187,7 @@ def set_parameters_LE(
             # >>> LE embedding hyperparameters <<<
             "maxiter": maxiter,
             "tol": tol,
-            "NCV": 6,
+            "ncv": 6,  # ! Don't touch
         },
         "classifier": {
             # >>> Logistic regression <<<
@@ -216,5 +216,6 @@ def build_theta_range(experiment_setup):
     return linspace(
         experiment_setup["theta_min"],
         experiment_setup["theta_max"],
-        experiment_setup["theta_num"]
+        num=experiment_setup["theta_num"],
+        endpoint=True
     )

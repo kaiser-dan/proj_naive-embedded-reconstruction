@@ -5,15 +5,16 @@ additional post-processing for non-consecutive node ids.
 """
 # ============= SET-UP =================
 # --- Scientific computing ---
-import numpy as np
 
 # --- Network science ---
 import networkx as nx
 from node2vec import Node2Vec
 
+# --- Miscellaneous ---
+from embed.helpers import get_contiguous_vectors
 
 # ============= FUNCTIONS =================
-def N2V(graph, parameters, hyperparameters):
+def N2V(graph: nx.Graph, parameters: dict, hyperparameters: dict):
     """Embed `graph` using node2vec.
 
     Parameters
@@ -31,44 +32,42 @@ def N2V(graph, parameters, hyperparameters):
         Map of node ids to embedded vectors.
     """
     # Sample random walks
-    embedding_model = Node2Vec(graph, **{k: v for k, v in parameters.items() if k in ["dimensions","walk_length","num_walks","workers","quiet"]})
+    embedding_model = Node2Vec(graph, **parameters)
 
     # Embed walks with word2vec and retrieve model
-    embedding_model = embedding_model.fit()#**hyperparameters)
+    embedding_model = embedding_model.fit(**hyperparameters)
     embedding_model = embedding_model.wv
 
     # Retrieve resultant vectors
-    vectors = embedding_model.vectors
-
-    # Retrieve word2vec internal hash of node ids to vector indices
-    node_labels = embedding_model.index_to_key
-
-    # Map node ids into corresponding vector
-    # This accounts for graphs with non-consecutive node ids
-    embedding = {
-        int(node_label): vectors[node_index]
-        for node_index, node_label in enumerate(node_labels)
-    }
+    embedding = get_contiguous_vectors(embedding_model)
 
     return embedding
 
 
-def N2V_per_component(graph, parameters, hyperparameters):
+def N2V_per_component(graph: nx.Graph, parameters: dict, hyperparameters: dict):
+    # >>> Book-keeping >>>
     vectors_per_component = []  # list of vector embeddings, canonical ordering
     vectors = {}  # amalgamated mapping of nodes to their embedded vectors (by component)
+    # <<< Book-keeping <<<
+
+    # >>> Embedding >>>
     # Retrieve each component as a graph
-    component_subgraphs = sorted([ graph.subgraph(component).copy() for component in nx.connected_components(graph)], key=len,reverse=True)
+    component_subgraphs = sorted(
+        [
+            graph.subgraph(component).copy()
+            for component in nx.connected_components(graph)
+        ],
+        key=len,reverse=True
+    )
+
     # Embed each component by themselves
     for component_subgraph in component_subgraphs:
         vectors_per_component.append(N2V(component_subgraph, parameters, hyperparameters))
-    # #scale results
-    # average_norm_gcc=np.mean([np.linalg.norm(i) for i in vectors_per_component[0].values()])
-    # for n,component_subgraph in enumerate(vectors_per_component[1:]):
-    #     average_norm_multiplier=average_norm_gcc/np.mean([np.linalg.norm(i) for i in component_subgraph.values()])
-    #     for node in component_subgraph:
-    #         component_subgraph[node]=average_norm_multiplier*(component_subgraph[node])
+
     # Amalgamate results
     for component_vectors in vectors_per_component:
         for node, vector in component_vectors.items():
             vectors[node] = vector
+    # <<< Embedding <<<
+
     return vectors

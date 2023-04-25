@@ -132,7 +132,7 @@ def generate_configuration_model (degree):
 # --- LFR model ---
 # * NOTE: I swapped out `os.system` for the safer, more controllable `subprocess.check_call`
 # * This also allows me to suppress that super annoying LFR generation logging to stdout
-def LFR(n,t1,t2,mu,avg_k,max_k, ROOT="../../"):
+def LFR(n,t1,t2,mu,avg_k,max_k, ROOT):
     # Call LFR generation, wait for completion, propogate bash exit codes
     subprocess.call(
         " ".join([
@@ -144,8 +144,8 @@ def LFR(n,t1,t2,mu,avg_k,max_k, ROOT="../../"):
             "-t2", f"{t2}",
             "-mu", f"{mu}"
         ]),
-        # stdout=open(os.devnull, 'w'),
-        # stderr=open(os.devnull, 'w'),
+        stdout=open(os.devnull, 'w'),
+        stderr=open(os.devnull, 'w'),
         shell=True
     )
 
@@ -161,7 +161,7 @@ def LFR(n,t1,t2,mu,avg_k,max_k, ROOT="../../"):
     return g, coms
 
 
-def lfr_multiplex (N, tau1, tau2, mu, average_degree, max_degree, min_community, prob_relabel):
+def lfr_multiplex (N, tau1, tau2, mu, average_degree, max_degree, min_community, prob_relabel, ROOT="../../"):
 
     # >>> Book-keeping >>>
     groups = {}
@@ -169,7 +169,7 @@ def lfr_multiplex (N, tau1, tau2, mu, average_degree, max_degree, min_community,
 
     # >>> Experimental data sampling >>>
     # Generate LFR network (one layer)
-    H, comm = LFR(n=N, t1=tau1, t2=tau2, mu=mu, avg_k=average_degree, max_k = max_degree)#, min_community=min_community)
+    H, comm = LFR(n=N, t1=tau1, t2=tau2, mu=mu, avg_k=average_degree, max_k = max_degree, ROOT=ROOT)#, min_community=min_community)
 
     # Create list of communities
     for n in comm:

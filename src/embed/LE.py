@@ -2,6 +2,8 @@
 """
 # ============= SET-UP =================
 # --- Scientific computing ---
+from numpy import ndarray
+
 from scipy.sparse.linalg import eigsh  # eigensolver
 from scipy.linalg import eigh  # eigensolver for dense matrices
 
@@ -9,7 +11,7 @@ from scipy.linalg import eigh  # eigensolver for dense matrices
 import networkx as nx
 
 # --- Miscellaneous ---
-from embed.helpers import reindex_nodes, get_components
+from embed.helpers import reindex_nodes, get_components, matrix_to_dict
 
 # ============= FUNCTIONS =================
 # --- Driver ---
@@ -58,6 +60,17 @@ def LE(graph, parameters, hyperparameters, per_component: bool = False):
     # <<< Dispatch <<<
 
     # >>> Post-processing >>>
+    # Converting type
+    if type(eigenvectors) == ndarray:
+        eigenvectors = matrix_to_dict(eigenvectors)
+
+    # Remove first coordinate of eigenvectors
+    # Proportional to node degree
+    eigenvectors = {
+        node: vector[1:]
+        for node, vector in eigenvectors.items()
+    }
+
     # Apply node reindexing
     for node, node_adjusted in node_index.items():
         vectors[node] = eigenvectors[node_adjusted]

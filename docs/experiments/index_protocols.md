@@ -25,15 +25,6 @@ Experiments are considered "operative" if they are actively being developed or r
 
 Active experiments are settings currently being developed or analyzed.
 
-- ex32
-  - Associated experiments: ex31, 33
-  - Summary: Full factorial experiment on logistic regression features with configuration embedded distance form and adjusted renormalization procedure on synthetic networks.
-  - Details: LFR duplexes with varying $\mu$ and _prob_ parameters, fixed $\gamma$
-- ex33
-  - Associated experiments: ex31, ex32
-  - Summary: Full factorial experiment on logistic regression features with configuration embedded distance form and adjusted renormalization procedure on synthetic networks.
-  - Details: LFR duplexes with varying $\gamma$ , fixed _prob_ and $\mu$ parameters. Initially on smaller $N = 1000$ for speed.
-
 ## Completed
 
 Completed experiments are settings with generated, analyzed results that are without question.
@@ -90,12 +81,42 @@ Completed experiments are settings with generated, analyzed results that are wit
   - Date completed: 2023-04-02
   - Associated experiments: ex30, ex32
   - Summary: Full factorial experiment on logistic regression features with configuration embedded distance form and adjusted renormalization procedure.
+- ex32
+  - Date completed: 2023-04-17
+  - Associated experiments: ex31, 33
+  - Summary: Full factorial experiment on logistic regression features with configuration embedded distance form and adjusted renormalization procedure on synthetic networks.
+  - Details: LFR duplexes with varying $\mu$ and _prob_ parameters, fixed $\gamma$
+- ex33
+  - Date completed: 2023-04-17
+  - Associated experiments: ex31, ex32
+  - Summary: Full factorial experiment on logistic regression features with configuration embedded distance form and adjusted renormalization procedure on synthetic networks.
+  - Details: LFR duplexes with varying $\gamma$ , fixed _prob_ and $\mu$ parameters. Initially on smaller $N = 1000$ for speed.
+- ex34
+  - Date completed: 2023-04-19
+  - Associated experiments: ex35, ex36
+  - Summary: Recreate "D"-classifier with current code.
+- ex35
+  - Date completed: 2023-04-19
+  - Associated experiments: ex34, ex36
+  - Summary: Recreate "DC"-classifier with current code and N2V. 
+- ex36
+  - Date completed: 2023-04-19
+  - Associated experiments: ex34, ex35
+  - Summary: Explore effect of wallk_length on N2V reconstruction on synthetics.
 
 
 ## Planned
 
-Planned experiments are experiments that are planned or actively being designed, but before active development starts.
+Planned experiments are experiments that are planned or actively being designed, but before active computation begins.
 
+- ex37
+  - Summary: Full factorial N2V recreation on real extended corpus
+- ex38
+ - Summary: Full factorial N2V recreation on synthetic extended corpus
+- ex39
+  - Summary: Full factorial LE recreation on real extended corpus
+- ex40
+  - Summary: Full factorial LE recreation on synthetic extended corpus
 
 
 # Inoperative Experiments

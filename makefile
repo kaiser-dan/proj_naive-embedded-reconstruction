@@ -18,7 +18,7 @@ get_data_tarballs:
 		curl -o $(DIR_DATA)/arxiv.zip https://manliodedomenico.com/data/arXiv-Netscience_Multiplex_Coauthorship.zip |> /dev/null;\
 	else \
 		echo "'arxiv collaboration multiplex' already present!" ;\
-	fi 
+	fi
 	@echo "\n\nRetrieving 'celegans connectome'..."
 	@if ! [ -f $(DIR_DATA)/celegans.zip ] ;\
 	then \

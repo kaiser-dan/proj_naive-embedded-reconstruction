@@ -1,0 +1,49 @@
+##########################################
+######     Attribute information    ######
+##########################################
+N: 
+  _name: "size, number of nodes"
+  description: "Number of nodes of the multiplex network. Attribute only found on synthetic benchmarks where size is controlled in multiplex generation."
+  notes: [
+    "Listed value is the number of nodes in _one_ layer of the multiplex - the benchmark generation procedure assumes similar layers, hence, the total number of nodes if the layers are maximally disjoint is 2*N"
+  ]
+mu:
+  _name: "community strength, mixing paramater"
+  description:
+  notes:
+t1:
+  _name: "gamma, degree heterogeneity, degree distribution paramater"
+  description:
+  notes:
+t2:
+  _name: "community heterogeneity, community size distribution parameter"
+  description:
+  notes:
+kavg:
+  _name: "average degree"
+  description:
+  notes:
+kmin: 
+  _name: "minimum degree"
+  description:
+  notes:
+kmax: 
+  _name: "maximum degree, degree cutoff"
+  description:
+  notes:
+prob: 
+  _name: "probability, relabeling probability, shuffling, correlation"
+  description:
+  notes:
+sign: 
+  _name: "sign, shuffling direction"
+  description:
+  notes:
+name: 
+  _name: "system, system name"
+  description:
+  notes:
+layers:
+  _name: "layers, induced duplex, sub-multiplex"
+  description:
+  notes:

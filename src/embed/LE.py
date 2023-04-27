@@ -46,6 +46,15 @@ def LE(graph, parameters, hyperparameters, per_component: bool = False):
 
     node_index = reindex_nodes(graph)  # relabeling node labels -> contiguous node labels
 
+    # * >>> Adjust dimension for trivialities >>>
+    dim_adj = 1
+    num_components = len(list(nx.connected_components(graph)))
+    dim_adj += num_components
+
+    parameters["k"] = parameters["k"] + dim_adj
+    # * <<<
+
+
     vectors = dict()  # output struct, node label -> vector
     # <<< Book-keeping <<<
 
@@ -64,10 +73,10 @@ def LE(graph, parameters, hyperparameters, per_component: bool = False):
     if type(eigenvectors) == ndarray:
         eigenvectors = matrix_to_dict(eigenvectors)
 
-    # Remove first coordinate of eigenvectors
-    # Proportional to node degree
+    # Remove first coordinate of eigenvectors (proportional to node degree)
+    # Remove trivial coordinates proportional to number of components
     eigenvectors = {
-        node: vector[1:]
+        node: vector[dim_adj:]
         for node, vector in eigenvectors.items()
     }
 

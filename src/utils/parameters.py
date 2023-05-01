@@ -126,6 +126,7 @@ def set_parameters_N2V(
 def set_parameters_LE(
         # LE
         dimensions=128,
+        which="SM",
         maxiter=1000,
         tol=-8,
         # LogReg
@@ -142,6 +143,8 @@ def set_parameters_LE(
     ----------
     dimensions : int, optional
         _description_, by default 128
+    which: str, optional,
+        _description_, by default "SM"
     maxiter : int, optional
         _description_, by default 1000
     tol : int, optional
@@ -185,6 +188,7 @@ def set_parameters_LE(
     hyperparameters = {
         "embedding": {
             # >>> LE embedding hyperparameters <<<
+            "which": which,
             "maxiter": maxiter,
             "tol": tol,
             "ncv": 6,  # ! Don't touch

@@ -48,17 +48,9 @@ def LE(graph, parameters, hyperparameters, per_component: bool = False, nodelist
 
     node_index = reindex_nodes(graph)  # relabeling node labels -> contiguous node labels
 
-    # * >>> Adjust dimension for trivialities >>>
-    dim_adj = 1
-    #num_components = len(list(nx.connected_components(graph)))
-    #dim_adj += num_components
-
-    #parameters["k"] = parameters["k"] + dim_adj
-    # * <<<
-
     # Homogenize node sorting for adjacency/Laplacian matrices
     if nodelist is None:
-        noelist = sorted(graph.nodes())
+        nodelist = sorted(graph.nodes())
 
     vectors = dict()  # output struct, node label -> vector
     # <<< Book-keeping <<<
@@ -79,9 +71,8 @@ def LE(graph, parameters, hyperparameters, per_component: bool = False, nodelist
         eigenvectors = matrix_to_dict(eigenvectors)
 
     # Remove first coordinate of eigenvectors (proportional to node degree)
-    # Remove trivial coordinates proportional to number of components
     eigenvectors = {
-        node: vector[dim_adj:]
+        node: vector[1:]
         for node, vector in eigenvectors.items()
     }
 

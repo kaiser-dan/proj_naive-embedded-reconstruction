@@ -20,6 +20,7 @@ sys.path.append(f"{ROOT}/src/")
 
 from sampling.random import partial_information
 from embed.N2V import N2V
+from embed.LE import LE
 
 # ========== CLASSES ==========
 @dataclass
@@ -167,14 +168,16 @@ def get_preprocessed_data(
 
     return preprocessed_data
 
+
 def calculate_preprocessed_data(
         G, H,
         system, layers,
         theta, repetition,
         embedding_parameters, embedding_hyperparameters,
+        EMBEDDING="N2V",
         ROOT="../../data/input/preprocessed/"):
     filename = \
-        f"{ROOT}/cache_system={system}_layers={layers[0]}-{layers[1]}_theta={theta:.2f}_rep={repetition}.pkl"
+        f"{ROOT}/cache_system={system}_layers={layers[0]}-{layers[1]}_embedding={EMBEDDING}_theta={theta:.2f}_rep={repetition}.pkl"
 
     if os.path.isfile(filename):
         print(f"File already exists, skipping cache (if you want to force re-run, move or delete {filename} first)")
@@ -184,8 +187,13 @@ def calculate_preprocessed_data(
     R_G, R_H, unobserved_edges, observed_edges = partial_information(G, H, theta)
 
     # Embed remnants
-    E_G = N2V(R_G, embedding_parameters, embedding_hyperparameters)
-    E_H = N2V(R_H, embedding_parameters, embedding_hyperparameters)
+    if EMBEDDING == "N2V":
+        E_G = N2V(R_G, embedding_parameters, embedding_hyperparameters)
+        E_H = N2V(R_H, embedding_parameters, embedding_hyperparameters)
+    elif EMBEDDING == "LE":
+        nodelist = sorted(R_G.nodes())
+        E_G = LE(R_G, embedding_parameters, embedding_hyperparameters, nodelist=nodelist)
+        E_H = LE(R_H, embedding_parameters, embedding_hyperparameters, nodelist=nodelist)
 
     # Format class
     preprocessed_data = PreprocessedData(
@@ -203,6 +211,7 @@ def calculate_preprocessed_data(
 def _get_center_of_mass(vectors):
     return np.mean(vectors, axis=0)
 
+
 def _align_centers(U, V):
     ubar = _get_center_of_mass(U)
     vbar = _get_center_of_mass(V)
@@ -212,6 +221,7 @@ def _align_centers(U, V):
     Vprime = [v + delta for v in V]
 
     return Vprime
+
 
 def _center_to_origin(V):
     vbar = _get_center_of_mass(V)

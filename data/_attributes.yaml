@@ -1,7 +1,7 @@
 ##########################################
 ######     Attribute information    ######
 ##########################################
-N: 
+N:
   _name: "size, number of nodes"
   description: "Number of nodes of the multiplex network. Attribute only found on synthetic benchmarks where size is controlled in multiplex generation."
   notes: [
@@ -23,23 +23,23 @@ kavg:
   _name: "average degree"
   description:
   notes:
-kmin: 
+kmin:
   _name: "minimum degree"
   description:
   notes:
-kmax: 
+kmax:
   _name: "maximum degree, degree cutoff"
   description:
   notes:
-prob: 
+prob:
   _name: "probability, relabeling probability, shuffling, correlation"
   description:
   notes:
-sign: 
+sign:
   _name: "sign, shuffling direction"
   description:
   notes:
-name: 
+name:
   _name: "system, system name"
   description:
   notes:

@@ -66,9 +66,9 @@ def main():
     # Shared system setup
     systems = [
         ("arxiv", 2, 6, preprocessing.duplex_network(dataio.read_file(dataio.get_input_filehandle("arxiv", ROOT=ROOT).format(system="arxiv")), *[2, 6])),
-        ("celegans", 1, 2, preprocessing.duplex_network(dataio.read_file(dataio.get_input_filehandle("celegans", ROOT=ROOT).format(system="celegans")), *[1, 2])),
+        # ("celegans", 1, 2, preprocessing.duplex_network(dataio.read_file(dataio.get_input_filehandle("celegans", ROOT=ROOT).format(system="celegans")), *[1, 2])),
         ("drosophila", 1, 2, preprocessing.duplex_network(dataio.read_file(dataio.get_input_filehandle("drosophila", ROOT=ROOT).format(system="drosophila")), *[1, 2])),
-        ("london", 1, 2, preprocessing.duplex_network(dataio.read_file(dataio.get_input_filehandle("london", ROOT=ROOT).format(system="london")), *[1, 2]))
+        # ("london", 1, 2, preprocessing.duplex_network(dataio.read_file(dataio.get_input_filehandle("london", ROOT=ROOT).format(system="london")), *[1, 2]))
     ]
     # <<< SETUP <<<
 
@@ -83,7 +83,7 @@ def main():
     if args.EMBEDDING == "N2V":
         raise NotImplementedError("N2V real system caching has not been refactored in this script yet!")
     elif args.EMBEDDING == "LE":
-        parameters, hyperparameters, _ = params.set_parameters_LE(dimensions=args.dimensions, maxiter=100_000)
+        parameters, hyperparameters, _ = params.set_parameters_LE(dimensions=args.dimensions, maxiter=100_000, tol=-4)
 
     for system_, theta, rep in tqdm(grid, desc="Caching observational data..."):
         system, l1, l2, (G, H) = system_

@@ -26,6 +26,7 @@ from src.utils import parameters as params
 
 # --- Miscellaneous ---
 from tqdm import tqdm
+from scipy.sparse.linalg._eigen.arpack.arpack import ArpackNoConvergence
 
 # --- Globals ---
 class Config(float, Enum):
@@ -138,18 +139,21 @@ def main():
     if args.EMBEDDING == "N2V":
         raise NotImplementedError("N2V LFR caching has not been refactored in this script yet!")
     elif args.EMBEDDING == "LE":
-        parameters, hyperparameters, _ = params.set_parameters_LE(dimensions=args.dimensions)
+        parameters, hyperparameters, _ = params.set_parameters_LE(dimensions=args.dimensions, maxiter=1_000_000)
 
-        # TODO: Check if cache already exists
         for theta, rep in tqdm(grid, desc="Caching system across theta/rep"):
-            observations.calculate_preprocessed_data(
-                *remnants,
-                filename, [1, 2],
-                theta, rep,
-                parameters, hyperparameters["embedding"],
-                args.EMBEDDING,
-                ROOT="preprocessed/"
-            )
+            try:
+                observations.calculate_preprocessed_data(
+                    *remnants,
+                    filename, [1, 2],
+                    theta, rep,
+                    parameters, hyperparameters["embedding"],
+                    args.EMBEDDING,
+                    ROOT="preprocessed/"
+                )
+            except ArpackNoConvergence as err:
+                sys.stderr.write(str(err)+"\n")
+
     # <<< CACHING EMBEDDINGS <<<
 
     print("Finished caching! Have a nice day.")

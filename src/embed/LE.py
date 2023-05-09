@@ -15,7 +15,11 @@ from embed.helpers import reindex_nodes, get_components, matrix_to_dict
 
 # ============= FUNCTIONS =================
 # --- Driver ---
-def LE(graph, parameters, hyperparameters, per_component: bool = False, nodelist: [list|None] = None):
+def LE(
+        graph: nx.Graph,
+        parameters: dict, hyperparameters: dict,
+        per_component: bool = False,
+        nodelist: list|None = None):
     """Embed `graph` using Laplacian eigenmaps.
 
     Parameters
@@ -26,9 +30,9 @@ def LE(graph, parameters, hyperparameters, per_component: bool = False, nodelist
         Keyword arguments for LE parameter selection.
     hyperparameters : dict
         Keyword arguments for ARPACK convergence parameters.
-    per_component: bool. optional
+    per_component: bool, optional
         Embed each graph component separately, by default False.
-    nodelist: [list|None], optional
+    nodelist: list|None, optional
         Node order for normalized laplacian matrix presentation, by default sorted index.
 
     Returns
@@ -38,7 +42,6 @@ def LE(graph, parameters, hyperparameters, per_component: bool = False, nodelist
 
     """
     # >>> Book-keeping >>>
-    # TODO Fill in notes
     _dispatch = _LE  # default embedding sub-method
 
     # ! >>> Temp NCV fix >>>
@@ -57,7 +60,7 @@ def LE(graph, parameters, hyperparameters, per_component: bool = False, nodelist
 
     # >>> Dispatch >>>
     if per_component:
-        return _LE_per_component(graph, parameters, hyperparameters)
+        return _LE_per_component(graph, parameters, hyperparameters, nodelist)
 
     if parameters["k"] >= graph.number_of_nodes():
         _dispatch = _LE_dense
@@ -108,8 +111,7 @@ def _LE_dense(graph, parameters, hyperparameters, nodelist):
     return eigenvectors
 
 
-# TODO: Add functionality for nodelist inheritance and subsetting
-def _LE_per_component(graph, parameters, hyperparameters):
+def _LE_per_component(graph, parameters, hyperparameters, nodelist):
     # >>> Book-keeping >>>
     vectors_per_component = []  # list of vector embeddings, canonical ordering
     vectors = {}  # amalgamated mapping of nodes to their embedded vectors (by component)
@@ -120,8 +122,9 @@ def _LE_per_component(graph, parameters, hyperparameters):
 
     # Embed each component by themselves
     for component_subgraph in component_subgraphs:
+        component_nodelist = [node for node in nodelist if node in component_subgraph.nodes()]
         vectors_per_component.append(
-            LE(component_subgraph, parameters, hyperparameters)
+            LE(component_subgraph, parameters, hyperparameters, component_nodelist)
         )
 
     # Amalgamate results

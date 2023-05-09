@@ -14,7 +14,10 @@ from node2vec import Node2Vec
 from embed.helpers import get_contiguous_vectors
 
 # ============= FUNCTIONS =================
-def N2V(graph: nx.Graph, parameters: dict, hyperparameters: dict):
+def N2V(
+        graph: nx.Graph,
+        parameters: dict, hyperparameters: dict,
+        per_component: bool = False):
     """Embed `graph` using node2vec.
 
     Parameters
@@ -25,12 +28,20 @@ def N2V(graph: nx.Graph, parameters: dict, hyperparameters: dict):
         Keyword arguments for node2vec walk generation.
     hyperparameters : dict
         Keyword arguments for word2vec fitting on node2vec-generated walks.
+    per_component: bool, optional
+        Embed each graph component separately, by default False.
 
     Returns
     -------
     dict
         Map of node ids to embedded vectors.
     """
+    # >>> Dispatch >>>
+    if per_component:
+        return N2V_per_component(graph, parameters, hyperparameters)
+
+    # <<< Dispatch <<<
+
     # Sample random walks
     embedding_model = Node2Vec(graph, **parameters)
 

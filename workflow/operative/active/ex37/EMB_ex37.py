@@ -264,16 +264,14 @@ if __name__ == "__main__":
     # Metadata
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
-            PROJECT_ID="EMB_ex33",
-            CURRENT_VERSION="v2.1",
+            PROJECT_ID="EMB_ex37",
+            CURRENT_VERSION="v1.0",
             ROOT=ROOT
         )
 
     # Parameter grid
     system_layer_sets = {
         # & Synthetic systems
-        (f"LFR_gamma-{gamma}", 1, 2)
-        for gamma in [2.1, 2.5, 2.9, 3.5]
     }
     feature_sets = (
         # & Single features

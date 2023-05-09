@@ -110,13 +110,11 @@ Completed experiments are settings with generated, analyzed results that are wit
 Planned experiments are experiments that are planned or actively being designed, but before active computation begins.
 
 - ex37
-  - Summary: Full factorial N2V recreation on real extended corpus
+  - Summary: Per-component N2V on LFRs
 - ex38
- - Summary: Full factorial N2V recreation on synthetic extended corpus
+  - Summary: Per-component LE on LFRs
 - ex39
-  - Summary: Full factorial LE recreation on real extended corpus
-- ex40
-  - Summary: Full factorial LE recreation on synthetic extended corpus
+  - Summary: Full factorial N2V recreation on real extended corpus
 
 
 # Inoperative Experiments

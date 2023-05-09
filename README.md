@@ -57,7 +57,30 @@ This will install all necessary packages for you to be able to run the scripts a
 
 ## Quick Start
 
-[Describe makefile and reproduction script]
+In the interest of reproducibility and scientific rigor, we have prepared a `makefile` that will reproduce the main analyses present in the accompanying manuscript. Broadly, this `makefile` will do the following:
+1. Setup python environment.
+2. Retrieve and prepare the relevant multiplex datasets from online archives
+3. Run the main experiments on these data and save the results to disk
+4. Prepare the figures as they appear in the manuscript.
+
+This `makefile` also contains rules for cleaning downloaded and temporary files as well as retrieving binaries for sampling LFR benchmarks.
+
+To use this `makefile`, which requires `GNUMake`, simply run
+  ```
+  $> make
+  ```
+to install the necessary packages to use our source code.
+
+Reproducing our experiments can be done with
+  ```
+  $> make reproduce
+  ```
+
+
+Finally, cleaning all downloaded/generated files can be accomplished with
+  ```
+  $> make clean
+  ```
 
 # Usage
 

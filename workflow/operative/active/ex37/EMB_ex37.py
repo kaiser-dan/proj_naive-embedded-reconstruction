@@ -26,7 +26,7 @@ import pandas as pd
 # --- Project source ---
 # PATH adjustments
 ROOT = "../../../../"
-# ROOT = "./"
+sys.path.append(f"{ROOT}/")
 sys.path.append(f"{ROOT}/src/")
 
 # Primary modules
@@ -36,21 +36,50 @@ from data import postprocessing
 from data import observations
 
 ## Classifiers
-from classifiers import features  # feature set helpers
-from classifiers import logreg  # logistic regression
+from src.classifiers import features  # feature set helpers
+from src.classifiers import logreg  # logistic regression
 
 ## Utilities
-from utils import parameters as params  # helpers for experiment parameters
+from src.utils import parameters as params  # helpers for experiment parameters
 
 # --- Miscellaneous ---
-from time import perf_counter, time
+import logging
+from datetime import datetime  # logging tag
+from time import perf_counter, time  # simple pseudo-profiling
 from tqdm.auto import tqdm  # progress bars
-from tabulate import tabulate
 
 import warnings
 warnings.filterwarnings("ignore")  # remove sklearn depreciation warnings
 
 # ========== FUNCTIONS ==========
+def _start_logger(
+        logfile=f"log_{datetime.today().strftime('%Y%m%d')}.log",
+        logmode="w",
+        loglevel=logging.INFO,
+        logformat="%(asctime)s - %(name)s - %(levelname)s - %(message)s"):
+    # https://docs.python.org/3/howto/logging.html#advanced-logging-tutorial
+    # Create logger
+    logger = logging.getLogger(__name__)
+    logger.setLevel(loglevel)
+
+    # Create console handler and set level to debug
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+
+    # Create formatter
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    # Add formatter to console handler
+    ch.setFormatter(formatter)
+
+    # Add console handler to logger
+    logger.addHandler(ch)
+
+    logger.info("Started logging")
+
+    return logger
+
+
 def main(
         system_layer_sets: set[tuple[str, int, int]],
         feature_sets: set[set[str]],

@@ -24,9 +24,9 @@
 - Researchers: Daniel Kaiser
 - Version history:
 
-| Version  | Date Designed | Date Conducted | Date Analyzed | Notes                                                                                         |
-| -------- | ------------- | -------------- | ------------- | --------------------------------------------------------------------------------------------- |
-| **v1.0** | 2023-05-09    | 2023-05-09     | 2023-05-09    | N2V-PC on LFRs |
+| Version  | Date Designed | Date Conducted | Date Analyzed | Notes          |
+| -------- | ------------- | -------------- | ------------- | -------------- |
+| **v1.0** | 2023-05-09    |                |     | N2V-PC on LFRs |
 
 
 ## Relevant scripts

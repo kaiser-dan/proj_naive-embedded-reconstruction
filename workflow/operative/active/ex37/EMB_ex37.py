@@ -221,7 +221,7 @@ def experiment(
         logging.error(err)
         logging.info("LinAlgError detected, returning empty record")
         return record
-    except PerfectSeparationError:
+    except PerfectSeparationError as err:
         # ! One independent variable is perfect classifier (a good problem to have)
         logging.error(err)
         logging.info("PerfectSeparabilityError detected, returning empty record")
@@ -292,20 +292,21 @@ if __name__ == "__main__":
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
             PROJECT_ID="EMB_ex37",
-            CURRENT_VERSION="v1.0",
-            ROOT=ROOT
+            CURRENT_VERSION="v1.1",
+            ROOT=ROOT,
+            DIR="data/output/processed/dataframes/"
         )
 
     # Parameter grid
-    sysname="cache_system=LFR_PC-{PC}_N-1000_mu-0.1_t1-2.1_t2-1.0_kavg-6.0_kmax-31_prob-1.0_dimensions-50_layers=1-2_embedding=LE_theta={theta}_rep=1.pkl"
+    sysname="LFR_PC-{PC}_N-500_mu-0.1_t1-2.1_t2-1.0_kavg-6.0_kmax-31_prob-1.0_dimensions-128walklength-30"
     system_layer_sets = {
         # & Synthetic systems
         (
-            f"LFR_PC-{pc}_N-1000_mu-0.1_t1-2.1_t2-1.0_kavg-6.0_kmax-31_prob-1.0_dimensions-50",
+            sysname.format(PC=pc),
             1,
-            "2_embedding=LE"
+            "2_embedding=N2V"
         )
-        for pc in [True, False]
+        for pc in [True]
     }
     feature_sets = (
         # & Single features

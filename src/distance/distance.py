@@ -1,6 +1,9 @@
 """Project source code for calculating distances between vectors.
 """
 # ============= SET-UP =================
+# --- Standard library ---
+import sys
+
 # --- Scientific computations ---
 import numpy as np
 
@@ -10,7 +13,19 @@ from networkx import connected_components
 
 # ============= FUNCTIONS =================
 # --- Metrics ---
-def euclidean_distance(x, y): return np.linalg.norm(x - y)
+def euclidean_distance(x, y):
+    try:
+        distance = np.linalg.norm(x - y)
+    except ValueError as err:
+        sys.stderr.write(str(err)+"\n")
+        print("Dimension mismatch, projecting to common dimension")
+
+        dim = min(len(x), len(y))
+        x = x[:dim]
+        y = y[:dim]
+        distance = np.linalg.norm(x - y)
+    finally:
+        return distance
 def cosine_similarity(x, y): return np.dot(x, y) / (np.linalg.norm(x) * np.linalg.norm(y))
 def poincare_disk_distance(x, y): raise NotImplementedError("Hyperbolic distance not yet implemented!")
 

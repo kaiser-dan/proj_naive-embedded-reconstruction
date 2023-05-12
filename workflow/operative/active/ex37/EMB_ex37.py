@@ -8,13 +8,13 @@ Broadly speaking, we have the following "workflow":
 # ========== SET-UP ==========
 # --- Standard library ---
 import sys
+from datetime import datetime
 from itertools import product
 
 # --- Scientific computing ---
 import numpy as np
 from sklearn.metrics import accuracy_score, roc_auc_score, precision_recall_curve, auc
 
-from patsy import dmatrices
 import statsmodels.api as sm
 from statsmodels.tools.sm_exceptions import PerfectSeparationError
 
@@ -37,7 +37,7 @@ from data import observations
 
 ## Classifiers
 from src.classifiers import features  # feature set helpers
-from src.classifiers import logreg  # logistic regression
+# from src.classifiers import logreg  # logistic regression
 
 ## Utilities
 from src.utils import parameters as params  # helpers for experiment parameters
@@ -59,7 +59,7 @@ def _start_logger(
         logformat="%(asctime)s - %(name)s - %(levelname)s - %(message)s"):
     # https://docs.python.org/3/howto/logging.html#advanced-logging-tutorial
     # Create logger
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger(logfile)
     logger.setLevel(loglevel)
 
     # Create console handler and set level to debug
@@ -67,7 +67,7 @@ def _start_logger(
     ch.setLevel(logging.DEBUG)
 
     # Create formatter
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter(logformat)
 
     # Add formatter to console handler
     ch.setFormatter(formatter)
@@ -87,6 +87,8 @@ def main(
         experiment_setup: dict[str, object],
         output_filehandle: str = None) -> pd.DataFrame:
     # >>> Book-keeping >>>
+    _start_logger()
+
     # Prepare recordbook
     records = []
     # <<< Book-keeping <<<
@@ -101,14 +103,13 @@ def main(
     # Run experiment
     for parameter_grid_vertex in tqdm(parameter_grid, desc="Experiment"):
         system_layers, feature_set, theta, repetition = parameter_grid_vertex
-        for penalty in [0.1]:
-            record = experiment(
-                system_layers, feature_set,
-                theta, repetition,
-                hyperparameters,
-                penalty
-            )
-            records.append(record)
+        record = experiment(
+            system_layers, feature_set,
+            theta, repetition,
+            hyperparameters,
+            penalty=0.1
+        )
+        records.append(record)
     # <<< Experiment <<<
 
     # >>> Post-processing >>>
@@ -210,23 +211,20 @@ def experiment(
     try:
         model = sm.Logit(y, X)
         results = model.fit()
-    except ValueError:
+    except ValueError as err:
         # ! Should be fixed, happens in extreme London cases (removed from caches)
-        sys.stderr.write("ValueError")
-        with open("debug-value.log", "a") as fh:
-            print(record, file=fh)
+        logging.error(err)
+        logging.info("ValueError detected, returning empty record")
         return record
-    except np.linalg.LinAlgError:
+    except np.linalg.LinAlgError as err:
         # ! Convergence issues, may be amenable to hyperparameter-based fix?
-        sys.stderr.write("np.linalg.LinAlgError")
-        with open("debug-linalg.log", "a") as fh:
-            print(record, file=fh)
+        logging.error(err)
+        logging.info("LinAlgError detected, returning empty record")
         return record
     except PerfectSeparationError:
         # ! One independent variable is perfect classifier (a good problem to have)
-        sys.stderr.write("Perfect Separability!")
-        with open("debug-PSE.log", "a") as fh:
-            print(record, file=fh)
+        logging.error(err)
+        logging.info("PerfectSeparabilityError detected, returning empty record")
         return record
 
     intercept = list(results.params)[0]
@@ -299,8 +297,15 @@ if __name__ == "__main__":
         )
 
     # Parameter grid
+    sysname="cache_system=LFR_PC-{PC}_N-1000_mu-0.1_t1-2.1_t2-1.0_kavg-6.0_kmax-31_prob-1.0_dimensions-50_layers=1-2_embedding=LE_theta={theta}_rep=1.pkl"
     system_layer_sets = {
         # & Synthetic systems
+        (
+            f"LFR_PC-{pc}_N-1000_mu-0.1_t1-2.1_t2-1.0_kavg-6.0_kmax-31_prob-1.0_dimensions-50",
+            1,
+            "2_embedding=LE"
+        )
+        for pc in [True, False]
     }
     feature_sets = (
         # & Single features

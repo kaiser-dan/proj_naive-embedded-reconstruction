@@ -126,6 +126,7 @@ def set_parameters_N2V(
 def set_parameters_LE(
         # LE
         dimensions=128,
+        per_component=False,
         which="SM",
         maxiter=1000,
         tol=-8,
@@ -186,15 +187,15 @@ def set_parameters_LE(
     }
 
     hyperparameters = {
+        # >>> LE embedding hyperparameters <<<
         "embedding": {
-            # >>> LE embedding hyperparameters <<<
             "which": which,
             "maxiter": maxiter,
             "tol": tol,
             "ncv": 6,  # ! Don't touch
         },
+        # >>> Logistic regression <<<
         "classifier": {
-            # >>> Logistic regression <<<
             "penalty": penalty,  # L2 regularization
             "fit_intercept": fit_intercept,   # whether to fit an intercept
             "random_seed": 37,  # random seed

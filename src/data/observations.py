@@ -174,6 +174,7 @@ def calculate_preprocessed_data(
         system, layers,
         theta, repetition,
         embedding_parameters, embedding_hyperparameters,
+        per_component=False,
         EMBEDDING="N2V",
         ROOT="../../data/input/preprocessed/"):
     filename = \
@@ -188,12 +189,12 @@ def calculate_preprocessed_data(
 
     # Embed remnants
     if EMBEDDING == "N2V":
-        E_G = N2V(R_G, embedding_parameters, embedding_hyperparameters)
-        E_H = N2V(R_H, embedding_parameters, embedding_hyperparameters)
+        E_G = N2V(R_G, embedding_parameters, embedding_hyperparameters, per_component=per_component)
+        E_H = N2V(R_H, embedding_parameters, embedding_hyperparameters, per_component=per_component)
     elif EMBEDDING == "LE":
         nodelist = sorted(R_G.nodes())
-        E_G = LE(R_G, embedding_parameters, embedding_hyperparameters, nodelist=nodelist)
-        E_H = LE(R_H, embedding_parameters, embedding_hyperparameters, nodelist=nodelist)
+        E_G = LE(R_G, embedding_parameters, embedding_hyperparameters, nodelist=nodelist, per_component=per_component)
+        E_H = LE(R_H, embedding_parameters, embedding_hyperparameters, nodelist=nodelist, per_component=per_component)
 
     # Format class
     preprocessed_data = PreprocessedData(

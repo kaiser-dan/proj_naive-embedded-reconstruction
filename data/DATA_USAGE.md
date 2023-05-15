@@ -8,15 +8,36 @@ Included in this document are items such as, but not limited to,
 - Getting metadata
 
 
-This document was originally created by Daniel Kaiser on 2023-04-27. Updates to this document are not tracked explicitly.
+This document was originally created by [Daniel Kaiser](mailto:kaiserd@iu.edu) on 2023-04-27. Updates to this document are not tracked explicitly.
 
 ---
 
 # Table of Contents
-[TABLE OF CONTENTS HERE]
+
+- [Data Usage Guide](#data-usage-guide)
+- [Table of Contents](#table-of-contents)
+- [The Data Directory](#the-data-directory)
+  - [Tree structure](#tree-structure)
+  - [Naming conventions](#naming-conventions)
+  - [Large files](#large-files)
+- [Data Index and Metadata](#data-index-and-metadata)
+  - [Index](#index)
+  - [Metadata](#metadata)
+  - [More on naming conventions](#more-on-naming-conventions)
+  - [Searching data](#searching-data)
+- [Helper Scripts](#helper-scripts)
+  - [Search and retrieval](#search-and-retrieval)
+  - [Creating your own scripts](#creating-your-own-scripts)
+
 
 # The Data Directory
 ## Tree structure
+If you have the `tree` bash utility installed, you can see the directory structure of the `data/` directory by running the following command inside a terminal
+```bash
+tree -d data/
+```
+
+Run
 
 ## Naming conventions
 

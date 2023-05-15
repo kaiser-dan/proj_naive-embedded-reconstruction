@@ -124,7 +124,7 @@ def _LE_per_component(graph, parameters, hyperparameters, nodelist):
     for component_subgraph in component_subgraphs:
         component_nodelist = [node for node in nodelist if node in component_subgraph.nodes()]
         vectors_per_component.append(
-            LE(component_subgraph, parameters, hyperparameters, component_nodelist)
+            LE(component_subgraph, parameters, hyperparameters, nodelist=component_nodelist)
         )
 
     # Amalgamate results

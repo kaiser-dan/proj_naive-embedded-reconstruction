@@ -31,7 +31,7 @@ from scipy.sparse.linalg._eigen.arpack.arpack import ArpackNoConvergence
 # --- Globals ---
 class Config(float, Enum):
     # Observations
-    REPS = 1.0  # convert to int
+    REPS = 5.0  # convert to int
     THETA_MIN = 0.05
     THETA_MAX = 0.95
     THETA_NUM = 37.0  # convert to int
@@ -39,7 +39,9 @@ class Config(float, Enum):
 
 # ================ FUNCTIONS ======================
 def _setup_argument_parser():
-    parser = argparse.ArgumentParser(description='Cache LFR benchmark observational data.')
+    parser = argparse.ArgumentParser(
+        description='Cache LFR benchmark observational data.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
         "EMBEDDING",
@@ -53,6 +55,10 @@ def _setup_argument_parser():
         "-w", "--walklength", dest="walk_length",
         type=int, default=30,
         help="N2V Walk Length.")
+    parser.add_argument(
+        "--percomponent",
+        action="store_true",
+        help="Flag indicating component-wise embedding.")
     parser.add_argument(
         "-N", "--nodes", dest="N",
         type=int, default=1000,
@@ -96,17 +102,21 @@ def main():
     args = parser.parse_args()
 
     # Shared filename setup
-    filename = "LFR_N-{}_mu-{}_t1-{}_t2-{}_kavg-{}_kmax-{}_prob-{}_dimensions-{}"
-    filename = filename.format(*[args.N, args.MU, args.T1, args.T2, args.AVG_K, args.MAX_K, args.PROB, args.dimensions])
+    filename = "LFR_PC-{}_N-{}_mu-{}_t1-{}_t2-{}_kavg-{}_kmax-{}_prob-{}_dimensions-{}"
+    filename = filename.format(*[args.percomponent, args.N, args.MU, args.T1, args.T2, args.AVG_K, args.MAX_K, args.PROB, args.dimensions])
+    if args.EMBEDDING == "N2V":
+        filename += f"walklength-{args.walk_length}"
     # <<< SETUP <<<
 
     # >>> SAMPLING MODEL >>>
     # Generate network
     print("Generating benchmark topologies...")
     try:
-        filepath = f"raw/synthetic/{filename}.edgelist"
+        # Check if network already exists so we don't waste time
+        filepath = f"preprocessed/edgelists/{filename}.edgelist"
         if os.path.isfile(filepath):
-            raise FileExistsError(f"{filepath} already exists!")
+            raise FileExistsError
+        # Generate network if it does not exist
         else:
             remnants = preprocessing.duplex_network(
                 benchmarks.lfr_multiplex(
@@ -120,8 +130,9 @@ def main():
                 )
             with open(filepath, "wb") as _fh:
                 pickle.dump(remnants, _fh, pickle.HIGHEST_PROTOCOL)
+    # If network exists, bring it into memory and move to next step with a note
     except FileExistsError as err:
-        print(err, "Continuing to next step.")
+        print(f"{filepath} already exists! Continuing to next step.")
         with open(filepath, "rb") as _fh:
             remnants = pickle.load(_fh)
     finally:
@@ -137,26 +148,32 @@ def main():
 
     # Select embedder and parameters
     if args.EMBEDDING == "N2V":
-        raise NotImplementedError("N2V LFR caching has not been refactored in this script yet!")
+        parameters, hyperparameters, _ = params.set_parameters_N2V(dimensions=args.dimensions, walk_length=args.walk_length)
+
     elif args.EMBEDDING == "LE":
         parameters, hyperparameters, _ = params.set_parameters_LE(dimensions=args.dimensions, maxiter=1_000_000)
 
-        for theta, rep in tqdm(grid, desc="Caching system across theta/rep"):
-            try:
-                observations.calculate_preprocessed_data(
-                    *remnants,
-                    filename, [1, 2],
-                    theta, rep,
-                    parameters, hyperparameters["embedding"],
-                    args.EMBEDDING,
-                    ROOT="preprocessed/"
-                )
-            except ArpackNoConvergence as err:
-                sys.stderr.write(str(err)+"\n")
-
+    # Apply caching
+    for theta, rep in tqdm(grid, desc="Caching system across theta/rep"):
+        try:
+            observations.calculate_preprocessed_data(
+                *remnants,
+                filename, [1, 2],
+                theta, rep,
+                parameters, hyperparameters["embedding"],
+                args.percomponent,
+                args.EMBEDDING,
+                ROOT="preprocessed/"
+            )
+        except ArpackNoConvergence as err:  # LE convergence errors
+            sys.stderr.write(str(err)+"\n")
+        except Exception as err:
+            sys.stderr.write("UNCAUGHT EXCEPTION!\n")
+            raise err
     # <<< CACHING EMBEDDINGS <<<
 
     print("Finished caching! Have a nice day.")
+    return
 
 
 # ================ MAIN ======================

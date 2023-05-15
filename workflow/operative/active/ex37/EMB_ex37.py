@@ -8,13 +8,13 @@ Broadly speaking, we have the following "workflow":
 # ========== SET-UP ==========
 # --- Standard library ---
 import sys
+from datetime import datetime
 from itertools import product
 
 # --- Scientific computing ---
 import numpy as np
 from sklearn.metrics import accuracy_score, roc_auc_score, precision_recall_curve, auc
 
-from patsy import dmatrices
 import statsmodels.api as sm
 from statsmodels.tools.sm_exceptions import PerfectSeparationError
 
@@ -26,7 +26,7 @@ import pandas as pd
 # --- Project source ---
 # PATH adjustments
 ROOT = "../../../../"
-# ROOT = "./"
+sys.path.append(f"{ROOT}/")
 sys.path.append(f"{ROOT}/src/")
 
 # Primary modules
@@ -36,21 +36,50 @@ from data import postprocessing
 from data import observations
 
 ## Classifiers
-from classifiers import features  # feature set helpers
-from classifiers import logreg  # logistic regression
+from src.classifiers import features  # feature set helpers
+# from src.classifiers import logreg  # logistic regression
 
 ## Utilities
-from utils import parameters as params  # helpers for experiment parameters
+from src.utils import parameters as params  # helpers for experiment parameters
 
 # --- Miscellaneous ---
-from time import perf_counter, time
+import logging
+from datetime import datetime  # logging tag
+from time import perf_counter, time  # simple pseudo-profiling
 from tqdm.auto import tqdm  # progress bars
-from tabulate import tabulate
 
 import warnings
 warnings.filterwarnings("ignore")  # remove sklearn depreciation warnings
 
 # ========== FUNCTIONS ==========
+def _start_logger(
+        logfile=f"log_{datetime.today().strftime('%Y%m%d')}.log",
+        logmode="w",
+        loglevel=logging.INFO,
+        logformat="%(asctime)s - %(name)s - %(levelname)s - %(message)s"):
+    # https://docs.python.org/3/howto/logging.html#advanced-logging-tutorial
+    # Create logger
+    logger = logging.getLogger(logfile)
+    logger.setLevel(loglevel)
+
+    # Create console handler and set level to debug
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+
+    # Create formatter
+    formatter = logging.Formatter(logformat)
+
+    # Add formatter to console handler
+    ch.setFormatter(formatter)
+
+    # Add console handler to logger
+    logger.addHandler(ch)
+
+    logger.info("Started logging")
+
+    return logger
+
+
 def main(
         system_layer_sets: set[tuple[str, int, int]],
         feature_sets: set[set[str]],
@@ -58,6 +87,8 @@ def main(
         experiment_setup: dict[str, object],
         output_filehandle: str = None) -> pd.DataFrame:
     # >>> Book-keeping >>>
+    _start_logger()
+
     # Prepare recordbook
     records = []
     # <<< Book-keeping <<<
@@ -72,14 +103,13 @@ def main(
     # Run experiment
     for parameter_grid_vertex in tqdm(parameter_grid, desc="Experiment"):
         system_layers, feature_set, theta, repetition = parameter_grid_vertex
-        for penalty in [0.1]:
-            record = experiment(
-                system_layers, feature_set,
-                theta, repetition,
-                hyperparameters,
-                penalty
-            )
-            records.append(record)
+        record = experiment(
+            system_layers, feature_set,
+            theta, repetition,
+            hyperparameters,
+            penalty=0.1
+        )
+        records.append(record)
     # <<< Experiment <<<
 
     # >>> Post-processing >>>
@@ -181,23 +211,20 @@ def experiment(
     try:
         model = sm.Logit(y, X)
         results = model.fit()
-    except ValueError:
+    except ValueError as err:
         # ! Should be fixed, happens in extreme London cases (removed from caches)
-        sys.stderr.write("ValueError")
-        with open("debug-value.log", "a") as fh:
-            print(record, file=fh)
+        logging.error(err)
+        logging.info("ValueError detected, returning empty record")
         return record
-    except np.linalg.LinAlgError:
+    except np.linalg.LinAlgError as err:
         # ! Convergence issues, may be amenable to hyperparameter-based fix?
-        sys.stderr.write("np.linalg.LinAlgError")
-        with open("debug-linalg.log", "a") as fh:
-            print(record, file=fh)
+        logging.error(err)
+        logging.info("LinAlgError detected, returning empty record")
         return record
-    except PerfectSeparationError:
+    except PerfectSeparationError as err:
         # ! One independent variable is perfect classifier (a good problem to have)
-        sys.stderr.write("Perfect Separability!")
-        with open("debug-PSE.log", "a") as fh:
-            print(record, file=fh)
+        logging.error(err)
+        logging.info("PerfectSeparabilityError detected, returning empty record")
         return record
 
     intercept = list(results.params)[0]
@@ -264,16 +291,22 @@ if __name__ == "__main__":
     # Metadata
     output_filehandle, TAG = \
         dataio.get_output_filehandle(
-            PROJECT_ID="EMB_ex33",
-            CURRENT_VERSION="v2.1",
-            ROOT=ROOT
+            PROJECT_ID="EMB_ex37",
+            CURRENT_VERSION="v1.1",
+            ROOT=ROOT,
+            DIR="data/output/processed/dataframes/"
         )
 
     # Parameter grid
+    sysname="LFR_PC-{PC}_N-500_mu-0.1_t1-2.1_t2-1.0_kavg-6.0_kmax-31_prob-1.0_dimensions-128walklength-30"
     system_layer_sets = {
         # & Synthetic systems
-        (f"LFR_gamma-{gamma}", 1, 2)
-        for gamma in [2.1, 2.5, 2.9, 3.5]
+        (
+            sysname.format(PC=pc),
+            1,
+            "2_embedding=N2V"
+        )
+        for pc in [True]
     }
     feature_sets = (
         # & Single features

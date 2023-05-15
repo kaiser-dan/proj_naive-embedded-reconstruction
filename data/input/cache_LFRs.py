@@ -31,7 +31,7 @@ from scipy.sparse.linalg._eigen.arpack.arpack import ArpackNoConvergence
 # --- Globals ---
 class Config(float, Enum):
     # Observations
-    REPS = 1.0  # convert to int
+    REPS = 5.0  # convert to int
     THETA_MIN = 0.05
     THETA_MAX = 0.95
     THETA_NUM = 37.0  # convert to int
@@ -113,7 +113,7 @@ def main():
     print("Generating benchmark topologies...")
     try:
         # Check if network already exists so we don't waste time
-        filepath = f"raw/synthetic/{filename}.edgelist"
+        filepath = f"preprocessed/edgelists/{filename}.edgelist"
         if os.path.isfile(filepath):
             raise FileExistsError
         # Generate network if it does not exist

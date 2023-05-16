@@ -88,16 +88,26 @@ Finally, cleaning all downloaded/generated files can be accomplished with
 
 ## Repository Structure
 
-[Describe structure]
+[Fill in here]
 
 ## Reproducing experiments
 
-[Describe experimental protocol docs]
+As mentioned above, the experiments can be reproduced in their entirety with the command
+```
+$> make reproduce
+```
+
+This will reproduce all analyses present within the manuscript within their respective order. It will take a fair bit of time as many multiplexes are generated, embedded, reconstructed, and compared throughout. It is generally recommended you do _not_ run this command directly.
+
+Each figure in the manuscript has a corresponding script which will reproduce _only_ the experiments necessary to create that figure (and actually do the figure synthesis and save to disk as well). These are located in the `script/` directory and it is highly recommended that you utilize these scripts if you only want to reproduce a portion of the manuscript. Additional information can be found in `scripts/REPRODUCING_RESULTS.md`
 
 # Documentation
 
-[Describe documentation]
+This repository does not maintain extensive independent documentation for its source code. We do, however, include documentation and notes on scientific experiments we've conducted throughout the project. If you are interested in seeing these notes, please email [Daniel Kaiser](mailto:kaiserd@iu.edu) with your inquiry.
 
+We have kept in the published repository all of the experimental protocols related to the final design of the published experiments. These can be found in `docs/experiments/` with the appropriate names matching the results as presented in the manuscript.
+
+Additionally, a copy of individual derivations can be found in `docs/` that are highly suggestive of methodological choices and implications for our work.
 
 # Running the tests
 

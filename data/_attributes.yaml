@@ -9,41 +9,41 @@ N:
   ]
 mu:
   _name: "community strength, mixing paramater"
-  description:
+  description: "Mixing parameter in LFR model; proxies community strength and planted partition modularity values."
   notes:
 t1:
   _name: "gamma, degree heterogeneity, degree distribution paramater"
-  description:
+  description:  "Exponent of degree distribution Power-law distribution. Controls the heterogeneity of the degree sequence."
   notes:
 t2:
   _name: "community heterogeneity, community size distribution parameter"
-  description:
+  description: "Exponent of degree distribution Power-law distribution. Controls the heterogeneity of the degree sequence."
   notes:
 kavg:
   _name: "average degree"
-  description:
+  description: "Average degree of sampled degree sequence."
   notes:
 kmin:
   _name: "minimum degree"
-  description:
+  description: "Minimum degree of sampled degree sequence."
   notes:
 kmax:
   _name: "maximum degree, degree cutoff"
-  description:
+  description: "Maximum degree, enforced degree cutoff for power-law sampled degree sequence."
   notes:
 prob:
   _name: "probability, relabeling probability, shuffling, correlation"
-  description:
+  description: "Node relabeling probability, controls the correlated of degree sequences between layers."
   notes:
 sign:
   _name: "sign, shuffling direction"
-  description:
+  description: "Enforced correlation of layer degree sequences after shuffling."
   notes:
 name:
   _name: "system, system name"
-  description:
+  description: "Name of the system being analyzed. Useful for real-world multiplexes."
   notes:
 layers:
   _name: "layers, induced duplex, sub-multiplex"
-  description:
+  description: "Labels of layers used in duplex analysis when several layers are present. If a synthetic network, default to 1 and 2."
   notes:

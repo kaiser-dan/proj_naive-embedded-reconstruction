@@ -65,9 +65,9 @@ We utilize LFR multiplexes with the following parameter settings:
 | $\langle k \rangle$ | 6                        | 1     |
 | max($k$)            | $\sqrt{N} = \sqrt{1000}$ | 1     |
 | prob                | 1.0                      | 1     |
-| Repetitions         | [1,10]                   | 10    |
+| Repetitions         | [1,5]                   | 5    |
 |                     |                          |       |
-| **Total**           |                          | 10    |
+| **Total**           |                          | 5    |
 
 Additionally, for experimental parameters we have the following settings:
 
@@ -75,11 +75,11 @@ Additionally, for experimental parameters we have the following settings:
 | ----------- | ---------------------------- | ----- |
 | $\theta$    | `np.linspace(0.5, 0.95, 11)` | 11    |
 | Dimension   | 128                          | 1     |
-| Walk length | [5, 25, 50]                  | 3     |
+| Walk length | [30]                  | 1    |
 |             |                              |       |
-| **Total**   |                              | 33    |
+| **Total**   |                              | 11    |
 
-Hence, altogether we have $10*33 = 330$ individual records.
+Hence, altogether we have $5*11 = 55$ individual records.
 
 ## Procedure
 

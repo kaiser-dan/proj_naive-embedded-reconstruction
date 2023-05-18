@@ -1,4 +1,6 @@
-"""Experiment script to explore one feature logistic regression reconstructions from layer remnant embeddings
+"""Experiment script to explore one feature logistic regression reconstructions from layer remnant embeddings.
+
+See `protocol_EMB_ex37.md` for additional details.
 
 Broadly speaking, we have the following "workflow":
 
@@ -10,6 +12,7 @@ Broadly speaking, we have the following "workflow":
 import sys
 from datetime import datetime
 from itertools import product
+import yaml
 
 # --- Scientific computing ---
 import numpy as np
@@ -37,7 +40,6 @@ from data import observations
 
 ## Classifiers
 from src.classifiers import features  # feature set helpers
-# from src.classifiers import logreg  # logistic regression
 
 ## Utilities
 from src.utils import parameters as params  # helpers for experiment parameters
@@ -87,8 +89,6 @@ def main(
         experiment_setup: dict[str, object],
         output_filehandle: str = None) -> pd.DataFrame:
     # >>> Book-keeping >>>
-    _start_logger()
-
     # Prepare recordbook
     records = []
     # <<< Book-keeping <<<
@@ -99,6 +99,7 @@ def main(
 
     repetitions = range(1, experiment_setup["repeat"]+1)
     parameter_grid = list(product(system_layer_sets, feature_sets, thetas, repetitions))
+
 
     # Run experiment
     for parameter_grid_vertex in tqdm(parameter_grid, desc="Experiment"):
@@ -296,6 +297,9 @@ if __name__ == "__main__":
             ROOT=ROOT,
             DIR="data/output/processed/dataframes/"
         )
+    logger = _start_logger()
+    logger.info(f"Experiment {} started: {datetime.today().strftime('%Y%m%d %H:%M:%S')}")
+
 
     # Parameter grid
     sysname="LFR_PC-{PC}_N-500_mu-0.1_t1-2.1_t2-1.0_kavg-6.0_kmax-31_prob-1.0_dimensions-128walklength-30"

@@ -2,7 +2,7 @@
 """
 # ============= SET-UP =================
 # --- Project source code ---
-from distance import _likelihoods
+from distance.distance import _likelihoods
 
 # ============= FUNCTIONS =================
 def edge_likelihood(

@@ -8,7 +8,7 @@ import sys
 from networkx import connected_components
 
 # --- Source code ---
-from distance import _metrics
+from distance.distance import _metrics
 
 # --- Globals ---
 SYSTEM_PRECISION = sys.float_info.epsilon

@@ -3,6 +3,7 @@
 # ========== SET-UP ==========
 # --- Standard library ---
 import sys
+import os
 
 # --- Scientific computing ---
 import numpy as np
@@ -14,7 +15,8 @@ import statsmodels.api as sm
 import pandas as pd
 
 # --- Project source ---
-sys.path.append("../")
+SRC = os.path.join(*["..", ""])
+sys.path.append(SRC)
 from distance.distance import embedded_edge_distance
 from distance.score import likelihood, scale_probability
 

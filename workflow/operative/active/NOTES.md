@@ -29,3 +29,6 @@ So input to script should be pickled cache?
 - 6 is a small post-processing function
   - May have data race problems with snakemake
   - Should cache some temporary files and add a cleanup step?
+- 2 uses CachedEmbedding class
+- 3 uses LogReg(Model) class
+- I will likely need a separate workflow for doing the embeddings themselves

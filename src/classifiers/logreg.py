@@ -35,6 +35,7 @@ class LogReg(ReconstructionModel):
 
         return
 
+
     # --- Private methods ---
     def __start_sklearn_model(self):
         self._model = LogisticRegression(**self.logreg_parameters)

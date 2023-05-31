@@ -75,3 +75,16 @@ There are many reasons to suspect that metadata is
 ## Search and retrieval
 
 ## Creating your own scripts
+
+# SCRATCH NOTES
+Data hierarchy includes
+
+Network edgelist
+    -> Remnants [params: theta, hyperparams: observation_strategy]
+        -> Embeddings [params: method, dimension]
+            -> CachedEmbeddings
+                -> Reconstruction
+                    -> Dataframe record
+        -> Dataframe
+    -> (merged dataframes)
+-> (merged dataframes)

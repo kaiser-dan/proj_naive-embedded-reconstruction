@@ -39,21 +39,24 @@ your local machine for development, testing, and analysis purposes.
 A compatible Python install is needed to begin - the package management is handled by Conda as described below.
 - [Python \[3.10+\]](https://python.org/downloads/)
 - [Conda \[4.14+\]](https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html)
+- [GNU Make \[4.2+\]](https://www.gnu.org/software/make/) (only needed for our provided `makefile` - see [Reproducing Experiments](#reproducing-experiments))
 
 A complete list of packages is available in the `environment.yaml` file. Instructions for creating a controlled environment from this manifest is available below, in the [Installing](#installing) section.
+
+> _Note: We personally recommend using mambaforge, an extension of conda that is considerably faster and more robust. Further information can be found in the [Mamba docs](https://mamba.readthedocs.io/en/latest/index.html)_.
 
 ## Installing
 
 To (locally) reproduce this project, do the following:
 
-0. Download this code base. Notice that raw data are typically not included in the git-history and may need to be downloaded independently.
-1. Open a terminal with Python and Conda installed and run the commands:
+1. Download this code base. Notice that raw data are typically not included in the git-history and may need to be downloaded independently - see [Reproducing Experiments](#reproducing-experiments) for more information.
+2. Open a terminal with Python and Conda installed and run the commands:
    ```
    $> conda env create -f environment.yaml
    $> conda activate EmbeddedNaive
    ```
 
-This will install all necessary packages for you to be able to run the scripts and everything should work out of the box.
+This will install all necessary packages for you to be able to run the scripts and everything should work out of the box. 
 
 ## Quick Start
 
@@ -105,9 +108,9 @@ Each figure in the manuscript has a corresponding script which will reproduce _o
 
 This repository does not maintain extensive independent documentation for its source code. We do, however, include documentation and notes on scientific experiments we've conducted throughout the project. If you are interested in seeing these notes, please email [Daniel Kaiser](mailto:kaiserd@iu.edu) with your inquiry.
 
-We have kept in the published repository all of the experimental protocols related to the final design of the published experiments. These can be found in `docs/experiments/` with the appropriate names matching the results as presented in the manuscript.
+We have, however, kept all experimental protocols related to the final experimental designs of the published results in this public repository. These can be found in `docs/experiments/` with the appropriate names matching the results as presented in the manuscript.
 
-Additionally, a copy of individual derivations can be found in `docs/` that are highly suggestive of methodological choices and implications for our work.
+<!-- Additionally, a copy of individual derivations can be found in `docs/` that are highly suggestive of methodological choices and implications for our work. -->
 
 # Running the tests
 
@@ -146,7 +149,7 @@ All correspondence shoulld be directed to [Daniel Kaiser](mailto:kaiserd@iu.edu)
 
 This project is licensed under the [MIT License](LICENSE.md)
 Creative Commons License - see the [LICENSE](LICENSE.md) file for
-details
+details.
 
 ## Acknowledgments
   - **Billie Thompson** - *Provided README and CONTRIBUTING template* -

@@ -4,56 +4,45 @@
 # --- Standard library ---
 import sys
 
-# --- Scientific computations ---
-import numpy as np
-
 # --- Network science ---
 from networkx import connected_components
 
+# --- Source code ---
+from distance import _metrics
+
+# --- Globals ---
+SYSTEM_PRECISION = sys.float_info.epsilon
 
 # ============= FUNCTIONS =================
-# --- Metrics ---
-def euclidean_distance(x, y):
-    try:
-        distance = np.linalg.norm(x - y)
-    except ValueError as err:
-        sys.stderr.write(str(err)+"\n")
-        print("Dimension mismatch, projecting to common dimension")
+def embedded_edge_distance(
+        edge, vectors,
+        metric=_metrics.euclidean_distance):
+    src, tgt = edge  # unpack edge
+    distance = metric(vectors[src], vectors[tgt])
+    distance += SYSTEM_PRECISION
 
-        dim = min(len(x), len(y))
-        x = x[:dim]
-        y = y[:dim]
-        distance = np.linalg.norm(x - y)
-    finally:
-        return distance
-def cosine_similarity(x, y): return np.dot(x, y) / (np.linalg.norm(x) * np.linalg.norm(y))
-def poincare_disk_distance(x, y): raise NotImplementedError("Hyperbolic distance not yet implemented!")
+    return distance
 
+def component_penalized_embedded_edge_distance(
+        edge, vectors, components,
+        penalty=2**8,
+        metric=_metrics.euclidean_distance):
+    src, tgt = edge  # unpack edge
 
-# --- Drivers ---
-def embedded_edge_distance(edge, vectors, distance_=euclidean_distance):
-    src, tgt = edge
-
-    return distance_(vectors[src], vectors[tgt]) + 1e-16
-
-def component_penalized_embedded_edge_distance(edge, vectors, components, penalty=2**8, distance_=euclidean_distance):
-    src, tgt = edge
-
-    try:
-        dist = distance_(vectors[src], vectors[tgt]) + 1e-16
-    except ValueError:  # Dimension mismatch when per-component embedding applied
-        dist = 1e-16
+    distance = metric(vectors[src], vectors[tgt])
+    distance += SYSTEM_PRECISION
 
     if components[src] != components[tgt]:
-        dist += penalty
+        distance += penalty
 
-    return dist
+    return distance
 
 # --- Helpers ---
 def get_component_mapping(graph):
-    mapping = {}
-    components = connected_components(graph)
+    mapping = {}  # node -> component
+    components = connected_components(graph)  # [[nodes in component], ..., [nodes in component]]
 
+    # Enumerate over components, associating included nodes to that component
     for component_id, component_nodes in enumerate(components):
         for node in component_nodes:
             mapping[node] = component_id

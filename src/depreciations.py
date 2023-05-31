@@ -105,3 +105,16 @@ def component_penalized_embedded_edge_distance_ratio(
     # <<< Score (feature) calculation <<<
     finally:
         return ratio
+
+
+def format_distance_ratios(X):
+    # Apply logarithmic transform to regularize division space
+    X = np.log(X)
+
+    # Remove NaNs for sklearn model
+    X = np.nan_to_num(X, nan=-1e-32)
+
+    # Shape features for sklearn model
+    X = X.reshape(-1, 1)
+
+    return X

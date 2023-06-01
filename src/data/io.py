@@ -2,6 +2,8 @@
 """
 # ============= SET-UP =================
 # --- Standard library ---
+import sys
+import pickle
 from datetime import datetime  # date metadata
 
 # --- Network science ---
@@ -67,6 +69,15 @@ def get_input_filehandle(
 
 
 # --- Output ---
+def save_multiplex(M: dict[int, nx.Graph], filepath: str):
+    try:
+        fh = open(filepath, "wb")
+        pickle.dump(M, fh, pickle.HIGHEST_PROTOCOL)
+    except Exception as err:
+        sys.stderr.write(f"{err}\n Error saving multiplex!")
+    finally:
+        fh.close()
+
 def save_df(dataframe, output_filehandle):
     dataframe.to_csv(output_filehandle)
     return

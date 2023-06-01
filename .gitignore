@@ -168,8 +168,11 @@ cython_debug/
 
 # Data files
 _research/  # Temporary toying around files
-*/raw/  # Input or output data that is 'unusable'
-data/  # Ignore data uploads until curl script and ACL are configured
+data/output/models/
+data/output/reconstructions/
+data/input/caches/
+data/input/edgelists/
+
 
 # Cached modules
 *.pyc

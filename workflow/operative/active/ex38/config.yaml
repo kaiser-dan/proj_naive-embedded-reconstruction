@@ -1,0 +1,53 @@
+metadata:
+  id: "EMB_ex38"
+  version: "v0.1"
+  researchers: "DK"
+  protocol: True
+  protocol_path: "./procotol_EMB_ex38.md"
+
+dev:
+  logging:
+    directory: "{ROOT}.logs/"  # NOTE: Will use .format() in setup
+    filelogger:
+      filepath: "log_EMB_ex38_{datetime.today().strftime('%Y%m%d')}.log"  # NOTE: Will use .format() in setup
+      mode: "w"
+      level: 10
+    consolelogger:
+      level: 20
+  console:
+    tqdm: True
+    warnings_filter: True
+
+
+hyperparameters:
+  workflow:
+    root: ["..", "..", "..", "..", ""]  # NOTE: Uses os.join(*root) :: ex -> active -> operative -> workflow -> root
+    clean:
+      model: True
+      reconstruction: True
+      # NOTE: Individual records are always marked as temporary
+      # NOTE: Dataframes are the main output, do not remove them!
+  env: False
+
+
+parameters:  # default to always including intercept, see logreg params
+  features: [["emb"], ["deg"], ["emb", "deg"]]
+
+  caches:  # check inclusion
+    embedding:
+      embedder: "N2V"
+      PC: True
+      dimensions: [128]
+    network:
+      system: "LFR"
+      N: [1000]
+      t1: [2.1]
+      t2: [1.0]
+      mu: [0.1]
+      kavg: [6]
+      kmax: [31]
+
+  logistic_regression:  # pass as kwargs
+    fit_intercept: True
+    solver: "newton-cholesky"
+    penalty: "l2"

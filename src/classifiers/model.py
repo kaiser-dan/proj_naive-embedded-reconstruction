@@ -7,11 +7,28 @@ import pickle
 
 # ============= CLASSES =================
 class ReconstructionModel:
+    """General class for applying a multiplex reconstruction classifier.
+
+    Data
+    ----
+    model_type : str
+        Type of reconstruction classifier, e.g., "logistic regression"
+    features : tuple
+        Names of included features - considered as ordered!
+    experiment_params : dict
+        Experimental parameters and their values
+
+
+    Methods
+    -------
+    save(filepath: str)
+        Saves object to the given filepath.
+    """
     def __init__(
             self,
-            model_type: str,  # type of reconstruction classifier, e.g., "logistic regression"
-            features: tuple,  # names of included features - considered as ordered!
-            experiment_params: dict,  # experimental parameters and their values
+            model_type: str,
+            features: tuple,
+            experiment_params: dict,
             ):
         # Data assignment
         self.model_type = model_type

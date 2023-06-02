@@ -18,7 +18,7 @@ import pandas as pd
 SRC = os.path.join(*["..", ""])
 sys.path.append(SRC)
 from distance.distance import embedded_edge_distance
-from distance.score import likelihood, scale_probability
+from distance.score import edge_likelihood, scale_probability
 
 
 # ========== FUNCTIONS ==========

@@ -1,5 +1,5 @@
-from numpy import Inf, absolute
-from numpy.linalg import norm, dot
+from numpy import Inf, absolute, dot
+from numpy.linalg import norm
 
 # >>> Helpers >>>
 def _handle_mismatched_dims(x, y):

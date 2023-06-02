@@ -166,12 +166,20 @@ cython_debug/
 # Snakemake
 .snakemake
 
-# Data files
-_research/  # Temporary toying around files
-data/output/models/
-data/output/reconstructions/
-data/intput/
-
-
 # Cached modules
 *.pyc
+
+# Dev scripts
+_research/  # Temporary toying around files
+
+# Data
+## Input
+**/caches/
+**/edgelists/
+**/partitions/
+
+## Output
+**/models/
+**/reconstructions/
+
+

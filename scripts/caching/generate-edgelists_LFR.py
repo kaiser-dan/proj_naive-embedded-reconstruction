@@ -41,7 +41,7 @@ def main():
     _t2 = np.linspace(2.1, 3.5, num=5)
     _kavg = np.linspace(6, 20, num=6, dtype=int)
     _prob = np.linspace(0, 1, num=5)
-    _rep = np.arange(11, dtype=int)
+    _rep = np.arange(1, 11, dtype=int)
 
     parameter_grid = product(_N, _mu, _t1, _t2, _kavg, _prob, _rep)
     parameter_grid_size = len(_N)*len(_mu)*len(_t1)*len(_t2)*len(_kavg)*len(_prob)*len(_rep)

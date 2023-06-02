@@ -86,3 +86,33 @@ def load_cached_embedding(filepath: str):
         fh.close()
 
     return cache
+
+
+# --- Pseudo-constructors ---
+def build_cache(
+        name: str,
+        layers: tuple[int, int],
+        theta: float,
+        remnants: tuple[Remnant, Remnant],
+        embeddings: tuple[Embedding, Embedding],
+        observed_edges: dict[tuple[int, int], int],
+        unobserved_edges: dict[tuple[int, int], int]):
+    pass
+
+def embed_and_cache_remnants(
+        name: str,
+        layers: tuple[int, int],
+        remnants: tuple(Remnant, Remnant),
+        embedder: str = "LE"):
+    # Dispatch correct embedding method
+    match embedder:
+        case "LE":
+            pass
+        case "LE-PC":
+            pass
+        case "N2V":
+            pass
+        case "N2V-PC":
+            pass
+        case _:
+            raise NotImplementedError(f"Embedder {embedder} not a recognized/implemented graph embedding!")

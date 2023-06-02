@@ -12,6 +12,7 @@ from node2vec import Node2Vec
 
 # --- Miscellaneous ---
 from embed.helpers import get_contiguous_vectors
+from embed.embedding import Embedding
 
 # ============= FUNCTIONS =================
 def N2V(
@@ -33,12 +34,12 @@ def N2V(
 
     Returns
     -------
-    dict
-        Map of node ids to embedded vectors.
+    Embedding
+        Embedding class instance.
     """
     # >>> Dispatch >>>
     if per_component:
-        return N2V_per_component(graph, parameters, hyperparameters)
+        return _N2V_per_component(graph, parameters, hyperparameters)
 
     # <<< Dispatch <<<
 
@@ -50,12 +51,14 @@ def N2V(
     embedding_model = embedding_model.wv
 
     # Retrieve resultant vectors
-    embedding = get_contiguous_vectors(embedding_model)
+    vectors = get_contiguous_vectors(embedding_model)
+
+    embedding = Embedding(vectors, "N2V")
 
     return embedding
 
 
-def N2V_per_component(graph: nx.Graph, parameters: dict, hyperparameters: dict):
+def _N2V_per_component(graph: nx.Graph, parameters: dict, hyperparameters: dict):
     # >>> Book-keeping >>>
     vectors_per_component = []  # list of vector embeddings, canonical ordering
     vectors = {}  # amalgamated mapping of nodes to their embedded vectors (by component)
@@ -81,4 +84,4 @@ def N2V_per_component(graph: nx.Graph, parameters: dict, hyperparameters: dict):
             vectors[node] = vector
     # <<< Embedding <<<
 
-    return vectors
+    return Embedding(vectors, "N2V")

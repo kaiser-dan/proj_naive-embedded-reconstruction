@@ -12,6 +12,8 @@ import networkx as nx
 
 # --- Miscellaneous ---
 from embed.helpers import reindex_nodes, get_components, matrix_to_dict
+from embed.embedding import Embedding
+
 
 # ============= FUNCTIONS =================
 # --- Driver ---
@@ -37,8 +39,8 @@ def LE(
 
     Returns
     -------
-    dict
-        Map of node ids to embedded vectors.
+    Embedding
+        Embedding class instance.
 
     """
     # >>> Book-keeping >>>
@@ -84,7 +86,9 @@ def LE(
         vectors[node] = eigenvectors[node_adjusted]
     # <<< Post-processing <<<
 
-    return vectors
+    embedding = Embedding(vectors, "LE" if not per_component else "LE-PC")
+
+    return embedding
 
 
 # --- Main computations ---

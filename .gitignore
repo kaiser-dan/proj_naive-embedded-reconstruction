@@ -170,8 +170,7 @@ cython_debug/
 _research/  # Temporary toying around files
 data/output/models/
 data/output/reconstructions/
-data/input/caches/
-data/input/edgelists/
+data/intput/
 
 
 # Cached modules

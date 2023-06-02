@@ -49,6 +49,8 @@ def main():
     for paramaters in tqdm(parameter_grid, total=parameter_grid_size, desc="Sampling LFRs...", colour="blue"):
         N, mu, t1, t2, kavg, prob, rep = paramaters
         kmax = int(np.sqrt(N))
+        if kavg >= kmax:
+            continue
 
         D, sigma1, sigma2, _ = \
             generate_multiplex_LFR(

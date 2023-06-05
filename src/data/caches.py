@@ -102,7 +102,7 @@ def build_cache(
 def embed_and_cache_remnants(
         name: str,
         layers: tuple[int, int],
-        remnants: tuple(Remnant, Remnant),
+        remnants: tuple[Remnant, Remnant],
         embedder: str = "LE"):
     # Dispatch correct embedding method
     match embedder:

@@ -37,8 +37,8 @@ def main():
 
     _N = np.linspace(100, 10_000, num=10, dtype=int)
     _mu = np.linspace(0.1, 0.5, num=5)
-    _t1 = np.linspace(1.0, 4.0, num=4, dtype=int)
-    _t2 = np.linspace(2.1, 3.5, num=5)
+    _t1 = np.linspace(2.1, 3.5, num=5)
+    _t2 = np.linspace(1.0, 4.0, num=4, dtype=int)
     _kavg = np.linspace(6, 20, num=6, dtype=int)
     _prob = np.linspace(0, 1, num=5)
     _rep = np.arange(1, 11, dtype=int)

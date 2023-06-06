@@ -1,6 +1,9 @@
 """Project source code for applying Laplacian Eigenmap embedding.
 """
 # ============= SET-UP =================
+# --- Standard library ---
+from typing import Union
+
 # --- Scientific computing ---
 from numpy import ndarray
 
@@ -21,7 +24,7 @@ def LE(
         graph: nx.Graph,
         parameters: dict, hyperparameters: dict,
         per_component: bool = False,
-        nodelist: list|None = None):
+        nodelist: Union[None, list] = None):
     """Embed `graph` using Laplacian eigenmaps.
 
     Parameters

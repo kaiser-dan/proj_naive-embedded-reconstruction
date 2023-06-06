@@ -17,8 +17,15 @@ SRC = os.path.join(*[ROOT, "src", ""])
 sys.path.append(ROOT)
 sys.path.append(SRC)
 
+## Embeddings
 from embed.embedding import Embedding
+from embed import LE, N2V
+
+## Remnants
 from sampling.remnants import Remnant
+
+## Utils
+from utils import parameters as params
 
 # ========== CLASSES ==========
 @dataclass
@@ -35,7 +42,7 @@ class CachedEmbeddings:
         Relative size of training set.
     remnants : tuple[Remnant, Remnant]
         Remnant layers.
-    embeddings : tuple[Embedding, Embedding]
+    embeddings : list[Embedding, Embedding]
         Embeddings of remnant layers.
     observed_edges : dict[tuple[int, int], int]
         Mapping of training set edges into their true layers, as given by indices of `layers`.
@@ -51,7 +58,7 @@ class CachedEmbeddings:
     layers: tuple[int, int]
     theta: float
     remnants: tuple[Remnant, Remnant]
-    embeddings: tuple[Embedding, Embedding]
+    embeddings: list[Embedding, Embedding]  # has to be mutable to post-process
     observed_edges: dict[tuple[int, int], int]
     unobserved_edges: dict[tuple[int, int], int]
 
@@ -89,30 +96,57 @@ def load_cached_embedding(filepath: str):
 
 
 # --- Pseudo-constructors ---
-def build_cache(
-        name: str,
-        layers: tuple[int, int],
-        theta: float,
-        remnants: tuple[Remnant, Remnant],
-        embeddings: tuple[Embedding, Embedding],
-        observed_edges: dict[tuple[int, int], int],
-        unobserved_edges: dict[tuple[int, int], int]):
-    pass
-
-def embed_and_cache_remnants(
+def build_cachedremnants(
         name: str,
         layers: tuple[int, int],
         remnants: tuple[Remnant, Remnant],
         embedder: str = "LE"):
     # Dispatch correct embedding method
-    match embedder:
+    match embedder:  # TODO: Simplify with regex on "X-PC"
         case "LE":
-            pass
+            embedding_function = LE.LE
+            parameters, hyperparameters, experiment_setup = params.set_parameters_LE()
         case "LE-PC":
-            pass
+            embedding_function = LE.LE
+            per_component = True
+            parameters, hyperparameters, experiment_setup = params.set_parameters_LE()
         case "N2V":
-            pass
+            embedding_function = N2V.N2V
+            parameters, hyperparameters, experiment_setup = params.set_parameters_N2V()
         case "N2V-PC":
-            pass
+            embedding_function = N2V.N2V
+            per_component = True
+            parameters, hyperparameters, experiment_setup = params.set_parameters_N2V()
         case _:
             raise NotImplementedError(f"Embedder {embedder} not a recognized/implemented graph embedding!")
+
+    # Embed remnants (list of Embedding objects)
+    embeddings = [
+        embedding_function(
+            remnant,
+            parameters=parameters,
+            hyperparameters=hyperparameters,
+            per_component=per_component
+        )
+        for remnant in remnants
+    ]
+
+    # Aggregate training and test sets
+    observed_edges = remnants[0].known_edges
+    unobserved_edges = remnants[0].unknown_edges
+    observed_edges.update(remnants[1].known_edges)
+    unobserved_edges.update(remnants[1].unknown_edges)
+
+    # Create CachedEmbedding objects
+    cache = CachedEmbeddings(
+        name=name,
+        layers=layers,
+        theta=remnants[0].theta,
+        remnants=remnants,
+        embeddings=embeddings,
+        observed_edges=observed_edges,
+        unobserved_edges=unobserved_edges
+    )
+
+    return cache
+

@@ -1,16 +1,18 @@
 import logging
+from datetime import datetime
 
 def get_module_logger(
         # Logger
         name="main",
         # File handler
-        filename=".logs/log.log",
+        filename=f".logs/log_{datetime.today().strftime('%Y%m%d-%H%M%S')}.log",
         mode='a',
         file_level = 10,
         # Console handler
         console_level = 20):
     # Initialize logger
     logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
 
     # Setup formatters
     formatter_longform = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')

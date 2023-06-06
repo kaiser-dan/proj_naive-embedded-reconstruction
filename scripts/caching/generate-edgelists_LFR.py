@@ -26,6 +26,10 @@ from src.data.preprocessing import duplex_network
 
 # --- Miscellaneous ---
 from tqdm.auto import tqdm
+from src.utils._logger import get_module_logger
+
+# --- Globals ---
+LOGGER = get_module_logger("LFR edgelist generation")
 
 # ================= MAIN =======================
 def main():
@@ -38,19 +42,21 @@ def main():
     _N = np.linspace(100, 10_000, num=10, dtype=int)
     _mu = np.linspace(0.1, 0.5, num=5)
     _t1 = np.linspace(2.1, 3.5, num=5)
-    _t2 = np.linspace(1.0, 4.0, num=4, dtype=int)
+    _t2 = [1]  # np.linspace(1.0, 4.0, num=4, dtype=int)
     _kavg = np.linspace(6, 20, num=6, dtype=int)
-    _prob = np.linspace(0, 1, num=5)
-    _rep = np.arange(1, 11, dtype=int)
+    _prob = [1.0]  # np.linspace(0, 1, num=5)
+    _rep = np.arange(1, 6, dtype=int)
 
     parameter_grid = product(_N, _mu, _t1, _t2, _kavg, _prob, _rep)
     parameter_grid_size = len(_N)*len(_mu)*len(_t1)*len(_t2)*len(_kavg)*len(_prob)*len(_rep)
 
-    for paramaters in tqdm(parameter_grid, total=parameter_grid_size, desc="Sampling LFRs...", colour="blue"):
+    for paramaters in tqdm(parameter_grid, total=parameter_grid_size, desc="Sampling LFRs...", colour="cyan"):
         N, mu, t1, t2, kavg, prob, rep = paramaters
         kmax = int(np.sqrt(N))
         if kavg >= kmax:
             continue
+
+        LOGGER.debug(f"N={N}; mu={mu}; t1={t1}; t2={t2}; kavg={kavg}; prob={prob}; rep={rep}; kmax={kmax}")
 
         D, sigma1, sigma2, _ = \
             generate_multiplex_LFR(

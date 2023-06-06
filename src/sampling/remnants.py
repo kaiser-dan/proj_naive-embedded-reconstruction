@@ -118,6 +118,9 @@ def build_remnants(
     unknown_edges_G = {edge for edge, layer in test_edges.items() if layer == 1}
     unknown_edges_H = {edge for edge, layer in test_edges.items() if layer == 0}
 
+    if name is None:
+        name = "None"
+
     R_G = Remnant(G, known_edges_G, unknown_edges_G, theta, observation_strategy, name+"_layer-1")
     R_H = Remnant(H, known_edges_H, unknown_edges_H, theta, observation_strategy, name+"_layer-2")
 

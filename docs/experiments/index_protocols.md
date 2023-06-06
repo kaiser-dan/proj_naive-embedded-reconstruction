@@ -98,23 +98,23 @@ Completed experiments are settings with generated, analyzed results that are wit
 - ex35
   - Date completed: 2023-04-19
   - Associated experiments: ex34, ex36
-  - Summary: Recreate "DC"-classifier with current code and N2V. 
+  - Summary: Recreate "DC"-classifier with current code and N2V.
 - ex36
   - Date completed: 2023-04-19
   - Associated experiments: ex34, ex35
   - Summary: Explore effect of wallk_length on N2V reconstruction on synthetics.
+- ex37
+  - Date completed: 2023-05-12
+  - Associated experiments:
+  - Summary: Contrast N2V and N2V-PC performance
 
 
 ## Planned
 
 Planned experiments are experiments that are planned or actively being designed, but before active computation begins.
 
-- ex37
-  - Summary: Per-component N2V on LFRs
 - ex38
-  - Summary: Per-component LE on LFRs
-- ex39
-  - Summary: Full factorial N2V recreation on real extended corpus
+  - Summary: Contrast N2V and N2V-PC performance with appropriately scaled embedding dimension and network sizes
 
 
 # Inoperative Experiments

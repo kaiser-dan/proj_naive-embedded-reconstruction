@@ -57,12 +57,12 @@ def _setup_argument_parser():
         "dimensions",
         type=int,
         help="Embedding dimension.")
-
-    # Optional arguments, flag
     parser.add_argument(
         "--percomponent", dest="per_component",
         action="store_true",
         help="Flag indicating component-wise embedding.")
+
+    # Optional arguments, flag
     parser.add_argument(
         "-w", "--walklength", dest="walk_length",
         type=int, default=30,

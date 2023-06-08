@@ -76,7 +76,7 @@ def _N2V_per_component(graph: nx.Graph, parameters: dict, hyperparameters: dict)
 
     # Embed each component by themselves
     for component_subgraph in component_subgraphs:
-        vectors_per_component.append(N2V(component_subgraph, parameters, hyperparameters))
+        vectors_per_component.append(N2V(component_subgraph, parameters, hyperparameters).vectors)
 
     # Amalgamate results
     for component_vectors in vectors_per_component:

@@ -1,27 +1,30 @@
 #!/usr/bin/env bash
+# ============= SET-UP ==============
 # --- Globals ---
 ## Fixed paramaters
-REPS=5
+REPS=1
 EMBEDDING="N2V"
 
-## Specified paramaters
-find ../../data/input/edgelists/ -type f -regextype egrep -regex ".*/remnants_.*N-(250|500|750|1000)_.*" > remnants.tmp
-mapfile FILES < remnants.tmp
+## Miscellaneous
+BAR_SIZE=20
+touch log.log; rm log.log
 
+# ============= FUNCTIONS ==============
 # --- Helpers ---
 infer_dim () {
-    # N is first argument
-    # DIM is output
-    if [ "$1" = "250" ]
+    # Args (sorted): FILE
+    N=$(echo $1 | grep -o "N-[0-9]*" | grep -o "[0-9]*")
+
+    if [ "$N" = "250" ]
     then
         echo 32
-    elif [ "$1" = "500" ]
+    elif [ "$N" = "500" ]
     then
         echo 64
-    elif [ "$1" = "750" ]
+    elif [ "$N" = "750" ]
     then
         echo 96
-    elif [ "$1" = "1000" ]
+    elif [ "$N" = "1000" ]
     then
         echo 128
     else
@@ -31,30 +34,53 @@ infer_dim () {
     return 0
 }
 
+update_progbar () {
+    # Args (sorted): k, NUM_FILES, BAR_SIZE
+    _k=$1
+    _NUM_FILES=$2
+    _BAR_SIZE=$3
 
-# --- Main logic ---
-for ((k = 0; k <= ${#FILES[@]}; k++))
-do
-    # Progress bar update
-    # echo -n "[ "  # start bar
-    # for ((i = 0 ; i <= k; i++)); do echo -n "###"; done  # write bar according to progress
-    # for ((j = i ; j <= ${#FILES[@]}; j++)); do echo -n "   "; done  # write empty bar according to remaining
-    # v=$((k * 10))  # format percentage complete
-    # echo -n " ] "  # end bar
-    # echo -n "$v %" $'\r'  # append percentage
+    # Re-evaluate normalized task progress
+    prog_display=$(echo "scale=0; 100 * $_k / $_NUM_FILES" | bc)  # get current percentage complete
+    prog_bar=$(echo "scale=0; $prog_display / $_BAR_SIZE" | bc)  # get current bar percentage in groups of (1/BAR_SIZE)%
 
-    # Get DIM from N
-    N=$(echo ${FILES[k]} | grep -o "N-[0-9]*" | grep -o "[0-9]*")
-    DIM=$(infer_dim $N)
-    # echo $N $DIM
-
-    # # Embedding native
-    python generate-caches_LFR.sh ${FILES[k]} $EMBEDDING $DIM --repeat $REPS
-
-    # # Embedding per-component
-    # python generate-caches_LFR.sh ${FILES[k]} $EMBEDDING $DIM --percomponent --repeat $REPS
-done
-
+    echo -n "[ "  # start bar
+    for ((i = 1 ; i <= $prog_bar; i++)); do echo -n "###"; done  # write bar according to progress
+    for ((j = i ; j <= $_BAR_SIZE; j++)); do echo -n "   "; done  # write empty bar according to remaining
+    echo -n " ] "  # end bar
+    echo -n "$prog_display %" $'\r'  # append percentage
+}
 
 # --- Cleanup ---
-# find ./ -type f -name "*.tmp" -delete
+cleanup () {
+    find ./ -type f -name "*.tmp" -delete
+}
+
+
+# ============= MAIN ==============
+# Specify remnants to embed
+# find ../../data/input/edgelists/ -type f -regextype egrep -regex ".*/remnants_.*N-(250|500|750|1000)_.*" > remnants.tmp
+find ../../data/input/edgelists/ -type f -regextype egrep -regex ".*/remnants_.*N-250_.*" > remnants.tmp
+mapfile FILES < remnants.tmp
+
+# Apply main logic
+for ((k = 0; k <= ${#FILES[@]}; k++))
+do
+    FILE=${FILES[k]}
+
+    # Progress bar update
+    update_progbar $k ${#FILES[@]} $BAR_SIZE
+
+    # Get DIM from file
+    DIM=$(infer_dim $FILE)
+
+    # Cache embedding
+    echo "Embedding $FILE" >> log.log
+    echo "Naive" >> log.log
+    python embed_and_cache.py $FILE $EMBEDDING $DIM --repeat $REPS
+    echo "Per-component" >> log.log
+    python embed_and_cache.py $FILE "$EMBEDDING" $DIM --percomponent --repeat $REPS
+done
+
+# Cleanup
+cleanup

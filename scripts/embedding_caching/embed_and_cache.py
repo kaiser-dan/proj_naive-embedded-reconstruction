@@ -127,18 +127,13 @@ def main():
     ## Load remnants
     remnants = load_remnant(args.filepath)
 
-    ## Specify embedder dispatch
-    embedder = args.embedding
-    if args.per_component:
-        embedder += "-PC"
-
     ## Apply embeddings and form cache
     for rep in range(args.reps):
         cache = caches.build_cachedremnants(
             name=remnants[0].name,
             layers=(1, 2),
             remnants=remnants,
-            embedder=embedder)
+            embedder=args.embedding)
 
         ## Save cache to disk
         basename = FILEPATH_TEMPLATE.format(
@@ -146,7 +141,7 @@ def main():
             pc=args.per_component,
             dim=args.dimensions,
             rep=rep,
-            remnant_filepath=args.filepath
+            remnant_filepath=os.path.basename(args.filepath)
         )
         cache.save(os.path.join(CACHE_DIR, basename))
 

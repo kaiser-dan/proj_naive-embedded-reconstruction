@@ -8,8 +8,8 @@ import os
 # --- Scientific computing ---
 import numpy as np
 
-from patsy import dmatrices
-import statsmodels.api as sm
+# from patsy import dmatrices
+# import statsmodels.api as sm
 
 # --- Data handling ---
 import pandas as pd
@@ -88,7 +88,7 @@ def get_configuration_distances_feature(distances_G, distances_H, zde_penalty = 
     for idx in range(M):
         s_G = 1 / (distances_G[idx] + zde_penalty)
         s_H = 1 / (distances_H[idx] + zde_penalty)
-        probability = likelihood(s_G, s_H)
+        probability = edge_likelihood(s_G, s_H)
 
         # Feature transformation
         probability = scale_probability(probability)

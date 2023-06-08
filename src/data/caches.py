@@ -101,32 +101,24 @@ def build_cachedremnants(
         layers: tuple[int, int],
         remnants: tuple[Remnant, Remnant],
         embedder: str = "LE",
+        per_component = False,
         **kwargs):
     # Dispatch correct embedding method
-    match embedder:  # TODO: Simplify with regex on "X-PC"
-        case "LE":
-            embedding_function = LE.LE
-            parameters, hyperparameters, experiment_setup = params.set_parameters_LE(**kwargs)
-        case "LE-PC":
-            embedding_function = LE.LE
-            per_component = True
-            parameters, hyperparameters, experiment_setup = params.set_parameters_LE(**kwargs)
-        case "N2V":
-            embedding_function = N2V.N2V
-            parameters, hyperparameters, experiment_setup = params.set_parameters_N2V(**kwargs)
-        case "N2V-PC":
-            embedding_function = N2V.N2V
-            per_component = True
-            parameters, hyperparameters, experiment_setup = params.set_parameters_N2V(**kwargs)
-        case _:
-            raise NotImplementedError(f"Embedder {embedder} not a recognized/implemented graph embedding!")
+    if embedder == "LE":  # TODO: Simplify with regex on "X-PC"
+        embedding_function = LE.LE
+        parameters, hyperparameters, experiment_setup = params.set_parameters_LE(**kwargs)
+    if embedder ==  "N2V":
+        embedding_function = N2V.N2V
+        parameters, hyperparameters, experiment_setup = params.set_parameters_N2V(**kwargs)
+    else:
+        raise NotImplementedError(f"Embedder {embedder} not a recognized/implemented graph embedding!")
 
     # Embed remnants (list of Embedding objects)
     embeddings = [
         embedding_function(
-            remnant,
+            remnant.remnant,
             parameters=parameters,
-            hyperparameters=hyperparameters,
+            hyperparameters=hyperparameters["embedding"],
             per_component=per_component
         )
         for remnant in remnants

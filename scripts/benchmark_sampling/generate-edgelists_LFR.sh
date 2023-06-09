@@ -14,6 +14,9 @@ do
     N=${NS[index]}
     KMAX=${KMAXS[index]}
 
+    # * This cannot be parallelized naively
+    # * LFR binary saves to file without uniquely identifying name
+    # * Piping into GNU parallel would cause a data race
     echo "Sampling duplexes with N=${N} & max(k)=${KMAX}..."
     python sample_LFR.py -N $N -u $MU -d $T1 -c $T2 -k $KAVG -m $KMAX -p $PROB
 done

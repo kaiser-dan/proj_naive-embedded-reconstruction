@@ -58,7 +58,7 @@ unpack_data: $(DIR_DATA)/arxiv.zip $(DIR_DATA)/celegans.zip $(DIR_DATA)/drosophi
 	gunzip $(DIR_DATA)/london.zip
 	cp $(DIR_DATA)/PATH/TO/EDGELIST.edges $(DIR_DATA_PREPROCESSED)/multiplex_system-london.edgelist
 	@echo "'london transportation multiplex' unpacked!"
-	
+
 
 setup: $(REQUIREMENTS)
 	@echo "Creating conda environment from $(REQUIREMENTS)..."

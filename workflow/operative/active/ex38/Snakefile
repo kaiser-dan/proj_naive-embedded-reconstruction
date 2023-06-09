@@ -1,0 +1,80 @@
+"""Experiment rule file to reconstruct synthetic duplexes with N2V.
+
+See `protocol_EMB_ex38.md` for additional details.
+"""
+# ========== SET-UP ==========
+configfile: "config.yaml"
+
+# * COMPREHEND CONFIG FILE
+# Includes, but is not limited to:
+# - Format output dataframe filepath
+# - Specify and configure cleanup rule(s)
+# - Specify input and output files
+# - Comprehend a .env file, if available
+
+
+# ========== WORKFLOW ==========
+# --- Target rule ---
+rule all:
+    input:
+
+
+# --- Workflow rules ---
+# NOTE: _Reverse_ sorted by order of application
+# CONCATENATE INDIVIDUAL RECORDS (WHICH ARE ALWAYS TMP)
+rule build_dataframe:
+    input:
+        _RECORDS
+    output:
+        DATAFRAME
+    shell:
+        "echo \"lol\""
+
+# COMPARE TEST SET CLASSIFICATION AND GROUND TRUTH
+rule evaluate_reconstruction:
+    input:
+        _CACHE, RECONSTRUCTION
+    output:
+        tmp(RECORD)
+
+# PREDICT TEST SET OF CACHED EMBEDDING
+rule reconstruct_multiplex:
+    input:
+        _CACHE, MODEL
+    output:
+        RECONSTRUCTION
+
+# TRAIN LOGREG ON CACHED EMBEDDING
+rule train_reconstruction_model:
+    input:
+        _CACHE
+    output:
+        MODEL
+
+
+
+# --- Metadata rules ---
+# GENERATE SNAKEMAKE RULEGRAPH (NOT DAG!)
+rule generate_rulegraph:
+    input:
+        DATAFRAME
+    output:
+        RULEGRAPH
+    shell:
+        "snakemake --rulegraph | dot -Tsvg > {output}"
+
+# GENERATE SNAKEMAKE REPORT
+rule generate_report:
+    input:
+        DATAFRAME
+    output:
+        REPORT
+    shell:
+        "snakemake --report {output}"
+
+# REMOVE FILES IF LISTED AS TEMPORARY
+rule clean:
+    input:
+        TEMP_FILES
+    shell:
+        "echo \"Cleaning temporary files...\""

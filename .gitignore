@@ -166,10 +166,21 @@ cython_debug/
 # Snakemake
 .snakemake
 
-# Data files
-_research/  # Temporary toying around files
-*/raw/  # Input or output data that is 'unusable'
-data/  # Ignore data uploads until curl script and ACL are configured
-
 # Cached modules
 *.pyc
+
+# Dev scripts
+_research/  # Temporary toying around files
+
+# Data
+## Input
+**/caches/
+**/edgelists/
+**/partitions/
+
+## Output
+**/models/
+**/reconstructions/
+
+## Log files
+.logs/

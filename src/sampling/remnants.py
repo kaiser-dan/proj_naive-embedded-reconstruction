@@ -32,6 +32,9 @@ class Remnant:
     -------
     save(filepath: str, only_graph: bool)
         Saves object to the given filepath. `only_graph` will save only an edgelist.
+
+    get_remnants(descending: bool)
+        Returns connected components of `remnant`. Will be sorted in descending order according to size if `descending` is True.
     """
     def __init__(
             self,
@@ -91,6 +94,9 @@ class Remnant:
     # --- Public methods ---
     def save(self, filepath: str, only_graph: bool = False):
         save_remnant(self, filepath, only_graph)
+
+    def get_components(self, descending: bool = True):
+        return sorted(nx.connected_components(self.remnant), key=len, reverse=descending)
 
 # ============= FUNCTIONS =================
 def save_remnant(remnant: Remnant, filepath: str, only_graph: bool = False):

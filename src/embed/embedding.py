@@ -98,6 +98,12 @@ class Embedding:
 
         return
 
+    def normalize(self, components):
+        self.align_vectors(components)
+        self.scale_vectors(components)
+
+        return
+
     # > I/O >
     def save(self, filepath: str, only_vectors: bool = False):
         save_embedding(self, filepath, only_vectors)

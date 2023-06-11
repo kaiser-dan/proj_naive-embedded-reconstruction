@@ -41,6 +41,7 @@ get_data_tarballs:
 	fi
 
 
+# TODO: Test unpacking make rule
 unpack_data: $(DIR_DATA)/arxiv.zip $(DIR_DATA)/celegans.zip $(DIR_DATA)/drosophila.zip $(DIR_DATA)/london.zip
 	@echo "Unpacking 'arXiv collaboration multiplex'..."
 	gunzip $(DIR_DATA)/arxiv.zip
@@ -67,9 +68,9 @@ setup: $(REQUIREMENTS)
 
 
 clean:
-	@echo "\n\nRemoving generated temporary files...\n\n"
-	@echo "THING HAPPENS\n\n"
-	@echo "\n\nRemoving downloaded multiplex data...\n\n"
-	@find $(DATA_DIR) -regextype posix-extended -regex ".*(arxiv|celegans|drosophila|london).*" -delete
-	@echo "Removing pycache files..."
+	@echo "Removing generated temporary files...\n"
+	@find ./ -type f -name "*.tmp" -delete
+	@echo "Removing downloaded multiplex data...\n"
+	@find $(DATA_DIR) -regextype egrep -regex ".*(arxiv|celegans|drosophila|london).*" -delete
+	@echo "Removing pycache files...\n"
 	@find ./ -name "__pycache__" -exec rm -rf {} \;

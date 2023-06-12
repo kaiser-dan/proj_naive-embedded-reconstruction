@@ -17,32 +17,27 @@ configfile: "config.yaml"
 # --- Target rule ---
 rule all:
     input:
+        DATAFRAME,
+        RULEGRAPH,
+        REPORT
 
 
 # --- Workflow rules ---
 # NOTE: _Reverse_ sorted by order of application
-# CONCATENATE INDIVIDUAL RECORDS (WHICH ARE ALWAYS TMP)
+# PREDICT TEST SET OF CACHED EMBEDDING, GATHER EVALUATION METRICS
 rule build_dataframe:
     input:
-        _RECORDS
+        RECORDS
     output:
         DATAFRAME
     shell:
-        "echo \"lol\""
+        # CONCATENATION
 
-# COMPARE TEST SET CLASSIFICATION AND GROUND TRUTH
-rule evaluate_reconstruction:
-    input:
-        _CACHE, RECONSTRUCTION
-    output:
-        tmp(RECORD)
-
-# PREDICT TEST SET OF CACHED EMBEDDING
 rule reconstruct_multiplex:
     input:
         _CACHE, MODEL
     output:
-        RECONSTRUCTION
+        tmp(RECORD)
 
 # TRAIN LOGREG ON CACHED EMBEDDING
 rule train_reconstruction_model:
@@ -71,10 +66,3 @@ rule generate_report:
         REPORT
     shell:
         "snakemake --report {output}"
-
-# REMOVE FILES IF LISTED AS TEMPORARY
-rule clean:
-    input:
-        TEMP_FILES
-    shell:
-        "echo \"Cleaning temporary files...\""

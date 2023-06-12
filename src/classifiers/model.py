@@ -55,6 +55,6 @@ def save_model(model: ReconstructionModel, filepath: str):
         fh = open(filepath, "wb")
         pickle.dump(model, fh, pickle.HIGHEST_PROTOCOL)
     except Exception as err:
-        sys.stderr.write(f"{err}\n Error serializing ReconstructionModel instance!")
+        print(f"{err}\n Error serializing ReconstructionModel instance!", file=sys.stderr)
     finally:
         fh.close()

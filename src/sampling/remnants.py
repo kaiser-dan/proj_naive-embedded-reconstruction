@@ -33,7 +33,7 @@ class Remnant:
     save(filepath: str, only_graph: bool)
         Saves object to the given filepath. `only_graph` will save only an edgelist.
 
-    get_remnants(descending: bool)
+    get_components(descending: bool)
         Returns connected components of `remnant`. Will be sorted in descending order according to size if `descending` is True.
     """
     def __init__(

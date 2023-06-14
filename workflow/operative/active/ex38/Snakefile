@@ -3,53 +3,105 @@
 See `protocol_EMB_ex38.md` for additional details.
 """
 # ========== SET-UP ==========
-configfile: "config.yaml"
+# --- Imports ---
+# - Standard library -
+from os import listdir
+from os.path import join, basename, splitext  # OS-safe PATH adjustements
+from datetime import datetime  # File naming convention
 
-# * COMPREHEND CONFIG FILE
-# Includes, but is not limited to:
-# - Format output dataframe filepath
-# - Specify and configure cleanup rule(s)
-# - Specify input and output files
-# - Comprehend a .env file, if available
+# --- Configuration ---
+configfile: "config.yaml"  # Specify config file for Snakemake auto-loader
+
+# - Pathing -
+_dirs = config["hyperparameters"]["workflow"]["directories"]
+ROOT = join(*_dirs["root"])
+SCRIPTS = join(ROOT, join(*_dirs["scripts_from_root"]))
+
+# Inputs
+CACHES = join(ROOT, join(*_dirs["caches_from_root"]))
+
+# Outputs
+MODELS = join(ROOT, join(*_dirs["models_from_root"]))
+RECONSTRUCTIONS = join(ROOT, join(*_dirs["reconstructions_from_root"]))
+DATAFRAMES = join(ROOT, join(*_dirs["dataframes_from_root"]))
+FIGURES = join(ROOT, join(*_dirs["figures_from_root"]))
+
+# - Globals -
+_logreg = config["parameters"]["logistic_regression"]
+FIT_INT = _logreg["fit_intercept"]
+SOLVER = _logreg["solver"]
+PENALTY = None if _logreg["penalty"] == "none" else _logreg["penalty"]
+
+# - Build output manifest -
+desired_output = list()
+# Required output
+DATAFRAME = join(
+    ROOT, join(*_dirs["dataframes_from_root"]),
+    f"dataframe_{config['metadata']['id']}{config['metadata']['version']}_{datetime.today().strftime('%Y%m%d')}.csv")
+desired_output.append(DATAFRAME)
+
+CACHE_FILENAMES = list()
+# ! FIX HARD-CODING INPUT CACHES?
+for filename in listdir(CACHES):
+    if "N-250" in filename:
+        CACHE_FILENAMES.append(splitext(basename(filename))[0])
+
+# Optional output
+## Workflow rulegraph
+if config["hyperparameters"]["workflow"]["reports"]["rulegraph"]:
+    RULEGRAPH = join(
+        ROOT, join(*_dirs["reports_from_root"]),
+        f"rulegraph_{config['metadata']['id']}{config['metadata']['version']}_{datetime.today().strftime('%Y%m%d')}.svg")
+    desired_output.append(RULEGRAPH)
+## Snakemake report
+if config["hyperparameters"]["workflow"]["reports"]["report"]:
+    REPORT = join(
+        ROOT, join(*_dirs["reports_from_root"]),
+        f"report_{config['metadata']['id']}{config['metadata']['version']}_{datetime.today().strftime('%Y%m%d')}.pdf")
+    desired_output.append(REPORT)
 
 
 # ========== WORKFLOW ==========
 # --- Target rule ---
 rule all:
     input:
-        DATAFRAME,
-        RULEGRAPH,
-        REPORT
+        desired_output
 
 
 # --- Workflow rules ---
 # NOTE: _Reverse_ sorted by order of application
-# PREDICT TEST SET OF CACHED EMBEDDING, GATHER EVALUATION METRICS
 rule build_dataframe:
     input:
-        RECORDS
+        expand(f"{RECONSTRUCTIONS}performance_model_penalty-{PENALTY}_{{cache_filename}}.dat", cache_filename=CACHE_FILENAMES)
     output:
         DATAFRAME
     shell:
-        # CONCATENATION
+        "cat {input} >> {output}"
 
 rule reconstruct_multiplex:
     input:
-        _CACHE, MODEL
+        cache=f"{CACHES}{{cache_filename}}.pkl",
+        model=f"{MODELS}model_penalty-{PENALTY}_{{cache_filename}}.pkl"
     output:
-        tmp(RECORD)
+        reconstruction=f"{RECONSTRUCTIONS}reconstruction_model_penalty-{PENALTY}_{{cache_filename}}.pkl",
+        performance=f"{RECONSTRUCTIONS}performance_model_penalty-{PENALTY}_{{cache_filename}}.dat"
+    shell:
+        f"python {SCRIPTS}reconstruct_multiplex.py {{input.cache}} {{input.model}} {{output.reconstruction}} {{output.performance}}"
 
-# TRAIN LOGREG ON CACHED EMBEDDING
 rule train_reconstruction_model:
     input:
-        _CACHE
+        f"{CACHES}{{cache_filename}}.pkl"
+    params:
+        fit_intercept=FIT_INT,
+        solver=SOLVER,
+        penalty=PENALTY
     output:
-        MODEL
-
+        f"{MODELS}model_penalty-{PENALTY}_{{cache_filename}}.pkl"
+    shell:
+        f"python {SCRIPTS}train_reconstruction_model.py {{input}} {{output}}"
 
 
 # --- Metadata rules ---
-# GENERATE SNAKEMAKE RULEGRAPH (NOT DAG!)
 rule generate_rulegraph:
     input:
         DATAFRAME
@@ -58,7 +110,6 @@ rule generate_rulegraph:
     shell:
         "snakemake --rulegraph | dot -Tsvg > {output}"
 
-# GENERATE SNAKEMAKE REPORT
 rule generate_report:
     input:
         DATAFRAME

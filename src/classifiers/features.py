@@ -50,10 +50,10 @@ def get_distances(vectors, edges):
 # --- Formatters ---
 def as_configuration(
         *data,
-        transform: function = safe_inverse,
-        scale: function = scale_probability):
+        transform = safe_inverse,
+        scale = scale_probability):
     # Gather passed in lists of features
-    data = list(*data)
+    data = list(data)
 
     # Apply transformation
     for idx in range(len(data)):
@@ -71,7 +71,7 @@ def as_configuration(
 
 def format_feature_matrix(*feature_vectors):
     # Get number of features and observations
-    num_cols = len(*feature_vectors)
+    num_cols = len(feature_vectors)
     num_rows = len(feature_vectors[0])
     dims = (num_rows, num_cols)
 

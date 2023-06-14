@@ -1,5 +1,3 @@
-# Input: CachedEmbedding filepath, LogReg filepath
-# Output: Reconstruction filepath
 #!/usr/bin/env python
 """Script to apply a trained LogReg reconstruction model to a test set.
 """
@@ -10,6 +8,9 @@ import os
 import pickle
 from enum import Enum
 
+# --- Scientific computing ---
+import numpy as np
+
 # --- Project source ---
 # PATH adjustments
 ROOT = os.path.join(*["..", "..", ""])
@@ -19,7 +20,6 @@ sys.path.append(SRC)
 
 # Source code imports
 ## Classifiers
-from src.classifiers.logreg import LogReg
 from src.classifiers import features, performance
 
 ## CachedEmbedding
@@ -35,12 +35,14 @@ class Status(Enum):
 
 # ================= FUNCTIONS =======================
 # --- File I/O ---
-def _verify_filepath(filepath: str, output: str):
-    if not os.path.isfile(filepath):
+def _verify_filepath(filepath: str, exists: bool):
+    # File doesn't exist when it should
+    if exists and not os.path.isfile(filepath):
         raise FileNotFoundError(filepath)
 
-    if os.path.isfile(output):
-        raise FileExistsError(output)
+    # File exists when it shouldn't
+    if not exists and os.path.isfile(filepath):
+        raise FileExistsError(filepath)
 
 # --- Features ---
 def calculate_degree_feature(cache: CachedEmbeddings):
@@ -83,13 +85,33 @@ def calculate_features(cache: CachedEmbeddings):
 
     return feature_matrix
 
+# --- Model evaluation ---
+def evaluate_model(model, test_data, test_labels):
+    # Apply model to test data, forming reconstruction
+    scores = model.get_scores(test_data)
+    predictions = model.get_reconstruction(test_data)
+
+    # Calculate performances
+    accuracy = performance.performance(scores, predictions, test_labels, "accuracy")
+    auroc = performance.performance(scores, predictions, test_labels, "AUC")
+    pr = performance.performance(scores, predictions, test_labels, "PR")
+
+    # Print to stdout (captured downstream)
+    return f"{accuracy},{auroc},{pr}"
+
 
 # ================= MAIN =======================
-def main(cache_filepath: str, model_filepath: str, output: str):
+def main(
+        cache_filepath: str,
+        model_filepath: str,
+        reconstruction_filepath: str,
+        performance_filepath: str):
     # Verify CL arguments
     try:
-        _verify_filepath(cache_filepath, output)
-        _verify_filepath(model_filepath, output)
+        _verify_filepath(cache_filepath, True)
+        _verify_filepath(model_filepath, True)
+        _verify_filepath(reconstruction_filepath, False)
+        _verify_filepath(performance_filepath, False)
     except FileNotFoundError as err:
         print(err, file=sys.stderr)
         quit(Status.FILE.value)
@@ -125,20 +147,18 @@ def main(cache_filepath: str, model_filepath: str, output: str):
     test_data = calculate_features(cache=cache)
     test_labels = features.get_labels(cache.unobserved_edges)
 
-    # Apply model to test data, forming reconstruction
-    scores = model.get_scores(test_data)
-    predictions = model.get_reconstruction(test_data)
+    # Evaluate model
+    performance_output_string = evaluate_model(model, test_data, test_labels)
 
-    accuracy = performance.performance(scores, predictions, test_labels, "accuracy")
-    auroc = performance.performance(scores, predictions, test_labels, "AUC")
-    pr = performance.performance(scores, predictions, test_labels, "PR")
-
-    # Print to stdout (captured downstream)
-    print(f"{accuracy}, {auroc}, {pr}")
+    # Save to disk
+    np.save(reconstruction_filepath, model.get_reconstruction(test_data))
+    print(performance_output_string, file=performance_filepath)
 
 
 if __name__ == "__main__":
-    filepath = sys.argv[1]
-    output = sys.argv[2]
+    cache_filepath = sys.argv[1]  # CachedEmbedding filepath
+    model_filepath = sys.argv[2]  # LogReg filepath
+    reconstruction_filepath = sys.argv[3]  # Reconstruction filepath
+    performance_filepath = sys.argv[4]  # Performance filepath
 
-    main(filepath, output)
+    main(cache_filepath, model_filepath, reconstruction_filepath, performance_filepath)

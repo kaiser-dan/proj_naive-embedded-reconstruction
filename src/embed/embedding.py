@@ -66,7 +66,10 @@ class Embedding:
 
         for component in components:
             # Get component center of mass
-            component_center = np.mean(self.vectors[component])
+            component_center = np.mean([
+                self.vectors[vector_id]
+                for vector_id in component
+                ])
 
             # Translate each vector by center of mass
             # & Has effect of recentering vectors about the origin

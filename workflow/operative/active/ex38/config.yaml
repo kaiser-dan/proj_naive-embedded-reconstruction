@@ -3,13 +3,13 @@ metadata:
   version: "v0.1"
   researchers: "DK"
   protocol: True
-  protocol_path: "./procotol_EMB_ex38.md"
+  protocol_from_root: ["workflow", "operative", "active", "ex38", "procotol_EMB_ex38.md"]
 
 dev:
   logging:
-    directory: "{ROOT}.logs/"  # NOTE: Will use .format() in setup
+    directory_from_root: [".logs", ""]
     filelogger:
-      filepath: "log_EMB_ex38_{datetime.today().strftime('%Y%m%d')}.log"  # NOTE: Will use .format() in setup
+      filepath: "log__{datetime.today().strftime('%Y%m%d')}.log"  # NOTE: Will use .format() in setup
       mode: "w"
       level: 10
     consolelogger:
@@ -21,18 +21,32 @@ dev:
 
 hyperparameters:
   workflow:
-    root: ["..", "..", "..", "..", ""]  # NOTE: Uses os.join(*root) :: ex -> active -> operative -> workflow -> root
+    directories:
+      root: ["..", "..", "..", "..", ""]  # Note: Relative to this config file!
+      scripts_from_root: ["scripts", "snakemake", ""]
+      caches_from_root: ["data", "input", "caches", ""]
+      models_from_root: ["data", "output", "models", ""]
+      reconstructions_from_root: ["data", "output", "reconstructions", ""]
+      dataframes_from_root: ["data", "output", "dataframes", ""]
+      figures_from_root: ["data", "output", "figures", ""]
+      reports_from_root: ["results", "reports", ""]
+    reports:
+      rulegraph: True
+      report: True
     clean:
-      model: True
-      reconstruction: True
-      # NOTE: Individual records are always marked as temporary
-      # NOTE: Dataframes are the main output, do not remove them!
+      models: False
+      reconstructions: True
   env: False
 
 
 parameters:  # default to always including intercept, see logreg params
-  features: [["emb"], ["deg"], ["emb", "deg"]]
+  features: [
+    # ["emb"],
+    # ["deg"],
+    ["emb", "deg"]
+  ]
 
+  # ! This should all be off-loaded?
   caches:  # check inclusion
     embedding:
       embedder: "N2V"
@@ -50,4 +64,4 @@ parameters:  # default to always including intercept, see logreg params
   logistic_regression:  # pass as kwargs
     fit_intercept: True
     solver: "newton-cholesky"
-    penalty: "l2"
+    penalty: "none"

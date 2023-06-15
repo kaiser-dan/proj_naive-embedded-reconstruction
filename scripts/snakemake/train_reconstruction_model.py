@@ -8,6 +8,9 @@ import os
 import pickle
 from enum import Enum
 
+# --- Scientific computations ---
+import numpy as np
+
 # --- Project source ---
 # PATH adjustments
 # ROOT = os.path.join(*["..", "..", ""])  # Relative to this file
@@ -126,7 +129,17 @@ def main(filepath: str, output: str):
     # ! Cached just the edges, not edge -> g.t. mapping
     # training_labels = features.get_labels(cache.observed_edges)
     # ! <<< HOT-FIX >>>
-    training_labels = features.get_labels(cache.observed_edges)
+    training_labels = []
+    print(f"AHHHHH {cache.remnants[0].known_edges == cache.remnants[1].known_edges}")
+    for edge in sorted(list(cache.observed_edges)):
+        print(edge)
+        if edge in cache.remnants[0].known_edges:
+            print("G edge")
+            training_labels.append(1)
+        else:
+            print("H edge")
+            training_labels.append(0)
+    training_labels = np.array(training_labels)
     # ! <<< BROKEN <<<
 
     # Build LogReg class instance

@@ -83,7 +83,7 @@ rule reconstruct_multiplex:
         cache=f"{CACHES}{{cache_filename}}.pkl",
         model=f"{MODELS}model_penalty-{PENALTY}_{{cache_filename}}.pkl"
     output:
-        reconstruction=f"{RECONSTRUCTIONS}reconstruction_model_penalty-{PENALTY}_{{cache_filename}}.pkl",
+        reconstruction=f"{RECONSTRUCTIONS}reconstruction_model_penalty-{PENALTY}_{{cache_filename}}.pkl.npy",
         performance=f"{RECONSTRUCTIONS}performance_model_penalty-{PENALTY}_{{cache_filename}}.dat"
     shell:
         f"python {SCRIPTS}reconstruct_multiplex.py {{input.cache}} {{input.model}} {{output.reconstruction}} {{output.performance}}"

@@ -13,8 +13,7 @@ def performance(
         or ("ROC" in measure):
         return metrics.roc_auc_score(true_labels, scored_labels, **kwargs)
     elif "PR" in measure:
-        scores = metrics.accuracy_score(true_labels, predicted_labels, **kwargs)
-        precision, recall, _ = metrics.precision_recall_curve(true_labels, scores, **kwargs)
+        precision, recall, _ = metrics.precision_recall_curve(true_labels, scored_labels, **kwargs)
         return metrics.auc(recall, precision, **kwargs)
     else:
         raise NotImplementedError("Performance measure not implemented! Try \"accuracy\", \"auroc\", or \"aupr\".")

@@ -13,7 +13,8 @@ import numpy as np
 
 # --- Project source ---
 # PATH adjustments
-ROOT = os.path.join(*["..", "..", ""])
+# ROOT = os.path.join(*["..", "..", ""])  # Relative to this file
+ROOT = os.path.join(*["..", "..", "..", "..", ""])  # Relative to snakemake
 SRC = os.path.join(*[ROOT, "src", ""])
 sys.path.append(ROOT)
 sys.path.append(SRC)
@@ -47,11 +48,17 @@ def _verify_filepath(filepath: str, exists: bool):
 # --- Features ---
 def calculate_degree_feature(cache: CachedEmbeddings):
     rem_G, rem_H = cache.remnants
-    edges = set(cache.unobserved_edges.keys())
+    # ! >>> Broken >>>
+    # ! Cached just the edges, not edge -> g.t. mapping
+    # edges = set(cache.unobserved_edges.keys())
+    # ! <<< HOT-FIX >>>
+    edges = sorted(list(cache.unobserved_edges))
+    # ! <<< BROKEN <<<
+
 
     # Calculate degrees
-    src_rem_G, tgt_rem_G = features.get_degrees(rem_G, edges)
-    src_rem_H, tgt_rem_H = features.get_degrees(rem_H, edges)
+    src_rem_G, tgt_rem_G = features.get_degrees(rem_G.remnant, edges)
+    src_rem_H, tgt_rem_H = features.get_degrees(rem_H.remnant, edges)
 
     numerators = src_rem_G * tgt_rem_G
     others = src_rem_H * tgt_rem_H
@@ -62,11 +69,16 @@ def calculate_degree_feature(cache: CachedEmbeddings):
 
 def calculate_distance_feature(cache: CachedEmbeddings):
     vec_G, vec_H = cache.embeddings
-    edges = set(cache.unobserved_edges.keys())
+    # ! >>> Broken >>>
+    # ! Cached just the edges, not edge -> g.t. mapping
+    # edges = set(cache.unobserved_edges.keys())
+    # ! <<< HOT-FIX >>>
+    edges = sorted(list(cache.unobserved_edges))
+    # ! <<< BROKEN <<<
 
     # Calculate degrees
-    distances_G = features.get_distances(vec_G, edges)
-    distances_H = features.get_distances(vec_H, edges)
+    distances_G = features.get_distances(vec_G.vectors, edges)
+    distances_H = features.get_distances(vec_H.vectors, edges)
 
     feature = features.as_configuration(distances_G, distances_H)
 
@@ -74,9 +86,10 @@ def calculate_distance_feature(cache: CachedEmbeddings):
 
 def calculate_features(cache: CachedEmbeddings):
     # Ensure vectors are normalized
-    for vectors in cache.embeddings:
+    for idx, vectors in enumerate(cache.embeddings):
         if not vectors.aligned or not vectors.scaled:
-            vectors.normalize()
+            components = cache.remnants[idx].get_components()
+            vectors.normalize(components)
 
     features_degrees = calculate_degree_feature(cache)
     features_distances = calculate_distance_feature(cache)
@@ -126,7 +139,7 @@ def main(
     # Bring CachedEmbedding into scope
     try:
         filehandle = open(cache_filepath, "rb")
-        cache = pickle.load(cache_filepath)
+        cache = pickle.load(filehandle)
     except Exception as err:
         print(err, file=sys.stderr)
         quit(Status.OTHER.value)
@@ -136,7 +149,7 @@ def main(
     # Bring model into scope
     try:
         filehandle = open(model_filepath, "rb")
-        model = pickle.load(model_filepath)
+        model = pickle.load(filehandle)
     except Exception as err:
         print(err, file=sys.stderr)
         quit(Status.OTHER.value)
@@ -145,14 +158,26 @@ def main(
 
     # Calculate features
     test_data = calculate_features(cache=cache)
-    test_labels = features.get_labels(cache.unobserved_edges)
+    # ! >>> Broken >>>
+    # ! Cached just the edges, not edge -> g.t. mapping
+    # test_labels = features.get_labels(cache.unobserved_edges)
+    # ! <<< HOT-FIX >>>
+    test_labels = []
+    for edge in sorted(list(cache.unobserved_edges)):
+        if edge in cache.remnants[1].unknown_edges:
+            test_labels.append(0)
+        else:
+            test_labels.append(1)
+    test_labels = np.array(test_labels)
+    # ! <<< BROKEN <<<
 
     # Evaluate model
     performance_output_string = evaluate_model(model, test_data, test_labels)
 
     # Save to disk
     np.save(reconstruction_filepath, model.get_reconstruction(test_data))
-    print(performance_output_string, file=performance_filepath)
+    with open(performance_filepath, "a") as _fh:
+        _fh.write(performance_output_string)
 
 
 if __name__ == "__main__":

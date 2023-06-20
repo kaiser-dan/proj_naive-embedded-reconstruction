@@ -102,7 +102,7 @@ main () {
         check_exists $NEWFILE
         if [[ "$?" == "1" ]]
         then
-            echo "$FILE already exists; moving to next file" >> $LOG_FILE
+            echo "$NEWFILE already exists; moving to next file" >> $LOG_FILE
             continue
         fi
 

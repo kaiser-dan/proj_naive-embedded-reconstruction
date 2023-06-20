@@ -36,6 +36,7 @@ infer_dim () {
 
 check_exists () {
     # Args (sorted): FILE
+    # echo $1
     if [ -f "$1" ]
     then
         return 1
@@ -86,9 +87,19 @@ main () {
     # Apply main logic
     for ((k = 0; k <= ${#FILES[@]}; k++))
     do
+        # Skip strange empty lines that arise
+        if [ ${#FILES[k]} -lt 3 ]
+        then
+            continue
+        fi
+
         # Check file name exists
         FILE=${FILES[k]}
-        check_exists $FILE
+        FILE_PATH="${FILE%/*}/"
+        FILE_BASE="${FILE##*/}"
+        NEWFILE="../../data/input/caches/method-${EMBEDDING}*dim-${DIM}*$FILE_BASE"
+
+        check_exists $NEWFILE
         if [[ "$?" == "1" ]]
         then
             echo "$FILE already exists; moving to next file" >> $LOG_FILE
@@ -102,12 +113,13 @@ main () {
         DIM=$(infer_dim $FILE)
 
         # Cache embedding
+        echo ">>>>>>>>>>>>>>" >> $LOG_FILE
         echo "Embedding $FILE" >> $LOG_FILE
         echo "Naive" >> $LOG_FILE
         python embed_and_cache.py $FILE $EMBEDDING $DIM --repeat $REPS
         echo "Per-component" >> $LOG_FILE
-        python embed_and_cache.py $FILE "$EMBEDDING" $DIM --percomponent --repeat $REPS
-        echo "=============" >> $LOG_FILE
+        python embed_and_cache.py $FILE $EMBEDDING $DIM --percomponent --repeat $REPS
+        echo "<<<<<<<<<<<<<<" >> $LOG_FILE
     done
 }
 

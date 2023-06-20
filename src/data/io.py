@@ -2,9 +2,9 @@
 """
 # ============= SET-UP =================
 # --- Standard library ---
+import os
 import sys
 import pickle
-from datetime import datetime  # date metadata
 
 # --- Network science ---
 import networkx as nx
@@ -78,3 +78,26 @@ def save_multiplex(M: dict[int, nx.Graph], filepath: str):
     finally:
         fh.close()
 
+
+
+# --- Helper ---
+def process_filename(filename: str):
+    tags = dict()
+    tags["keywords"] = set()
+
+    basename = os.path.splitext(os.path.basename(filename))[0]
+    split_ = basename.split("_")
+
+    for tag in split_:
+        if "-" in tag:
+            name, value = tag.split("-")[:2]  # In case there are more than 1 -
+            tags[name] = value
+        else:
+            tags["keywords"].add(tag)
+
+    return tags
+
+
+if __name__ == "__main__":
+    s = "data/output/reconstructions/performance_model_penalty-None_method-N2V_percomponent-False_dim-32_embrep-0_remnants_theta-0.1_strategy-RANDOM_remrep-0_edgelists_name-LFR_N-250_T1-2.1_T2-1.0_kavg-10.0-15_mu-0.1_prob-1.0_rep-1.dat"
+    print(process_filename(s))

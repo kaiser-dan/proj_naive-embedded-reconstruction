@@ -41,9 +41,9 @@ DATAFRAME = join(
 desired_output.append(DATAFRAME)
 
 CACHE_FILENAMES = list()
-# ! FIX HARD-CODING INPUT CACHES?
+# ! FIX HARD-CODING INPUT CACHES?4
 for filename in listdir(CACHES):
-    if "N-250" in filename:
+    if "N-250" in filename and "theta-0.0" not in filename and "theta-1.0" not in filename:
         CACHE_FILENAMES.append(splitext(basename(filename))[0])
 
 # Optional output
@@ -116,4 +116,5 @@ rule generate_report:
     output:
         REPORT
     shell:
-        "snakemake --report {output}"
+        "touch {output}"
+        # "snakemake --report {output}"

@@ -25,6 +25,7 @@ from src.classifiers import features, performance
 
 ## CachedEmbedding
 from src.data.caches import CachedEmbeddings
+from src.data.io import process_filename
 
 # --- Globals ---
 ## Exit status
@@ -110,7 +111,7 @@ def evaluate_model(model, test_data, test_labels):
     pr = performance.performance(scores, predictions, test_labels, "PR")
 
     # Print to stdout (captured downstream)
-    return f"{accuracy},{auroc},{pr}"
+    return accuracy, auroc, pr
 
 
 # ================= MAIN =======================
@@ -172,12 +173,42 @@ def main(
     # ! <<< BROKEN <<<
 
     # Evaluate model
-    performance_output_string = evaluate_model(model, test_data, test_labels)
+    accuracy, auroc, pr = evaluate_model(model, test_data, test_labels)
+
+    # Format return string
+    ## Get identifying tags for record
+    tags = process_filename(performance_filepath)
+    tags.update({
+        "accuracy": accuracy,
+        "auroc": auroc,
+        "pr": pr
+    })
+
+    ## Ensure record has consistent data order
+    keys_sorted = sorted([
+        key
+        for key in tags.keys()
+        if key != "keywords"
+        ])
+
+    ## Add each feat ure to record
+    performance_output_string = ""
+    for key in keys_sorted:
+        performance_output_string += f"{tags[key]},"
+
+    ## Cleanup and add newline character
+    performance_output_string = performance_output_string[:-1] + "\n"
 
     # Save to disk
     np.save(reconstruction_filepath, model.get_reconstruction(test_data))
     with open(performance_filepath, "a") as _fh:
         _fh.write(performance_output_string)
+
+    # * >>>
+    with open("headers.txt", "w") as _fh:
+        for key in keys_sorted:
+            _fh.write(f"{key},")
+    # * <<<
 
 
 if __name__ == "__main__":

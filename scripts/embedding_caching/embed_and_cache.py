@@ -127,8 +127,8 @@ def main():
     ## Load remnants
     remnants = load_remnant(args.filepath)
 
-    ## Apply embeddings and form cache
     for rep in range(args.reps):
+        ## Apply embeddings and form cache
         cache = caches.build_cachedremnants(
             name=remnants[0].name,
             layers=(1, 2),

@@ -139,17 +139,10 @@ main () {
 
 # ============= MAIN ==============
 # Declare what remnants to embed
-declare -a REGEXES=(".*/remnants_.*remrep-1.*N-250_.*" ".*/remnants_.*remrep-1.*N-500_.*" ".*/remnants_.*remrep-1.*N-750_.*" ".*/remnants_.*remrep-1.*N-1000_.*")
-IDS=$(seq ${#REGEXES[@]})
-
-# Make functions to make visible to GNUParallel
-export -f infer_dim
-export -f check_exists
-export -f update_progbar
-export -f main
-
-# Embed the remnants over as many cores as are currently available
-parallel --xapply main {1} {2} ::: ${REGEXES[@]} ::: ${IDS[@]}
+main ".*/remnants_.*remrep-1.*N-250_.*" 1
+main ".*/remnants_.*remrep-1.*N-500_.*" 2
+main ".*/remnants_.*remrep-1.*N-750_.*" 3
+main ".*/remnants_.*remrep-1.*N-1000_.*" 4
 
 # Cleanup
 cleanup

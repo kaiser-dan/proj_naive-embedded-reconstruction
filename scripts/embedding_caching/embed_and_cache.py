@@ -104,7 +104,7 @@ def gather_args():
     except ValueError as err:
         print(str(err), file=sys.stderr)
         quit(Status.PARAM.value)
-    except:
+    except Exception as err:
         print(str(err), file=sys.stderr)
         quit(Status.OTHER.value)
 
@@ -147,4 +147,9 @@ def main():
 
 
 if __name__ == "__main__":
+    # ! >>> EMPTY FILENAME BUG HOT-FIX >>>
+    if len(sys.argv[1]) < 3:
+        quit()
+    # ! <<< EMPTY FILENAME BUG HOT-FIX <<<
+
     main()

@@ -5,16 +5,50 @@
 DIR_EDGELISTS="../../data/input/edgelists/"  # Where to find remnants (relative)
 FORCEALL=1  # Ignore if cache already exists
 
-## Fixed paramaters
-REPS=1
-EMBEDDING="N2V"
-
 ## Miscellaneous
 BAR_SIZE=20  # Progress bar aesthetics
 REGEXTYPE="egrep"  # Regex-type for `find`
+CONSOLE_LOG="0"  # Log to console as well as file
 
 # ============= FUNCTIONS ==============
 # --- File name processing ---
+find_files () {
+    # Args (sorted): REGEX_STRING, TEMP_FILE, EMBEDDING
+    # ~~~~~~~~~~~~~~~~~~~~
+    # Find all elements matching regex string
+    find ../../data/input/edgelists/ -type f -regextype egrep -regex "$REGEX_STRING" > "$TEMP_FILE"
+    mapfile RAWFILES < "$TEMP_FILE"
+
+    # Declare cleaned array, initially empty
+    CLEANFILES=()
+
+    # Check each file and add if they meet all criterion
+    for FILE in "${RAWFILES[@]}"
+    do
+        # Ignore empty filenames
+        # ? How do these come up? Can I exclude them from the find command directly?
+        [[ ${#FILE} -lt 3 ]] && continue
+
+        # Ignore files that already exist
+        if [[ "$FORCEALL" == "1" ]]
+        then
+            DIM=$(infer_dim $FILE)
+            FILE_PATH="${FILE%/*}/"
+            FILE_BASE="${FILE##*/}"
+            NEWFILE="../../data/input/caches/method-${EMBEDDING}*dim-${DIM}*$FILE_BASE"
+            [[ $(check_exists $NEWFILE) == "1" ]] && continue
+        fi
+
+        # --- Passed ---
+        # Add to array to save
+        CLEANFILES+=($FILE)
+    done
+
+    # Save cleaned file names to file
+    printf "%s\n" "${CLEANFILES[@]}" > "clean_${TEMP_FILE}"
+}
+
+
 infer_dim () {
     # Args (sorted): FILE
     # ~~~~~~~~~~~~~~~~~~~~
@@ -42,13 +76,7 @@ infer_dim () {
 check_exists () {
     # Args (sorted): FILE
     # ~~~~~~~~~~~~~~~~~~~~
-    # echo $1
-    if [ -f "$1" ]
-    then
-        return 1
-    else
-        return 0
-    fi
+    [[ -f "$1" ]] && return 1
 }
 
 # --- Display ---
@@ -70,6 +98,17 @@ update_progbar () {
     echo -n "$prog_display %" $'\r'  # append percentage
 }
 
+logger () {
+    # Args (sorted): TEXT, LOG_FILE
+    # ~~~~~~~~~~~~~~~~~~~~
+    if [ "$CONSOLE_LOG" == "1" ]
+    then
+        echo "$(date +%s) $1" | tee -a $2
+    else
+        echo "$(date +%s)  $1" >> $2
+    fi
+}
+
 # --- Cleanup ---
 cleanup () {
     find ./ -type f -name "*.tmp" -delete
@@ -77,47 +116,28 @@ cleanup () {
 
 # --- Main logic ---
 main () {
-    # Args (sorted): REGEX_STRING, TEMP_IDENTIFIER
+    # Args (sorted): REGEX_STRING, EMBEDDING, REPS
     # ~~~~~~~~~~~~~~~~~~~~
     # >>> Book-keeping >>>
     # Args processing
     REGEX_STRING="$1"
-    TEMP_IDENTIFIER="$2"
-    TEMP_FILE="remnants_$TEMP_IDENTIFIER.tmp"
-    LOG_FILE=".logs/log_$TEMP_IDENTIFIER.log"
+    EMBEDDING="$2"
+    REPS="$3"
+    TEMP_FILE="remnant_filepaths.tmp"
+    LOG_FILE=".logs/log_$(date +'%F::%H%M%S').log"
 
     # Empty log file
     touch $LOG_FILE; rm $LOG_FILE
     # <<< Book-keeping <<<
 
-    # Specify remnants to embed
-    find ../../data/input/edgelists/ -type f -regextype egrep -regex "$REGEX_STRING" > "$TEMP_FILE"
-    mapfile FILES < $TEMP_FILE
+    # Gather valid remnants for embedding
+    find_files $REGEX_STRING $TEMP_FILE $EMBEDDING
+    mapfile FILES < "clean_${TEMP_FILE}"
 
     # Apply main logic
     for ((k = 0; k <= ${#FILES[@]}; k++))
     do
-        # Skip strange empty lines that arise
-        if [ ${#FILES[k]} -lt 3 ]
-        then
-            continue
-        fi
-
-        # Check file name exists
-        if [[ "$FORCEALL" == "0" ]]
-        then
-            FILE=${FILES[k]}
-            FILE_PATH="${FILE%/*}/"
-            FILE_BASE="${FILE##*/}"
-            NEWFILE="../../data/input/caches/method-${EMBEDDING}*dim-${DIM}*$FILE_BASE"
-
-            check_exists $NEWFILE
-            if [[ "$?" == "1" ]]
-            then
-                echo "$NEWFILE already exists; moving to next file" >> $LOG_FILE
-                continue
-            fi
-        fi
+        FILE="${FILES[k]}"
 
         # Progress bar update
         update_progbar $k ${#FILES[@]} $BAR_SIZE
@@ -126,30 +146,27 @@ main () {
         DIM=$(infer_dim $FILE)
 
         # Cache embedding
-        echo ">>>>>>>>>>>>>>" >> $LOG_FILE
-        echo "Embedding $FILE" >> $LOG_FILE
-        echo "Naive" >> $LOG_FILE
+        logger ">>>>>>>>>>>>>>" $LOG_FILE
+        logger "Embedding $FILE" $LOG_FILE
+
+        logger "Naive" $LOG_FILE
         python embed_and_cache.py $FILE $EMBEDDING $DIM --repeat $REPS
-        echo "Per-component" >> $LOG_FILE
+
+        logger "Per-component" $LOG_FILE
         python embed_and_cache.py $FILE $EMBEDDING $DIM --percomponent --repeat $REPS
-        echo "<<<<<<<<<<<<<<" >> $LOG_FILE
+        logger "<<<<<<<<<<<<<<" $LOG_FILE
     done
 }
 
 
 # ============= MAIN ==============
-# Declare what remnants to embed
-declare -a REGEXES=(".*/remnants_.*remrep-1.*N-250_.*" ".*/remnants_.*remrep-1.*N-500_.*" ".*/remnants_.*remrep-1.*N-750_.*" ".*/remnants_.*remrep-1.*N-1000_.*")
-IDS=$(seq ${#REGEXES[@]})
+# Parse CL arguments
+REGEX_STRING=".*/remnants_.*remrep-1.*N-$1_.*"
+EMBEDDING="$2"
+REPS="$3"
 
-# Make functions to make visible to GNUParallel
-export -f infer_dim
-export -f check_exists
-export -f update_progbar
-export -f main
-
-# Embed the remnants over as many cores as are currently available
-parallel --xapply main {1} {2} ::: ${REGEXES[@]} ::: ${IDS[@]}
+# Embed the remnants
+main $REGEX_STRING $EMBEDDING $REPS
 
 # Cleanup
 cleanup

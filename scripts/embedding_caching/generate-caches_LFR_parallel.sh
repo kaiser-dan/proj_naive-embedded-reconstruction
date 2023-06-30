@@ -5,16 +5,49 @@
 DIR_EDGELISTS="../../data/input/edgelists/"  # Where to find remnants (relative)
 FORCEALL=1  # Ignore if cache already exists
 
-## Fixed paramaters
-REPS=1
-EMBEDDING="N2V"
-
 ## Miscellaneous
 BAR_SIZE=20  # Progress bar aesthetics
 REGEXTYPE="egrep"  # Regex-type for `find`
 
 # ============= FUNCTIONS ==============
 # --- File name processing ---
+find_files () {
+    # Args (sorted): REGEX_STRING, TEMP_FILE, EMBEDDING
+    # ~~~~~~~~~~~~~~~~~~~~
+    # Find all elements matching regex string
+    find ../../data/input/edgelists/ -type f -regextype egrep -regex "$REGEX_STRING" > "$TEMP_FILE"
+    mapfile RAWFILES < "$TEMP_FILE"
+
+    # Declare cleaned array, initially empty
+    CLEANFILES=()
+
+    # Check each file and add if they meet all criterion
+    for FILE in "${RAWFILES[@]}"
+    do
+        # Ignore empty filenames
+        # ? How do these come up? Can I exclude them from the find command directly?
+        [[ ${#FILE} -lt 3 ]] && continue
+
+        # Ignore files that already exist
+        if [[ "$FORCEALL" == "1" ]]
+        then
+            DIM=$(infer_dim $FILE)
+            FILE_PATH="${FILE%/*}/"
+            FILE_BASE="${FILE##*/}"
+            NEWFILE="../../data/input/caches/method-${EMBEDDING}*dim-${DIM}*$FILE_BASE"
+            [[ $(check_exists $NEWFILE) == "1" ]] && continue
+        fi
+
+        # --- Passed ---
+        # Add to array to save
+        CLEANFILES+=($FILE)
+    done
+
+    # Save cleaned file names to file
+    printf "%s\n" "${CLEANFILES[@]}" > "clean_${TEMP_FILE}"
+}
+
+
 infer_dim () {
     # Args (sorted): FILE
     # ~~~~~~~~~~~~~~~~~~~~
@@ -42,13 +75,7 @@ infer_dim () {
 check_exists () {
     # Args (sorted): FILE
     # ~~~~~~~~~~~~~~~~~~~~
-    # echo $1
-    if [ -f "$1" ]
-    then
-        return 1
-    else
-        return 0
-    fi
+    [[ -f "$1" ]] && return 1
 }
 
 # --- Display ---
@@ -76,73 +103,45 @@ cleanup () {
 }
 
 # --- Main logic ---
+embed_with_print () {
+    echo "$1"
+    if [ ${#1} -gt 3 ]
+    then
+        python embed_and_cache.py "$1" "$2" "$3" --repeat "$4"
+    fi
+}
+
 main () {
-    # Args (sorted): REGEX_STRING, TEMP_IDENTIFIER
+    # Args (sorted): REGEX_STRING, EMBEDDING, REPS, DIM
     # ~~~~~~~~~~~~~~~~~~~~
     # >>> Book-keeping >>>
     # Args processing
     REGEX_STRING="$1"
-    TEMP_IDENTIFIER="$2"
-    TEMP_FILE="remnants_$TEMP_IDENTIFIER.tmp"
-    LOG_FILE=".logs/log_$TEMP_IDENTIFIER.log"
-
-    # Empty log file
-    touch $LOG_FILE; rm $LOG_FILE
+    EMBEDDING="$2"
+    REPS="$3"
+    DIM="$4"
+    TEMP_FILE="remnant_filepaths.tmp"
     # <<< Book-keeping <<<
 
-    # Specify remnants to embed
-    find ../../data/input/edgelists/ -type f -regextype egrep -regex "$REGEX_STRING" > "$TEMP_FILE"
-    mapfile FILES < $TEMP_FILE
+    # Gather valid remnants for embedding
+    find_files $REGEX_STRING $TEMP_FILE $EMBEDDING
+    mapfile FILES < "clean_${TEMP_FILE}"
 
     # Apply main logic
-    for ((k = 0; k <= ${#FILES[@]}; k++))
-    do
-        # Skip strange empty lines that arise
-        if [ ${#FILES[k]} -lt 3 ]
-        then
-            continue
-        fi
-
-        # Check file name exists
-        if [[ "$FORCEALL" == "0" ]]
-        then
-            FILE=${FILES[k]}
-            FILE_PATH="${FILE%/*}/"
-            FILE_BASE="${FILE##*/}"
-            NEWFILE="../../data/input/caches/method-${EMBEDDING}*dim-${DIM}*$FILE_BASE"
-
-            check_exists $NEWFILE
-            if [[ "$?" == "1" ]]
-            then
-                echo "$NEWFILE already exists; moving to next file" >> $LOG_FILE
-                continue
-            fi
-        fi
-
-        # Progress bar update
-        update_progbar $k ${#FILES[@]} $BAR_SIZE
-
-        # Get DIM from file
-        DIM=$(infer_dim $FILE)
-
-        # Cache embedding
-        echo ">>>>>>>>>>>>>>" >> $LOG_FILE
-        echo "Embedding $FILE" >> $LOG_FILE
-        echo "Naive" >> $LOG_FILE
-        python embed_and_cache.py $FILE $EMBEDDING $DIM --repeat $REPS
-        echo "Per-component" >> $LOG_FILE
-        python embed_and_cache.py $FILE $EMBEDDING $DIM --percomponent --repeat $REPS
-        echo "<<<<<<<<<<<<<<" >> $LOG_FILE
-    done
+    export -f embed_with_print
+    parallel embed_with_print {1} $EMBEDDING $DIM $REPS ::: "${FILES[@]}"
 }
 
 
 # ============= MAIN ==============
-# Declare what remnants to embed
-main ".*/remnants_.*remrep-1.*N-250_.*" 1
-main ".*/remnants_.*remrep-1.*N-500_.*" 2
-main ".*/remnants_.*remrep-1.*N-750_.*" 3
-main ".*/remnants_.*remrep-1.*N-1000_.*" 4
+# Parse CL arguments
+REGEX_STRING=".*/remnants_.*remrep-1.*N-$1_.*"
+EMBEDDING="$2"
+REPS="$3"
+DIM="$4"
+
+# Embed the remnants
+main $REGEX_STRING $EMBEDDING $REPS
 
 # Cleanup
 cleanup

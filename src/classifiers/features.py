@@ -22,8 +22,10 @@ def get_labels(edges):
 
 # TODO: Add floating-point comparison safety for small floats
 def safe_inverse(x, tolerance=sys.float_info.epsilon):
+    # Ensure x has float dtype
+    x = x.astype(float)
     x += tolerance
-    if np.isclose(x, 0):
+    if np.isclose(x.any(), 0):
         raise ZeroDivisionError("Input with system precision is still too small!")
     else:
         return 1 / x
@@ -69,7 +71,7 @@ def as_configuration(
 
     return configurations
 
-def format_feature_matrix(*feature_vectors):
+def format_feature_matrix(feature_vectors):
     # Get number of features and observations
     num_cols = len(feature_vectors)
     num_rows = len(feature_vectors[0])

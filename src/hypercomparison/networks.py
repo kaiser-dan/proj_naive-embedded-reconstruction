@@ -71,14 +71,23 @@ class NetworkBase:
         ))
         shortest_path_length_dict = dict(nx.shortest_path_length(self.G))
 
+        # ! >>> BROKEN - FAILS FOR MANY COMPONENTS >>>
+        # for nodeid1 in range(number_of_nodes):
+        #     for nodeid2 in range(number_of_nodes):
+        #         l = shortest_path_length_dict[
+        #             self.id2node[nodeid1]
+        #         ][
+        #             self.id2node[nodeid2]
+        #         ]
+        #         self.shortest_path_length_matrix[nodeid1][nodeid2] = l
+        # ! --- HOTFIX - FAILS FOR MANY COMPONENTS ---
+        diameter = nx.diameter(self.get_largest_component())
         for nodeid1 in range(number_of_nodes):
             for nodeid2 in range(number_of_nodes):
-                l = shortest_path_length_dict[
-                    self.id2node[nodeid1]
-                ][
-                    self.id2node[nodeid2]
-                ]
+                l_dict = shortest_path_length_dict[self.id2node[nodeid1]]
+                l = l_dict.get(self.id2node[nodeid2], diameter**3)
                 self.shortest_path_length_matrix[nodeid1][nodeid2] = l
+        # ! <<< HOTFIX - FAILS FOR MANY COMPONENTS <<<
 
     def index_nodes(self):
         if not hasattr(self, 'id2node'):

@@ -3,6 +3,7 @@
 # ========== SET-UP ==========
 # --- Standard library ---
 from collections import Counter
+from typing import Union
 
 # --- Scientific computing ---
 import numpy as np
@@ -30,18 +31,18 @@ class LogReg(ReconstructionModel):
         self.logreg_parameters = logreg_parameters
 
         # Model instantiation
-        self.__start_sklearn_model()
-        self.__train()
+        self._start_sklearn_model()
+        self._train()
 
         return
 
 
     # --- Private methods ---
-    def __start_sklearn_model(self):
+    def _start_sklearn_model(self):
         self._model = LogisticRegression(**self.logreg_parameters)
         return
 
-    def __train(self):
+    def _train(self):
         self._model.fit(self.X, self.Y)
         self.intercept = self._model.intercept_[0]
         self.coefficients = self._model.coef_[0]
@@ -49,7 +50,22 @@ class LogReg(ReconstructionModel):
 
     # --- Public methods ---
     # > Examining given data >
-    def get_data(self, label=None):
+    def get_data(self, label: Union[None, int]=None):
+        """Retrieve data associated with a given label.
+
+        Restricts input data to points which match a given classification
+        label. If no label is specified, the entire feature matrix is returned.
+
+        Parameters
+        ----------
+        label : int, optional
+            Desired classification label, by default None
+
+        Returns
+        -------
+        np.array
+            Subset of feature matrix matching specified classification label.
+        """
         if label is not None:
             indices = np.nonzero(self.Y == label)
             return self.X[indices]

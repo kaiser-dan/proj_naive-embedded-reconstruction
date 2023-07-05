@@ -23,20 +23,6 @@ def embedded_edge_distance(
 
     return distance
 
-def component_penalized_embedded_edge_distance(
-        edge, vectors, components,
-        penalty=2**8,
-        metric=_metrics.euclidean_distance):
-    src, tgt = edge  # unpack edge
-
-    distance = metric(vectors[src], vectors[tgt])
-    distance += SYSTEM_PRECISION
-
-    if components[src] != components[tgt]:
-        distance += penalty
-
-    return distance
-
 # --- Helpers ---
 def get_component_mapping(graph):
     mapping = {}  # node -> component

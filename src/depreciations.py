@@ -263,3 +263,17 @@ def get_distance_ratios_feature(distances_G, distances_H, zde_penalty=1e-12):
     # <<< Calculate distance ratios <<<
 
     return distance_ratios
+
+def component_penalized_embedded_edge_distance(
+        edge, vectors, components,
+        penalty=2**8,
+        metric=_metrics.euclidean_distance):
+    src, tgt = edge  # unpack edge
+
+    distance = metric(vectors[src], vectors[tgt])
+    distance += SYSTEM_PRECISION
+
+    if components[src] != components[tgt]:
+        distance += penalty
+
+    return distance

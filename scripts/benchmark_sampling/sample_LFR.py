@@ -25,7 +25,7 @@ from src.data.preprocessing import duplex_network
 # --- Globals ---
 ## Fixed parameters
 MIN_COMMUNITY: int = 1
-REPS: int = 5
+REPS: int = 10
 
 ## Filepaths & templates
 DATA_EDGELISTS = os.path.join(*[ROOT, "data", "input", "edgelists", ""])

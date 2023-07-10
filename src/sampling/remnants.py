@@ -111,23 +111,61 @@ def save_remnant(remnant: Remnant, filepath: str, only_graph: bool = False):
         finally:
             fh.close()
 
-def build_remnants(
-        G: nx.Graph,
-        H: nx.Graph,
-        training_edges: dict[tuple[int, int], int],
-        test_edges: dict[tuple[int, int], int],
-        theta: Union[None, float] = None,
-        observation_strategy: Union[None, str] = None,
-        name: Union[None, str] = None):
-    known_edges_G = {edge for edge, layer in training_edges.items() if layer == 1}
-    known_edges_H = {edge for edge, layer in training_edges.items() if layer == 0}
-    unknown_edges_G = {edge for edge, layer in test_edges.items() if layer == 1}
-    unknown_edges_H = {edge for edge, layer in test_edges.items() if layer == 0}
-
+def build_remnant(raw_graph: nx.Graph,
+        training_edges,
+        test_edges,
+        layer_id,
+        theta,
+        observation_strategy,
+        name):
+    # >>> Book-keeping >>>
+    # Set non-None name for filepath downstream
     if name is None:
-        name = "None"
+        name = f"None_layer-{layer_id}"
+    # <<< Book-keeping <<<
 
-    R_G = Remnant(G, known_edges_G, unknown_edges_G, theta, observation_strategy, name+"_layer-1")
-    R_H = Remnant(H, known_edges_H, unknown_edges_H, theta, observation_strategy, name+"_layer-2")
+    # Calculate remnant graph
+    ## Add nodes
+    remnant_graph = nx.Graph()
+    remnant_graph.add_nodes_from(raw_graph)
+
+    ## Get edges
+    known_edges = {
+        edge
+        for edge, layer in training_edges.items()
+        if layer == layer_id
+    }
+    unknown_edges = set(test_edges.keys())
+    remnant_edges = known_edges | unknown_edges
+
+    ## Add edges
+    remnant_graph.add_edges_from(remnant_edges)
+
+    # Build Remnants object
+    remnant = Remnant(
+        remnant_graph,
+        known_edges,
+        unknown_edges,
+        theta,
+        observation_strategy,
+        name
+    )
+
+    return remnant
+
+def build_remnants(
+        G, H,
+        training_edges, test_edges,
+        theta, observation_strategy=None, name=None):
+    R_G = build_remnant(
+        G,
+        training_edges, test_edges, 1,
+        theta, observation_strategy, name
+    )
+    R_H = build_remnant(
+        H,
+        training_edges, test_edges, 0,
+        theta, observation_strategy, name
+    )
 
     return R_G, R_H

@@ -41,7 +41,7 @@ DATAFRAME = join(
 desired_output.append(DATAFRAME)
 
 CACHE_FILENAMES = list()
-# ! FIX HARD-CODING INPUT CACHES?4
+# ! FIX HARD-CODING INPUT CACHES?
 for filename in listdir(CACHES):
     if "N-250" in filename and "theta-0.0" not in filename and "theta-1.0" not in filename:
         CACHE_FILENAMES.append(splitext(basename(filename))[0])

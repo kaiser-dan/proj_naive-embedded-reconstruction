@@ -10,6 +10,31 @@ import numpy as np
 
 # ============= CLASSES =================
 class Embedding:
+    """General class containing multiplex embedding data.
+
+    Data
+    ----
+    vectors : np.array
+        Embedded node vectors.
+    embedder : str
+        String labeling the graph embedding the vectors were obtained from.
+    aligned : bool = False
+        Indicator if the vector sets are aligned to origin.
+    scaled : bool = False
+        Indicator if vector sets are normalized by norm.
+
+
+    Methods
+    -------
+    align_vectors(components)
+        Aligns vector sets of each component to have center of mass at origin.
+    scale_vectors(components)
+        Scale the vector sets of each component to have norm density one.
+    normalize(components)
+        Aligns then scales vectors.
+    save(filepath: str)
+        Saves object to the given filepath.
+    """
     def __init__(
             self,
             vectors: np.array,

@@ -46,7 +46,7 @@ class MDSBase:
 
 class Isomap_(MDSBase):
     def __init__(self, dimension=2):
-        super(Isomap, self).__init__(dimension)
+        super(Isomap_, self).__init__(dimension)
 
     def _get_embedding(self):
         return manifold.MDS(
@@ -85,22 +85,22 @@ def Isomap(
     node_index = reindex_nodes(graph)
 
     # Initialize return struct
-    vectors = dict()  # node label -> vector
+    vectors_return = dict()  # node label -> vector
     # <<< Book-keeping <<<
 
     # Get vectors
     vectors = _dispatch(graph, parameters)
 
     # Converting type
-    if eigenvectors is ndarray:
-        eigenvectors = matrix_to_dict(eigenvectors)
+    if vectors is ndarray:
+        vectors = matrix_to_dict(vectors)
 
     # Apply node reindexing
     for node, node_adjusted in node_index.items():
-        vectors[node] = eigenvectors[node_adjusted]
+        vectors_return[node] = vectors[node_adjusted]
 
     # Construct Embedding instance
-    embedding = Embedding(vectors, "Isomap" if not per_component else "Isomap-PC")
+    embedding = Embedding(vectors_return, "Isomap" if not per_component else "Isomap-PC")
 
     return embedding
 
@@ -110,7 +110,7 @@ def _Isomap(graph, parameters):
     G_ = networks.NetworkBase()
     G_.G = graph
 
-    vectors = Isomap(**parameters).train(G_)
+    vectors = Isomap_(**parameters).train(G_)
 
     return vectors
 

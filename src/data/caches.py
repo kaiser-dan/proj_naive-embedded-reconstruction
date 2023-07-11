@@ -19,7 +19,7 @@ sys.path.append(SRC)
 
 ## Embeddings
 from embed.embedding import Embedding
-from embed import LE, N2V
+from embed import LE, N2V, Isomap
 
 ## Remnants
 from sampling.remnants import Remnant
@@ -107,9 +107,14 @@ def build_cachedremnants(
     if embedder == "LE":  # TODO: Simplify with regex on "X-PC"
         embedding_function = LE.LE
         parameters, hyperparameters, experiment_setup = params.set_parameters_LE(**kwargs)
-    if embedder ==  "N2V":
+    elif embedder == "N2V":
         embedding_function = N2V.N2V
-        parameters, hyperparameters, experiment_setup = params.set_parameters_N2V(**kwargs)
+        parameters, hyperparameters, experiment_setup = params.set_parameters_N2V(**kwargs, quiet=False)
+    elif embedder == "ISOMAP":
+        embedding_function = Isomap.Isomap
+        parameters = {"dimension": 128}
+        # TODO: Tidy hyperparameter handling
+        hyperparameters = {"embedding": dict()}  # to avoid downstream keyerrors
     else:
         raise NotImplementedError(f"Embedder {embedder} not a recognized/implemented graph embedding!")
 

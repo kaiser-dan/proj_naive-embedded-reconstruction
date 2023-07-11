@@ -51,7 +51,7 @@ def _setup_argument_parser():
         help="Filepath of pickled remnant duplex.")
     parser.add_argument(
         "embedding",
-        choices=["N2V", "LE"],
+        choices=["N2V", "LE", "ISOMAP"],
         help="Embedding method.")
     parser.add_argument(
         "dimensions",

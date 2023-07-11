@@ -109,7 +109,7 @@ def build_cachedremnants(
         parameters, hyperparameters, experiment_setup = params.set_parameters_LE(**kwargs)
     elif embedder == "N2V":
         embedding_function = N2V.N2V
-        parameters, hyperparameters, experiment_setup = params.set_parameters_N2V(**kwargs, quiet=False)
+        parameters, hyperparameters, experiment_setup = params.set_parameters_N2V(**kwargs)
     elif embedder == "ISOMAP":
         embedding_function = Isomap.Isomap
         parameters = {"dimension": 128}

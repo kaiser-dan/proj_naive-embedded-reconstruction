@@ -133,7 +133,9 @@ def main():
             name=remnants[0].name,
             layers=(1, 2),
             remnants=remnants,
-            embedder=args.embedding)
+            embedder=args.embedding,
+            workers=1,
+            quiet=False)
 
         ## Save cache to disk
         basename = FILEPATH_TEMPLATE.format(

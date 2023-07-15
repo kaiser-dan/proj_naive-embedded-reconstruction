@@ -2,7 +2,7 @@
 # Clarify arguments
 ## Globals
 DIM=128
-INPUT_DIR="../../data/input/data_input_manuscript_initial/"
+INPUT_DIR="../../data/input/SYSLFR/edgelists"
 
 ## Command-line
 EMBEDDING="$1"
@@ -11,7 +11,7 @@ EMBEDDING="$1"
 find $INPUT_DIR -type f -regextype egrep -regex ".*remrep-1.*" > filehandles.tmp
 
 # Apply embed_and_cache.py
-cat filehandles.tmp | parallel python embed_and_cache.py {} $EMBEDDING $DIM
+cat filehandles.tmp | parallel --jobs 10 python embed_and_cache.py {} $EMBEDDING $DIM
 
 # Remove temporary files
 rm filehandles.tmp

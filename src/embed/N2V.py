@@ -22,20 +22,20 @@ import hypercomparison.networks
 class Node2Vec:
     def __init__(
         self,
-        dimension=128,
+        dimensions=128,
         walk_length=80,
-        walk_num=10,
+        num_walks=10,
         window_size=10,
-        worker=1,
+        workers=1,
         iteration=1,
         p=1,
         q=1
     ):
-        self.dimension = dimension
+        self.dimension = dimensions
         self.walk_length = walk_length
-        self.walk_num = walk_num
+        self.walk_num = num_walks
         self.window_size = window_size
-        self.worker = worker
+        self.worker = workers
         self.iteration = iteration
         self.p = p
         self.q = q
@@ -52,12 +52,12 @@ class Node2Vec:
         walks = [[str(node) for node in walk] for walk in walks]
         model = Word2Vec(
             walks,
-            size=self.dimension,
+            vector_size=self.dimension,
             window=self.window_size,
             min_count=0,
             sg=1,
             workers=self.worker,
-            iter=self.iteration,
+            # iter=self.iteration,
         )
         self.id2node = dict([(vid, node) for vid, node in enumerate(G.nodes())])
         #temp_embeddings = np.array([list(model.wv[str(self.id2node[i])]) for i in range(len(self.id2node))]) # centering the coordinates
@@ -200,21 +200,23 @@ def N2V(
     Embedding
         Embedding class instance.
     """
-    # >>> Dispatch >>>
-    if per_component:
-        return _N2V_per_component(graph, parameters, hyperparameters)
+    # # >>> Dispatch >>>
+    # if per_component:
+    #     return _N2V_per_component(graph, parameters, hyperparameters)
 
-    # <<< Dispatch <<<
+    # # <<< Dispatch <<<
 
-    # Sample random walks
-    embedding_model = n2v(graph, **parameters)
+    # # Sample random walks
+    # embedding_model = n2v(graph, **parameters)
 
-    # Embed walks with word2vec and retrieve model
-    embedding_model = embedding_model.fit(**hyperparameters)
-    embedding_model = embedding_model.wv
+    # # Embed walks with word2vec and retrieve model
+    # embedding_model = embedding_model.fit(**hyperparameters)
+    # embedding_model = embedding_model.wv
+
+    vectors = Node2Vec(**{k: v for k, v in parameters.items() if k in ["dimensions", "num_walks", "walk_length"]}).train(graph)
 
     # Retrieve resultant vectors
-    vectors = get_contiguous_vectors(embedding_model)
+    # vectors = get_contiguous_vectors(embedding_model)
 
     embedding = Embedding(vectors, "N2V")
 

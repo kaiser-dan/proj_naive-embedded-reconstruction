@@ -91,6 +91,12 @@ class LogReg(ReconstructionModel):
         true_labels = self.Y
         return performance(scored_labels, predicted_labels, true_labels, measure=measure)
 
+    def testing_performance(self, X_, Y_, measure="accuracy"):
+        scored_labels = self.get_scores(X_)
+        predicted_labels = self.get_reconstruction(X_)
+        true_labels = Y_
+        return performance(scored_labels, predicted_labels, true_labels, measure=measure)
+
     # > Model application >
     def decision_function(self, X_):
         return self._model.decision_function(X_)

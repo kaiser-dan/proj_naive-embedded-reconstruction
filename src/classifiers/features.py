@@ -21,14 +21,22 @@ def get_labels(edges):
     return list(edges.values())
 
 # TODO: Add floating-point comparison safety for small floats
+# TODO: See python docs on sys.float_info.epsilon versus sys.float_info.min
 def safe_inverse(x, tolerance=sys.float_info.epsilon):
     # Ensure x has float dtype
     x = x.astype(float)
+
+    # Add machine tolerance to avoid division by zero
     x += tolerance
+
+    # Check if adding machine tolerance is not enough to avoid standard precision errors
+    # * This shouldn't trigger by default
+    # * I think it primarily arises from mixing 32 and 64 bit floats
     if np.isclose(x.any(), 0):
         raise ZeroDivisionError("Input with system precision is still too small!")
-    else:
-        return 1 / x
+
+    # Calculate the multiplicative inverse (with tolerance added)
+    return 1 / x
 
 # --- Feature calculations ---
 def get_degrees(graph, edges):

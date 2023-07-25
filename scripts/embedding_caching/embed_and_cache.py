@@ -96,17 +96,18 @@ def gather_args():
     args = _parser.parse_args()
 
     # Verify integrity of arguments
-    try:
-        _verify_args(args)
-    except FileNotFoundError as err:
-        print(str(err), file=sys.stderr)
-        quit(Status.FILE.value)
-    except ValueError as err:
-        print(str(err), file=sys.stderr)
-        quit(Status.PARAM.value)
-    except Exception as err:
-        print(str(err), file=sys.stderr)
-        quit(Status.OTHER.value)
+    #try:
+        #_verify_args(args)
+    #except FileNotFoundError as err:
+        #print(str(err), file=sys.stderr)
+        #quit(Status.FILE.value)
+    #except ValueError as err:
+        #print(str(err), file=sys.stderr)
+        #quit(Status.PARAM.value)
+    #except Exception as err:
+        #print("AHHH", args)
+        #print(str(err), file=sys.stderr)
+        #quit(Status.OTHER.value)
 
     return args
 

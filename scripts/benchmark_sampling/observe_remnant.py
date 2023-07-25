@@ -18,6 +18,7 @@ sys.path.append(SRC)
 
 # Source code imports
 from src.sampling.random import partial_information
+from src.data.io import read_file
 
 # --- Globals ---
 ## Exit status
@@ -61,6 +62,16 @@ def _setup_argument_parser():
         "--repeat", dest="reps",
         type=int, default=1,
         help="Number of remnants to gather on given multiplex.")
+
+    # Plain-text input
+    parser.add_argument(
+        "--plain",
+        action="store_true",
+        help="Expect plain-text edgelist file.")
+    parser.add_argument(
+        "--layers", nargs=2,
+        help="Layers of plain-text multiplex from which to induce a duplex."
+    )
 
     return parser
 
@@ -144,8 +155,16 @@ def main():
 
     # Main logic
     edgelist_dir, edgelist_filepath = os.path.split(args.filepath)
-    for rep in range(args.reps):
+
+    if args.plain:
+        l1, l2 = [int(l) for l in args.layers]
+        duplex = read_file(args.filepath)
+        duplex = [duplex[l1], duplex[l2]]
+        edgelist_filepath = os.path.splitext(edgelist_filepath)[0] + f"_l1-{l1}_l2-{l2}" + os.path.splitext(edgelist_filepath)[1]
+    else:
         duplex = load_duplex(args.filepath)
+
+    for rep in range(args.reps):
         rem_G, rem_H = observe_remnant(duplex, args.theta, args.strategy)
         filepath = os.path.join(
             edgelist_dir,

@@ -129,6 +129,20 @@ def main():
     remnants = load_remnant(args.filepath)
 
     for rep in range(args.reps):
+        ## Check if cache exists
+        basename = FILEPATH_TEMPLATE.format(
+            method=args.embedding,
+            pc=args.per_component,
+            dim=args.dimensions,
+            rep=rep,
+            remnant_filepath=os.path.basename(args.filepath)
+        )
+
+        if os.path.isfile(os.path.join(CACHE_DIR, basename)):
+            print("Cache exists, skipping")
+            return
+
+
         ## Apply embeddings and form cache
         cache = caches.build_cachedremnants(
             name=remnants[0].name,
@@ -138,14 +152,7 @@ def main():
             # workers=1,
             # quiet=False)
 
-        ## Save cache to disk
-        basename = FILEPATH_TEMPLATE.format(
-            method=args.embedding,
-            pc=args.per_component,
-            dim=args.dimensions,
-            rep=rep,
-            remnant_filepath=os.path.basename(args.filepath)
-        )
+
         cache.save(os.path.join(CACHE_DIR, basename))
 
 

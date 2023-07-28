@@ -143,7 +143,7 @@ def alias_setup(probs):
     """
     K = len(probs)
     q = np.zeros(K)
-    J = np.zeros(K, dtype=np.int)
+    J = np.zeros(K, dtype=int)
 
     smaller = []
     larger = []
@@ -224,7 +224,7 @@ class AliasSampler:
         """
         K = len(self.probs)
         self.q = np.zeros(K)
-        self.J = np.zeros(K, dtype=np.int)
+        self.J = np.zeros(K, dtype=int)
 
         smaller = []
         larger = []

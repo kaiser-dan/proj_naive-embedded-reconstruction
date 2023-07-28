@@ -96,8 +96,12 @@ def Isomap(
         vectors = matrix_to_dict(vectors)
 
     # Apply node reindexing
-    for node, node_adjusted in node_index.items():
-        vectors_return[node] = vectors[node_adjusted]
+    # ! >>> BROKEN >>>
+    #for node, node_adjusted in node_index.items():
+    #    vectors_return[node] = vectors[node_adjusted]
+    # ! --- HOT-FIX ---
+    vectors_return = vectors
+    # ! <<< BROKEN <<<
 
     # Construct Embedding instance
     embedding = Embedding(vectors_return, "Isomap" if not per_component else "Isomap-PC")

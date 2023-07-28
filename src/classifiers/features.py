@@ -44,8 +44,15 @@ def get_degrees(graph, edges):
     tgt_degrees = []
 
     for src, tgt in edges:
-        src_degrees.append(graph.degree(src))
-        tgt_degrees.append(graph.degree(tgt))
+        # ! DEBUG
+        try:
+            src_degrees.append(graph.degree(src))
+        except:
+            print("AHHH", src)
+        try:
+            tgt_degrees.append(graph.degree(tgt))
+        except:
+            print("AHHH", tgt)
 
     return np.array(src_degrees), np.array(tgt_degrees)
 

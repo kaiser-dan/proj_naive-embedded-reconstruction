@@ -128,8 +128,8 @@ def set_parameters_LE(
         dimensions=128,
         per_component=False,
         which="SM",
-        maxiter=1000,
-        tol=-8,
+        maxiter=10000,
+        tol=-4,
         # LogReg
         penalty=None,
         fit_intercept=True,

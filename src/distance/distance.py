@@ -18,7 +18,21 @@ def embedded_edge_distance(
         edge, vectors,
         metric=_metrics.euclidean_distance):
     src, tgt = edge  # unpack edge
-    distance = metric(vectors[src], vectors[tgt])
+
+    try:
+        distance = metric(vectors[src], vectors[tgt])
+    except KeyError as err:  # * unknown cause of string keys may occur
+        # Note error
+        # print(f"Encountered key error: {err}; attempting key type conversion", file=sys.stderr)
+
+        # Attempt type fix
+        if isinstance(src, int): 
+            src, tgt = str(src), str(tgt)
+        elif isinstance(src, str): 
+            src, tgt = int(src), int(tgt)
+
+        distance = metric(vectors[src], vectors[tgt])
+    
     distance += SYSTEM_PRECISION
 
     return distance

@@ -11,7 +11,7 @@ EMBEDDING="$1"
 find $INPUT_DIR -type f -regextype egrep -regex ".*remrep-0.*arxiv.*" > filehandles.tmp
 
 # Apply embed_and_cache.py
-cat filehandles.tmp | parallel --jobs 10 python embed_and_cache.py {} $EMBEDDING $DIM
+cat filehandles.tmp | parallel --jobs 1 python embed_and_cache.py {} $EMBEDDING $DIM
 
 # Remove temporary files
 rm filehandles.tmp

@@ -8,10 +8,10 @@ INPUT_DIR="../../data/input/SYSLFR/edgelists"
 EMBEDDING="$1"
 
 # Get remnant filehandles
-find $INPUT_DIR -type f -regextype egrep -regex ".*remrep-1.*" > filehandles.tmp
+find $INPUT_DIR -type f -regextype egrep -regex ".*theta-0.[4-9][0-9].*remrep-0.*mu-0.[2-5].*" > "filehandles_$1.tmp"
 
 # Apply embed_and_cache.py
-cat filehandles.tmp | parallel --jobs 10 python embed_and_cache.py {} $EMBEDDING $DIM
+cat "filehandles_$1.tmp" | parallel --jobs $2 python embed_and_cache.py {} $EMBEDDING $DIM
 
 # Remove temporary files
-rm filehandles.tmp
+rm "filehandles_$1".tmp

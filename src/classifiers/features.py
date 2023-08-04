@@ -5,6 +5,9 @@
 import sys
 import os
 
+# --- Network science ---
+from networkx.exception import NetworkXError
+
 # --- Scientific computing ---
 import numpy as np
 
@@ -13,6 +16,10 @@ SRC = os.path.join(*["..", ""])
 sys.path.append(SRC)
 from src.distance.distance import embedded_edge_distance
 from src.distance.score import scale_probability
+
+# --- Miscellaneous ---
+import logging
+logging.basicConfig(level=logging.ERROR)
 
 
 # ========== FUNCTIONS ==========
@@ -44,15 +51,17 @@ def get_degrees(graph, edges):
     tgt_degrees = []
 
     for src, tgt in edges:
-        # ! DEBUG
         try:
             src_degrees.append(graph.degree(src))
-        except:
-            print("AHHH", src)
+        except NetworkXError as err:
+            logging.warning(f"Encountered NetworkXError ('{err}') - forcing degree 0")
+            src_degrees.append(0)
+
         try:
             tgt_degrees.append(graph.degree(tgt))
-        except:
-            print("AHHH", tgt)
+        except NetworkXError as err:
+            logging.warning(f"Encountered NetworkXError ('{err}') - forcing degree 0")
+            tgt_degrees.append(0)
 
     return np.array(src_degrees), np.array(tgt_degrees)
 

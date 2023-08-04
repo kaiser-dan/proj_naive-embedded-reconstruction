@@ -37,11 +37,12 @@ from src.classifiers import features
 # Logistic regression hyperparameters
 LOGREG = {
     "penalty": None,
-    "solver": "newton-cg",
+    "solver": "newton-cholesky",
+    "max_iter": 1_000,
 }
 
-DIR_EDGELISTS = os.path.join(ROOT, "data", "input", "SYSLFR", "edgelists", "")
-DIR_CACHES = os.path.join(ROOT, "data", "input", "SYSLFR", "caches", "")
+DIR_EDGELISTS = os.path.join(ROOT, "data", "input", "SYSREAL", "edgelists", "")
+DIR_CACHES = os.path.join(ROOT, "data", "input", "SYSREAL", "caches", "")
 DIR_DFS = os.path.join(ROOT, "data", "output", "dataframes", "")
 
 # >>> Miscellaneous <<<
@@ -55,7 +56,7 @@ def get_data(cache_fp):
         cache = pickle.load(_fh)
 
     # Get original edgelists
-    edgelists_fp = f"{DIR_EDGELISTS}/edgelists{cache_fp.split('edgelists')[1]}"
+    edgelists_fp = f"{DIR_EDGELISTS}/multiplex_{os.path.splitext(cache_fp.split('multiplex_')[1])[0]}.pkl"
     with open(edgelists_fp, 'rb') as _fh:
         edgelists = pickle.load(_fh)
 
@@ -155,7 +156,7 @@ def evaluate(cache_fp):
         "pr": pr,
         "method": cache_fp.split("method")[1].split("_")[0][1:],
         "theta": cache_fp.split("theta")[1].split("_")[0][1:],
-        "mu": cache_fp.split("mu")[1].split("_")[0][1:],
+        "system": cache_fp.split("network-")[1].split("_")[0],
     })
 
     # Return
@@ -164,14 +165,14 @@ def evaluate(cache_fp):
 # >>> Drivers <<<
 def analysis(
         query="",
-        processes=8,
+        processes=4,
         chunksize=12):
     # --- Book-keeping ---
     # Restrict CachedEmbeddings roster based on query
     dir_ = [
         f"{DIR_CACHES}/{fp}" 
         for fp in os.listdir(DIR_CACHES)
-        if query in fp
+        if query in fp 
     ]
     
     logging.info(f"Reconstructing {len(dir_)} CachedEmbeddings")
@@ -184,7 +185,7 @@ def analysis(
     
     # Save to disk
     df = pd.DataFrame.from_records(records)
-    df.to_csv(f"{DIR_DFS}/dataframe_EMB_exSYSLFR_query-{query}.csv", index=False)
+    df.to_csv(f"{DIR_DFS}/dataframe_EMB_exSYSREAL_query-{query}.csv", index=False)
 
     
     

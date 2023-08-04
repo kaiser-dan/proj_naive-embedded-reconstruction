@@ -5,8 +5,8 @@ REPS=10
 STRATEGY="RANDOM"
 
 ## Specified paramaters
-THETAS=$(seq 0.05 0.05 0.95)
-FILES=$(find ../../data/input/data_input_manuscript_initial/ -type f -regextype egrep -regex ".*/edgelists_.*N-10000_.*")
+THETAS=$(seq 0.4 0.05 0.95)
+FILES=$(find ../../data/input/SYSLFR/edgelists/ -type f -regextype egrep -regex ".*/edgelists_.*N-10000_.*")
 
 # --- Main logic ---
 # echo "REPS=$REPS"

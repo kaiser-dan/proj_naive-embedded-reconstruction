@@ -128,7 +128,7 @@ def set_parameters_LE(
         dimensions=128,
         per_component=False,
         which="SM",
-        maxiter=10000,
+        maxiter=100000,
         tol=-4,
         # LogReg
         penalty=None,

@@ -165,7 +165,6 @@ def main():
         duplex = load_duplex(args.filepath)
 
     for rep in range(args.reps):
-        rem_G, rem_H = observe_remnant(duplex, args.theta, args.strategy)
         filepath = os.path.join(
             edgelist_dir,
             "remnants_" + FILEPATH_TEMPLATE.format(
@@ -174,6 +173,12 @@ def main():
                 rep=rep,
                 edgelist_filepath=edgelist_filepath)
         )
+
+        if os.path.isfile(filepath):
+            print(f"File '{filepath}' already exists! Skipping")
+            return
+
+        rem_G, rem_H = observe_remnant(duplex, args.theta, args.strategy)
 
         save_data((rem_G, rem_H), filepath)
 

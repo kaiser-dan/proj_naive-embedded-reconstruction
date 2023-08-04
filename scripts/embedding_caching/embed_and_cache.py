@@ -139,19 +139,21 @@ def main():
         )
 
         if os.path.isfile(os.path.join(CACHE_DIR, basename)):
-            print("Cache exists, skipping")
+            print(f"Cache '{basename}' exists, skipping")
             return
 
 
         ## Apply embeddings and form cache
+        kwargs = dict()
+        if args.embedding == "N2V":
+            kwargs.update({"workers": 8, "quiet": True})
+
         cache = caches.build_cachedremnants(
             name=remnants[0].name,
             layers=(1, 2),
             remnants=remnants,
-            embedder=args.embedding,)
-            # workers=1,
-            # quiet=False)
-
+            embedder=args.embedding,
+            **kwargs)
 
         cache.save(os.path.join(CACHE_DIR, basename))
 

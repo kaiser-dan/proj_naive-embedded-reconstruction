@@ -4,6 +4,9 @@
 # --- Standard library ---
 import sys
 
+# --- Scientific computing ---
+import numpy as np
+
 # --- Network science ---
 from networkx import connected_components
 
@@ -22,16 +25,14 @@ def embedded_edge_distance(
     try:
         distance = metric(vectors[src], vectors[tgt])
     except KeyError as err:  # * unknown cause of string keys may occur
-        # Note error
-        # print(f"Encountered key error: {err}; attempting key type conversion", file=sys.stderr)
-
         # Attempt type fix
-        if isinstance(src, int): 
-            src, tgt = str(src), str(tgt)
-        elif isinstance(src, str): 
+        if isinstance(src, str) or isinstance(tgt, str): 
             src, tgt = int(src), int(tgt)
+            distance = metric(vectors[src], vectors[tgt])
+        # Consider as vacuous distance
+        else:
+            distance = 999
 
-        distance = metric(vectors[src], vectors[tgt])
     
     distance += SYSTEM_PRECISION
 

@@ -1,3 +1,4 @@
+import os
 import logging
 from datetime import datetime
 
@@ -24,12 +25,16 @@ def get_module_logger(
     handler_console.setLevel(console_level)
 
     # Setup logfile handler
+    if not os.path.exists(os.path.dirname(filename)):
+        os.mkdir(os.path.dirname(filename))
     handler_logfile = logging.FileHandler(filename=filename, mode=mode)
     handler_logfile.setFormatter(formatter_longform)
     handler_logfile.setLevel(file_level)
 
     # Add handlers
-    logger.addHandler(handler_console)
-    logger.addHandler(handler_logfile)
+    if console_level > 0:
+        logger.addHandler(handler_console)
+    if file_level > 0:
+        logger.addHandler(handler_logfile)
 
     return logger

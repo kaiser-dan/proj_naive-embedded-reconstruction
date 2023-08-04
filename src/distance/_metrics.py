@@ -1,8 +1,17 @@
+import sys
+import os
+
 from numpy import Inf, absolute, dot
 from numpy.linalg import norm
 
+sys.path.append(os.path.join("..", "utils", ""))
+import utils
+
+logger = utils.get_module_logger(name=__name__, file_level=0, console_level=30)
+
 # >>> Helpers >>>
 def _handle_mismatched_dims(x, y):
+    logger.warning("Attempting to add vectors of different sizes; casting as Infinity instead (for disconnected components)")
     if len(x) != len(y):
         return Inf
     else:

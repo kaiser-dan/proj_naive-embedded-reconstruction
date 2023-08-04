@@ -109,6 +109,7 @@ class Embedding:
         if self.scaled:
             print("Vectors already scaled!")
             return
+
         for component in components:
             # Get total component norm
             component_total_norm = \

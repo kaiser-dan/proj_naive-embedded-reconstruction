@@ -17,9 +17,10 @@ sys.path.append(SRC)
 from src.distance.distance import embedded_edge_distance
 from src.distance.score import scale_probability
 
+import src.utils
+
 # --- Miscellaneous ---
-import logging
-logging.basicConfig(level=logging.ERROR)
+logger = src.utils.logger.get_module_logger(name=__name__, file_level=10, console_level=30)
 
 
 # ========== FUNCTIONS ==========
@@ -54,13 +55,13 @@ def get_degrees(graph, edges):
         try:
             src_degrees.append(graph.degree(src))
         except NetworkXError as err:
-            logging.warning(f"Encountered NetworkXError ('{err}') - forcing degree 0")
+            logger.warning(f"Encountered NetworkXError ('{err}') - forcing degree 0")
             src_degrees.append(0)
 
         try:
             tgt_degrees.append(graph.degree(tgt))
         except NetworkXError as err:
-            logging.warning(f"Encountered NetworkXError ('{err}') - forcing degree 0")
+            logger.warning(f"Encountered NetworkXError ('{err}') - forcing degree 0")
             tgt_degrees.append(0)
 
     return np.array(src_degrees), np.array(tgt_degrees)

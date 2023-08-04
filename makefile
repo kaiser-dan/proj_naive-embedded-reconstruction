@@ -1,4 +1,4 @@
-.PHONY: all setup clean
+.PHONY: all setup clean deepclean
 .DEFAULT_GOAL := all
 
 REQUIRMENTS=environment.yaml
@@ -7,8 +7,7 @@ ENV_NAME=EmbeddedNaive
 DIR_DATA=data/input/raw
 DIR_DATA_PREPROCESSED=data/input/preprocessed/edgelists
 
-all: get_data_tarballs unpack_data clean
-
+all: get_data_tarballs unpack_data
 
 get_data_tarballs:
 	@echo "Retrieving 'arXiv collaboration multiplex'..."
@@ -70,6 +69,9 @@ setup: $(REQUIREMENTS)
 clean:
 	@echo "Removing generated temporary files...\n"
 	@find ./ -type f -name "*.tmp" -delete
+
+deepclean:
+	@make clean
 	@echo "Removing downloaded multiplex data...\n"
 	@find $(DATA_DIR) -regextype egrep -regex ".*(arxiv|celegans|drosophila|london).*" -delete
 	@echo "Removing pycache files...\n"

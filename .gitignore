@@ -173,15 +173,8 @@ cython_debug/
 _research/  # Temporary toying around files
 
 # Data
-## Input
-**/caches/
-**/edgelists/
-**/partitions/
+data/input/
+data/interim/
 
-## Output
-**/models/
-**/reconstructions/
-
-## Log files
+# Log files
 .logs/
-data

@@ -8,6 +8,7 @@ import os
 import pickle
 import argparse
 from enum import Enum
+from datetime import datetime
 
 # --- Scientific computing ---
 
@@ -23,6 +24,8 @@ sys.path.append(SRC)
 from src.data import caches
 
 # --- Miscellaneous ---
+import src.utils.logger
+logger = src.utils.logger.get_module_logger(name=__name__, filename=f".logs/custom_log_{datetime.today().strftime("%Y%m%d")}.log")
 
 # --- Globals ---
 ## Exit status
@@ -35,7 +38,6 @@ class Status(Enum):
 ## Filepaths & templates
 CACHE_DIR: str = os.path.join(ROOT, "data", "input", "caches", "")
 FILEPATH_TEMPLATE: str = "method-{method}_percomponent-{pc}_dim-{dim}_embrep-{rep}_{remnant_filepath}"
-
 
 # ================ FUNCTIONS ======================
 # --- Command-line Interface ---
@@ -139,9 +141,8 @@ def main():
         )
 
         if os.path.isfile(os.path.join(CACHE_DIR, basename)):
-            print(f"Cache '{basename}' exists, skipping")
+            logger.info(f"Cache '{basename}' exists, skipping to next cache")
             return
-
 
         ## Apply embeddings and form cache
         kwargs = dict()

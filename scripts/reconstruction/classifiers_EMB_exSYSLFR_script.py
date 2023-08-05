@@ -13,9 +13,6 @@ from multiprocessing import Pool
 import pickle
 import pandas as pd
 
-# --- Logging and configuration ---
-import logging
-
 # >>> Project source <<<
 # PATH adjustments
 ROOT = os.path.join(*["..", "..", ""])
@@ -45,16 +42,19 @@ DIR_CACHES = os.path.join(ROOT, "data", "input", "SYSLFR", "caches", "")
 DIR_DFS = os.path.join(ROOT, "data", "output", "dataframes", "")
 
 # >>> Miscellaneous <<<
-logging.basicConfig(level=logging.INFO)
+from src.utils.logger import get_module_logger
+logger = get_module_logger(name=__name__, console_level=10)
 
 # ================ FUNCTIONS ======================
 # >>> Data handling <<<
 def get_data(cache_fp):
     # Get caches
+    logger.info("Loading CachedEmbedding files")
     with open(cache_fp, 'rb') as _fh:
         cache = pickle.load(_fh)
 
     # Get original edgelists
+    logger.warning("Training sets incorrectly specified - loading edgelist files to impute mapping.")
     edgelists_fp = f"{DIR_EDGELISTS}/edgelists{cache_fp.split('edgelists')[1]}"
     with open(edgelists_fp, 'rb') as _fh:
         edgelists = pickle.load(_fh)
@@ -129,14 +129,18 @@ def evaluate(cache_fp):
         "auroc": None,
         "pr": None
     }
-    
+
     cache = get_data(cache_fp)
-    
-    logging.debug(f"Starting {cache_fp}")
+
+    logger.debug(f"Starting {cache_fp}")
 
     # Set up features
-    # cache.embeddings[0].normalize(helpers.get_components(cache.remnants[0].remnant))
-    # cache.embeddings[1].normalize(helpers.get_components(cache.remnants[1].remnant))
+    if not cache.embeddings[0].scaled and not cache.embeddings[0].aligned:
+        logger.info("Embedding 0 not nomalized; normalizing now.")
+        cache.embeddings[0].normalize(helpers.get_components(cache.remnants[0].remnant))
+    if not cache.embeddings[1].scaled and not cache.embeddings[0].aligned:
+        logger.info("Embedding 1 not nomalized; normalizing now.")
+        cache.embeddings[1].normalize(helpers.get_components(cache.remnants[1].remnant))
     X_train, Y_train = get_training_features(cache, cache.observed_edges)
     X_test, Y_test = get_testing_features(cache, cache.unobserved_edges)
 
@@ -169,56 +173,50 @@ def analysis(
     # --- Book-keeping ---
     # Restrict CachedEmbeddings roster based on query
     dir_ = [
-        f"{DIR_CACHES}/{fp}" 
+        f"{DIR_CACHES}/{fp}"
         for fp in os.listdir(DIR_CACHES)
-        if query in fp and "N-10000" in fp
+        if query in fp
     ]
-    
-    logging.info(f"Reconstructing {len(dir_)} CachedEmbeddings")
-    
+
+    logger.info(f"Reconstructing {len(dir_)} CachedEmbeddings")
+
     # --- Computations ---
     with Pool(processes=processes) as p:
         records = p.map(evaluate, dir_, chunksize=chunksize)
-    
-    logging.info("Finished reconstructions; saving to dataframe")
-    
+
+    logger.info("Finished reconstructions; saving to dataframe")
+
     # Save to disk
     df = pd.DataFrame.from_records(records)
     df.to_csv(f"{DIR_DFS}/dataframe_EMB_exSYSLFR_query-{query}.csv", index=False)
 
-    
-    
+
+
 # ========== MAIN ===========
 def main():
     # --- Dispatch ---
-    args = sys.argv  # gather CL args
-    
-    # No args passed, run defaults
-    if len(args) == 1:
-        analysis()
-        quit()  # quit so we don't trigger next conditionals
-    
-    # Some args passed
+    args = sys.argv[1:]  # gather CL args
     analysis_args = []
+
     ## Query
-    if len(args) >= 2:
-        logging.info(f"Found query argument '{sys.argv[1]}'")
+    if len(args) >= 1:
+        logger.info(f"Found query argument '{sys.argv[1]}'")
         analysis_args.append(sys.argv[1])
-    
+
     ## Query + processes
-    if len(args) >= 3:
-        logging.info(f"Found processes argument '{sys.argv[2]}'")
+    if len(args) >= 2:
+        logger.info(f"Found processes argument '{sys.argv[2]}'")
         analysis_args.append(int(sys.argv[2]))
-        
+
     ## Query + processes + chunksize
-    if len(args) == 4:
-        logging.info(f"Found chunksize argument '{sys.argv[3]}'")
+    if len(args) == 3:
+        logger.info(f"Found chunksize argument '{sys.argv[3]}'")
         analysis_args.append(int(sys.argv[3]))
-        
+
     ## Run process
     analysis(*analysis_args)
-    
-    
-    
+
+
+
 if __name__ == "__main__":
     main()

@@ -175,6 +175,7 @@ _research/  # Temporary toying around files
 # Data
 data/input/
 data/interim/
+data/.depr/
 
 # Log files
 .logs/

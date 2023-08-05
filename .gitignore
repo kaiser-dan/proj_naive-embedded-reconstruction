@@ -162,20 +162,16 @@ cython_debug/
 # VSCode
 .vscode/
 
-# =============================
-# Snakemake
-.snakemake
-
-# Cached modules
-*.pyc
-
-# Dev scripts
-_research/  # Temporary toying around files
+# =========== Project-specific content ==========
+# Workflow
+.snakemake/
+.logs/
 
 # Data
 data/input/
 data/interim/
 data/.depr/
 
-# Log files
-.logs/
+# Scratch work
+_research/
+scratch.tar.gz

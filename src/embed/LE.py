@@ -1,26 +1,30 @@
 """Project source code for applying Laplacian Eigenmap embedding.
 """
 # ============= SET-UP =================
+# --- Standard library ---
+from typing import Union
+
 # --- Scientific computing ---
+from numpy import ndarray
+
 from scipy.sparse.linalg import eigsh  # eigensolver
-from scipy.linalg import eigh
+from scipy.linalg import eigh  # eigensolver for dense matrices
 
 # --- Network science ---
 import networkx as nx
 
+# --- Miscellaneous ---
+from embed.helpers import reindex_nodes, get_components, matrix_to_dict
+from embed.embedding import Embedding
+
 
 # ============= FUNCTIONS =================
-# --- Helpers ---
-def _reindex_nodes(graph):
-    reindexed_nodes = {
-        index: new_index
-        for new_index, index in enumerate(sorted(graph.nodes()))
-    }  # Allow for non-contiguous node indices
-    return reindexed_nodes
-
-
 # --- Driver ---
-def LE(graph, parameters, hyperparameters, dense_error=False):
+def LE(
+        graph: nx.Graph,
+        parameters: dict, hyperparameters: dict,
+        per_component: bool = False,
+        nodelist: Union[None, list] = None):
     """Embed `graph` using Laplacian eigenmaps.
 
     Parameters
@@ -30,74 +34,104 @@ def LE(graph, parameters, hyperparameters, dense_error=False):
     parameters : dict
         Keyword arguments for LE parameter selection.
     hyperparameters : dict
-        Keyword arguments for ARPACK convergence parameters.\
-    dense_error : bool
-        Indicator if graph is dense, i.e., k >= N, by default False.
+        Keyword arguments for ARPACK convergence parameters.
+    per_component: bool, optional
+        Embed each graph component separately, by default False.
+    nodelist: list|None, optional
+        Node order for normalized laplacian matrix presentation, by default sorted index.
 
     Returns
     -------
-    ~~np.array~~
-    dict
-        Map of node ids to embedded vectors (as rows).
+    Embedding
+        Embedding class instance.
 
     """
     # >>> Book-keeping >>>
-    reindexed_nodes = _reindex_nodes(graph)  # fix networkx indexing
-    vectors = dict()
-    # ! >>> BROKEN >>>
-    # ! Non-contiguous indexing in some real remnants is causing
-    # ! indexing errors with arrays - generalizing to a dict instead
-    # ! All downstream analyses are able to proceed
-    # vectors = np.zeros(
-    #     (graph.number_of_nodes(), parameters["k"])  # needs k for scipy.sparse.linalg.eigsh
-    # )  # initialize embedded vectors
-    # ! <<< BROKEN <<<
+    _dispatch = _LE  # default embedding sub-method
+
+    # ! >>> Temp NCV fix >>>
+    if hyperparameters.get("ncv") is not None:
+        del hyperparameters["ncv"]
+    # ! <<< Temp NCV fix <<<
+
+    node_index = reindex_nodes(graph)  # relabeling node labels -> contiguous node labels
+
+    # Homogenize node sorting for adjacency/Laplacian matrices
+    if nodelist is None:
+        nodelist = sorted(graph.nodes())
+
+    vectors = dict()  # output struct, node label -> vector
     # <<< Book-keeping <<<
 
+    # >>> Dispatch >>>
+    if per_component:
+        return _LE_per_component(graph, parameters, hyperparameters, nodelist)
+
+    if parameters["k"] >= graph.number_of_nodes():
+        _dispatch = _LE_dense
+
+    eigenvectors = _dispatch(graph, parameters, hyperparameters, nodelist)
+    # <<< Dispatch <<<
+
+    # >>> Post-processing >>>
+    # Converting type
+    if type(eigenvectors) == ndarray:
+        eigenvectors = matrix_to_dict(eigenvectors)
+
+    # Remove first coordinate of eigenvectors (proportional to node degree)
+    eigenvectors = {
+        node: vector[1:]
+        for node, vector in eigenvectors.items()
+    }
+
+    # Apply node reindexing
+    for node, node_adjusted in node_index.items():
+        vectors[node] = eigenvectors[node_adjusted]
+    # <<< Post-processing <<<
+
+    embedding = Embedding(vectors, "LE" if not per_component else "LE-PC")
+
+    return embedding
+
+
+# --- Main computations ---
+def _LE(graph, parameters, hyperparameters, nodelist):
     # Calculate normalized Laplacian matrix
-    L = nx.normalized_laplacian_matrix(graph, nodelist=sorted(graph.nodes()))
+    L = nx.normalized_laplacian_matrix(graph, nodelist=nodelist)
 
     # Compute the eigenspectra of the normalized Laplacian matrix
-    # ! >>> BROKEN >>>
-    #_, eigenvectors = \
-    #    eigsh(L, **parameters, **hyperparameters)
-    # ! <<< BROKEN <<<
-    # ! >>> HOTFIX >>>
-    if dense_error:
-        _, eigenvectors = eigh(L.toarray())
-    else:
-        _, eigenvectors = \
-            eigsh(
-                L, k=parameters["k"],
-                maxiter=hyperparameters["maxiter"],
-                tol=hyperparameters["tol"],
-                ncv=hyperparameters["NCV"]*graph.number_of_nodes()
-            )
-    # ! <<< HOTFIX <<<
+    _, eigenvectors = eigsh(L, **parameters, **hyperparameters)
 
-    # Apply node reindexing (thanks networkx :/)
-    for index, new_index in reindexed_nodes.items():
-        vectors[index] = eigenvectors[new_index]
-
-    return vectors
+    return eigenvectors
 
 
-def LE_per_component(graph, parameters, hyperparameters, dense_error=False):
+def _LE_dense(graph, parameters, hyperparameters, nodelist):
+    # Calculate normalized Laplacian matrix
+    L = nx.normalized_laplacian_matrix(graph, nodelist=nodelist)
+
+    # Densify matrix
+    L = L.toarray()
+
+    # Compute the eigenspectra of the normalized Laplacian matrix
+    _, eigenvectors = eigh(L)
+
+    return eigenvectors
+
+
+def _LE_per_component(graph, parameters, hyperparameters, nodelist):
     # >>> Book-keeping >>>
     vectors_per_component = []  # list of vector embeddings, canonical ordering
     vectors = {}  # amalgamated mapping of nodes to their embedded vectors (by component)
     # <<< Book-keeping <<<
 
     # Retrieve each component as a graph
-    component_subgraphs = [
-        graph.subgraph(component).copy()
-        for component in nx.connected_components(graph)
-    ]
+    component_subgraphs = get_components(graph)
 
     # Embed each component by themselves
     for component_subgraph in component_subgraphs:
+        component_nodelist = [node for node in nodelist if node in component_subgraph.nodes()]
         vectors_per_component.append(
-            LE(component_subgraph, parameters, hyperparameters, dense_error=dense_error)
+            LE(component_subgraph, parameters, hyperparameters, nodelist=component_nodelist)
         )
 
     # Amalgamate results

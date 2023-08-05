@@ -10,7 +10,7 @@ from collections import deque
 import networkx as nx
 
 # --- Project code ---
-from utils.remnants import _build_remnants
+# from utils.remnants import _build_remnants
 
 
 # ============= FUNCTIONS =================
@@ -83,9 +83,9 @@ def balanced_partial_information(G1, G2, frac, seednodes=[0], search="bfs"):
             Etest[edge] = 0
 
     # Remnants
-    rem_G1, rem_G2, Etest = _build_remnants(G1, G2, Etrain, Etest)
+    # rem_G1, rem_G2, Etest = _build_remnants(G1, G2, Etrain, Etest)
 
-    return rem_G1, rem_G2, Etest
+    return None # rem_G1, rem_G2, Etest
 
 
 def _snowball_sample_edges(trees, seen, iterations):

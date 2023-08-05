@@ -9,7 +9,7 @@ import random
 # --- Network science ---
 
 # --- Project code ---
-from utils.remnants import _build_remnants
+from sampling.remnants import build_remnants
 
 
 # ============= FUNCTIONS =================
@@ -31,6 +31,6 @@ def partial_information(G1, G2, frac):
             Etest[e] = 0
 
     # Remnants
-    rem_G1, rem_G2, Etest = _build_remnants(G1, G2, Etrain, Etest)
+    rem_G1, rem_G2 = build_remnants(G1, G2, Etrain, Etest, theta=frac)
 
     return rem_G1, rem_G2, Etest, Etrain

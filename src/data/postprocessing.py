@@ -1,4 +1,4 @@
-"""Project source code for common multiplex pre-processing utility.
+"""Project source code for common multiplex post-processing utility.
 """
 # ============= SET-UP =================
 # --- Data handling ---

@@ -15,8 +15,11 @@ import networkx as nx  # General network tools
 
 # --- Project source code ---
 # PATH adjustments and binaries
-sys.path.append("../../bin/LFR/")
-sys.path.append("../")
+PATH_SRC = os.path.join(*["..", ""])
+sys.path.append(PATH_SRC)
+
+PATH_LFR = os.path.join(*["..", "..", "bin", "LFR", ""])
+sys.path.append(PATH_LFR)
 
 # Modules
 import utils
@@ -24,8 +27,8 @@ import utils
 
 # --- Miscellaneous ---
 # Aliases
-generate_power_law = utils.powerlaws.generate_power_law
-control_correlation = utils.correlations.control_correlation
+generate_power_law = utils.distributions.generate_power_law
+control_correlation = utils.distributions.control_correlation
 
 
 # =================== FUNCTIONS ===================
@@ -132,7 +135,7 @@ def generate_configuration_model (degree):
 # --- LFR model ---
 # * NOTE: I swapped out `os.system` for the safer, more controllable `subprocess.check_call`
 # * This also allows me to suppress that super annoying LFR generation logging to stdout
-def LFR(n,t1,t2,mu,avg_k,max_k, ROOT="../../"):
+def generate_LFR_model(n,t1,t2,mu,avg_k,max_k, ROOT):
     # Call LFR generation, wait for completion, propogate bash exit codes
     subprocess.call(
         " ".join([
@@ -144,24 +147,24 @@ def LFR(n,t1,t2,mu,avg_k,max_k, ROOT="../../"):
             "-t2", f"{t2}",
             "-mu", f"{mu}"
         ]),
-        # stdout=open(os.devnull, 'w'),
-        # stderr=open(os.devnull, 'w'),
+        stdout=open(os.devnull, 'w'),
+        stderr=open(os.devnull, 'w'),
         shell=True
     )
 
     # Format resultant network as networkx Graph
-    x=np.loadtxt(f'{ROOT}/network.dat')
+    x=np.loadtxt("./network.dat")
     edges=[(int(x[i][0])-1,int(x[i][1])-1) for i in range(len(x))]
     g=nx.Graph(edges)
 
     # Format resultant node partition as dict
-    x=np.loadtxt(f'{ROOT}/community.dat')
+    x=np.loadtxt("./community.dat")
     coms={int(x[i][0])-1:int(x[i][1]) for i in range(len(x))}
 
     return g, coms
 
 
-def lfr_multiplex (N, tau1, tau2, mu, average_degree, max_degree, min_community, prob_relabel):
+def generate_multiplex_LFR(N, tau1, tau2, mu, average_degree, max_degree, min_community, prob_relabel, ROOT="../../"):
 
     # >>> Book-keeping >>>
     groups = {}
@@ -169,7 +172,7 @@ def lfr_multiplex (N, tau1, tau2, mu, average_degree, max_degree, min_community,
 
     # >>> Experimental data sampling >>>
     # Generate LFR network (one layer)
-    H, comm = LFR(n=N, t1=tau1, t2=tau2, mu=mu, avg_k=average_degree, max_k = max_degree, min_community=min_community)
+    H, comm = generate_LFR_model(n=N, t1=tau1, t2=tau2, mu=mu, avg_k=average_degree, max_k = max_degree, ROOT=ROOT)#, min_community=min_community)
 
     # Create list of communities
     for n in comm:
@@ -247,7 +250,7 @@ def lfr_multiplex (N, tau1, tau2, mu, average_degree, max_degree, min_community,
     return G, sigma1, sigma2, mu
 
 
-def overlap_multiplex(num_nodes=100, proportion_overlap=0.5):
+def generate_multiplex_overlapping(num_nodes=100, proportion_overlap=0.5):
     """Generate a synthetic duplex with tunable number of overlapping active nodes.
 
     Parameters

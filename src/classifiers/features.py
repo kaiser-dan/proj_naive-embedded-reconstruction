@@ -3,102 +3,110 @@
 # ========== SET-UP ==========
 # --- Standard library ---
 import sys
+import os
+
+# --- Network science ---
+from networkx.exception import NetworkXError
 
 # --- Scientific computing ---
 import numpy as np
 
 # --- Project source ---
-sys.path.append("../")
-from distance.distance import embedded_edge_distance, component_penalized_embedded_edge_distance
+SRC = os.path.join(*["..", ""])
+sys.path.append(SRC)
+from src.distance.distance import embedded_edge_distance
+from src.distance.score import scale_probability
+
+import src.utils
+
+# --- Miscellaneous ---
+logger = src.utils.logger.get_module_logger(name=__name__, file_level=10, console_level=30)
 
 
 # ========== FUNCTIONS ==========
-# --- Calculations ---
-# > Degrees >
-def get_degrees(graphs, edges):
-    # >>> Book-keeping >>>
-    G, H = graphs  # alias input layer graphs
-    # <<< Book-keeping <<<
+# --- Helpers ---
+def get_labels(edges):
+    return list(edges.values())
 
-    # >>> Degree calculations >>>
-    src_degrees = [
-        [G.degree(edge[0]) for edge in edges],
-        [H.degree(edge[0]) for edge in edges]
-    ]
-    tgt_degrees = [
-        [G.degree(edge[1]) for edge in edges],
-        [H.degree(edge[1]) for edge in edges]
-    ]
-    # <<< Degree calculations
+# TODO: Add floating-point comparison safety for small floats
+# TODO: See python docs on sys.float_info.epsilon versus sys.float_info.min
+def safe_inverse(x, tolerance=sys.float_info.epsilon):
+    # Ensure x has float dtype
+    x = x.astype(float)
 
-    return src_degrees, tgt_degrees
+    # Add machine tolerance to avoid division by zero
+    x += tolerance
 
-def get_configuration_probabilities_feature(src_degrees, tgt_degrees):
-    # >>> Book-keeping >>>
-    M = len(src_degrees[0])  # get number of observations in dataset
-    configuration_probabilities = []  # initialize feature set
-    # <<< Book-keeping <<<
+    # Check if adding machine tolerance is not enough to avoid standard precision errors
+    # * This shouldn't trigger by default
+    # * I think it primarily arises from mixing 32 and 64 bit floats
+    if np.isclose(x.any(), 0):
+        raise ZeroDivisionError("Input with system precision is still too small!")
 
-    # >>> Calculate configuration probabilities >>>
-    for idx in range(M):
-        # numerator = k_i^G * k_j^G
-        numerator = src_degrees[0][idx] * tgt_degrees[0][idx]
+    # Calculate the multiplicative inverse (with tolerance added)
+    return 1 / x
 
-        # denominator = (k_i^G * k_j^G) + (k_i^H * k_j^H)
-        denominator = numerator + (src_degrees[1][idx] * tgt_degrees[1][idx])
+# --- Feature calculations ---
+def get_degrees(graph, edges):
+    src_degrees = []
+    tgt_degrees = []
 
-        probability = numerator / denominator
-        probability = 2*probability - 1
+    for src, tgt in edges:
+        try:
+            src_degrees.append(graph.degree(src))
+        except NetworkXError as err:
+            logger.warning(f"Encountered NetworkXError ('{err}') - forcing degree 0")
+            src_degrees.append(0)
 
-        configuration_probabilities.append(probability)
-    # <<< Calculate configuration probabilities <<<
+        try:
+            tgt_degrees.append(graph.degree(tgt))
+        except NetworkXError as err:
+            logger.warning(f"Encountered NetworkXError ('{err}') - forcing degree 0")
+            tgt_degrees.append(0)
 
-    return configuration_probabilities
-# < Degrees <
+    return np.array(src_degrees), np.array(tgt_degrees)
 
-# > Distance >
 def get_distances(vectors, edges):
-    # >>> Book-keeping >>>
-    G, H = vectors  # alias input layer embedded node vectors
-    # <<< Book-keeping <<<
+    distances = [
+        embedded_edge_distance(edge, vectors)
+        for edge in edges
+    ]
 
-    # >>> Distance calculations >>>
-    G_distances = [embedded_edge_distance(edge, G) for edge in edges]
-    H_distances = [embedded_edge_distance(edge, H) for edge in edges]
-    # <<< Distance calculations
-
-    return G_distances, H_distances
-
-def get_biased_distances(vectors, edges, components):
-    # >>> Book-keeping >>>
-    G, H = vectors  # alias input layer embedded node vectors
-    G_components, H_components = components  # alias component mapping of remnants
-    # <<< Book-keeping <<<
-
-    # >>> Distance calculations >>>
-    G_distances = [component_penalized_embedded_edge_distance(edge, G, G_components) for edge in edges]
-    H_distances = [component_penalized_embedded_edge_distance(edge, H, H_components) for edge in edges]
-    # <<< Distance calculations
-
-    return G_distances, H_distances
-# < Distance <
-
+    return np.array(distances)
 
 # --- Formatters ---
-def prepare_feature_matrix_confdeg_dist(configuration_degrees, distances):
-    # >>> Book-keeping >>>
-    N = len(configuration_degrees)
-    NUM_FEATURES = 3
+def as_configuration(
+        *data,
+        transform = safe_inverse,
+        scale = scale_probability):
+    # Gather passed in lists of features
+    data = list(data)
 
-    G_distances, H_distances = distances
+    # Apply transformation
+    for idx in range(len(data)):
+        data[idx] = list(map(transform, data[idx]))
 
-    feature_matrix = np.empty((N, NUM_FEATURES))
-    # <<< Book-keeping <<<
+    # Cast as configuration model
+    configurations = []
+    numerators = data[0]
+    for idx in range(len(numerators)):
+        configuration = numerators[idx] / sum([data_[idx] for data_ in data])
+        configuration = scale(configuration)
+        configurations.append(configuration)
 
-    # >>> Format feature matrix >>>
-    feature_matrix[:, 0] = configuration_degrees
-    feature_matrix[:, 1] = G_distances
-    feature_matrix[:, 2] = H_distances
-    # <<< Format feature matrix <<<
+    return configurations
+
+def format_feature_matrix(feature_vectors):
+    # Get number of features and observations
+    num_cols = len(feature_vectors)
+    num_rows = len(feature_vectors[0])
+    dims = (num_rows, num_cols)
+
+    # Instantiate empty feature matrix
+    feature_matrix = np.empty(dims)
+
+    # Add each feature to feature matrix, one column at a time
+    for idx, feature in enumerate(feature_vectors):
+        feature_matrix[:, idx] = feature
 
     return feature_matrix

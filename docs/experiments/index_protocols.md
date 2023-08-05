@@ -25,16 +25,6 @@ Experiments are considered "operative" if they are actively being developed or r
 
 Active experiments are settings currently being developed or analyzed.
 
-- ex27
-  - Associated experiments: ex26, ex28, ex29
-  - Summary: N2V with configuration-likelihood degree feature alone
-  - Another with intercept
-
-- ex28
-  - Associated experiments: ex26, ex27, ex29
-  - Summary: N2V with configuration-likelihood degree and embedding distance features
-
-
 ## Completed
 
 Completed experiments are settings with generated, analyzed results that are without question.
@@ -75,14 +65,56 @@ Completed experiments are settings with generated, analyzed results that are wit
   - Date completed: 2023-02-27
   - Associated experiments: ex27
   - Summary: Apply "D" classifier to real multiplexes
+- ex27
+  - Date completed: 2023-03-02
+  - Associated experiments: ex26, ex28
+  - Summary: N2V with configuration-likelihood degree feature alone
+- ex29
+  - Date completed: 2023-03-XX
+  - Associated experiments: ex27, ex28
+  - Summary: Full factorial experiment on logistic regression features
+- ex30
+  - Date completed: 2023-04-08
+  - Associated experiments: ex31, ex32
+  - Summary: Full factorial experiment on logistic regression features with several feature forms.
+- ex31
+  - Date completed: 2023-04-02
+  - Associated experiments: ex30, ex32
+  - Summary: Full factorial experiment on logistic regression features with configuration embedded distance form and adjusted renormalization procedure.
+- ex32
+  - Date completed: 2023-04-17
+  - Associated experiments: ex31, 33
+  - Summary: Full factorial experiment on logistic regression features with configuration embedded distance form and adjusted renormalization procedure on synthetic networks.
+  - Details: LFR duplexes with varying $\mu$ and _prob_ parameters, fixed $\gamma$
+- ex33
+  - Date completed: 2023-04-17
+  - Associated experiments: ex31, ex32
+  - Summary: Full factorial experiment on logistic regression features with configuration embedded distance form and adjusted renormalization procedure on synthetic networks.
+  - Details: LFR duplexes with varying $\gamma$ , fixed _prob_ and $\mu$ parameters. Initially on smaller $N = 1000$ for speed.
+- ex34
+  - Date completed: 2023-04-19
+  - Associated experiments: ex35, ex36
+  - Summary: Recreate "D"-classifier with current code.
+- ex35
+  - Date completed: 2023-04-19
+  - Associated experiments: ex34, ex36
+  - Summary: Recreate "DC"-classifier with current code and N2V.
+- ex36
+  - Date completed: 2023-04-19
+  - Associated experiments: ex34, ex35
+  - Summary: Explore effect of wallk_length on N2V reconstruction on synthetics.
+- ex37
+  - Date completed: 2023-05-12
+  - Associated experiments:
+  - Summary: Contrast N2V and N2V-PC performance
+
 
 ## Planned
 
-Planned experiments are experiments that are planned or actively being designed, but before active development starts.
+Planned experiments are experiments that are planned or actively being designed, but before active computation begins.
 
-- ex29
-  - Associated experiments: ex26, ex27, ex28
-  - Summary: N2V with configuration-likelihood degree, embedding distance features and component biases
+- ex38
+  - Summary: Contrast N2V and N2V-PC performance with appropriately scaled embedding dimension and network sizes
 
 
 # Inoperative Experiments
@@ -109,3 +141,4 @@ Depreciated experiments may, unlike failed experiments, be reproduced as is but 
 - ex11
 - ex12
 - ex17
+- ex28

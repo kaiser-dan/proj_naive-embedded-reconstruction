@@ -5,7 +5,7 @@ authors:
   given-names: "Daniel"
   orcid: "https://orcid.org/0000-0003-1346-451X"
 title: "proj_naive-embedded-reconstruction"
-version: 1.0.0-alpha
+version: 0.2.0-alpha
 doi:
 date-released:
 url: "https://github.com/kaiser-dan/proj_naive-embedded-reconstruction"

@@ -1,4 +1,9 @@
 """Project source code for controlling implicit correlations in synthetic multiplexes.
+
+Throughout, `parameters` are independent variables controlling embedding behavior.
+They have a theoretical motivation for accepting different values.
+In contrast, `hyperparameters` are independent variables for embedding or regression
+that have less convincing theoretical reasons to be altered (with respect to the original analysis).
 """
 # ============= SET-UP =================
 from numpy import linspace
@@ -17,6 +22,8 @@ def set_parameters_N2V(
         # LogReg
         penalty="l2",
         fit_intercept=True,
+        solver="lbfgs",
+        class_weight=None,
         # Other
         theta_min=0.05,
         theta_max=0.5,
@@ -42,7 +49,7 @@ def set_parameters_N2V(
         _description_, by default 1
     batch_words : int, optional
         _description_, by default 4
-    penalty: dict, default='l2'
+    penalty: str, default='l2'
         Specify the norm of the penalty:
         - `None`: no penalty is added;
         - `'l2'`: add a L2 penalty term and it is the default choice;
@@ -54,6 +61,13 @@ def set_parameters_N2V(
            solver.
     fit_intercept : bool, optional
         Specifies if a constant (a.k.a. bias or intercept) should be added to the decision function, by default True
+    solver: str, default='lbfgs'
+        Algorithm to use in the optimization problem. Default is ‘lbfgs’. To choose a solver, you might want to consider the following aspects:
+            - For small datasets, ‘liblinear’ is a good choice, whereas ‘sag’ and ‘saga’ are faster for large ones;
+            - For multiclass problems, only ‘newton-cg’, ‘sag’, ‘saga’ and ‘lbfgs’ handle multinomial loss;
+            - ‘liblinear’ is limited to one-versus-rest schemes.
+            - ‘newton-cholesky’ is a good choice for n_samples >> n_features, especially with one-hot encoded categorical features with rare categories. Note that it is limited to binary classification and the one-versus-rest reduction for multiclass classification. Be aware that the memory usage of this solver has a quadratic dependency on n_features because it explicitly computes the Hessian matrix.
+    class_weight: ! FILL IN LATER
     theta_min : float, optional
         Minimum relative size of training set (inclusive), by default 0.05
     theta_max : float, optional
@@ -91,7 +105,9 @@ def set_parameters_N2V(
         "classifier": {
             # >>> Logistic regression <<<
             "penalty": penalty,  # L2 regularization
-            "fit_intercept": fit_intercept,   # whether to fit an intercept
+            "fit_intercept": fit_intercept,   # whether to fit an intercept,
+            "solver": solver,
+            "class_weight": class_weight
         }
     }
 
@@ -110,15 +126,17 @@ def set_parameters_N2V(
 def set_parameters_LE(
         # LE
         dimensions=128,
-        maxiter=100,
-        tol=-8,
+        per_component=False,
+        which="SM",
+        maxiter=100000,
+        tol=-4,
         # LogReg
-        penalty="l2",
+        penalty=None,
         fit_intercept=True,
         # Other
         theta_min=0.05,
-        theta_max=0.5,
-        theta_num=10,
+        theta_max=0.95,
+        theta_num=11,
         repeat=5):
     """Prepare parameters for LE-based reconstruction experiments.
 
@@ -126,11 +144,13 @@ def set_parameters_LE(
     ----------
     dimensions : int, optional
         _description_, by default 128
+    which: str, optional,
+        _description_, by default "SM"
     maxiter : int, optional
-        _description_, by default 100
+        _description_, by default 1000
     tol : int, optional
         _description_, by default -8
-    penalty: dict, default='l2'
+    penalty: dict, default='None'
         Specify the norm of the penalty:
         - `None`: no penalty is added;
         - `'l2'`: add a L2 penalty term and it is the default choice;
@@ -167,14 +187,15 @@ def set_parameters_LE(
     }
 
     hyperparameters = {
+        # >>> LE embedding hyperparameters <<<
         "embedding": {
-            # >>> LE embedding hyperparameters <<<
+            "which": which,
             "maxiter": maxiter,
             "tol": tol,
-            "NCV": 6,
+            "ncv": 6,  # ! Don't touch
         },
+        # >>> Logistic regression <<<
         "classifier": {
-            # >>> Logistic regression <<<
             "penalty": penalty,  # L2 regularization
             "fit_intercept": fit_intercept,   # whether to fit an intercept
             "random_seed": 37,  # random seed
@@ -200,5 +221,6 @@ def build_theta_range(experiment_setup):
     return linspace(
         experiment_setup["theta_min"],
         experiment_setup["theta_max"],
-        experiment_setup["theta_num"]
+        num=experiment_setup["theta_num"],
+        endpoint=True
     )

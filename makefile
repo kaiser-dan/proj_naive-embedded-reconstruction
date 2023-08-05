@@ -1,14 +1,25 @@
+# ========== PREFACE ==========
+# Make specifications
 .PHONY: all setup clean deepclean
 .DEFAULT_GOAL := all
 
+# Requirements for setup rule
 REQUIRMENTS=environment.yaml
 ENV_NAME=EmbeddedNaive
 
-DIR_DATA=data/input/raw
-DIR_DATA_PREPROCESSED=data/input/preprocessed/edgelists
+# ========== Deployment ==========
+all: setup get_data_tarballs unpack_data
 
-all: get_data_tarballs unpack_data
+setup: $(REQUIREMENTS)
+	@echo "Creating conda environment from $(REQUIREMENTS)..."
+	conda env create -f $(REQUIREMENTS)
+	conda activate $(ENV_NAME)
 
+test:
+	pytest tests/
+
+# ========== Workflow reproduction ==========
+# --- Data acquisition & preparations ---
 get_data_tarballs:
 	@echo "Retrieving 'arXiv collaboration multiplex'..."
 	@if ! [ -f $(DIR_DATA)/arxiv.zip ] ;\
@@ -39,7 +50,6 @@ get_data_tarballs:
 		echo "'london transportation multiplex' already present!" ;\
 	fi
 
-
 # TODO: Test unpacking make rule
 unpack_data: $(DIR_DATA)/arxiv.zip $(DIR_DATA)/celegans.zip $(DIR_DATA)/drosophila.zip $(DIR_DATA)/london.zip
 	@echo "Unpacking 'arXiv collaboration multiplex'..."
@@ -59,20 +69,24 @@ unpack_data: $(DIR_DATA)/arxiv.zip $(DIR_DATA)/celegans.zip $(DIR_DATA)/drosophi
 	cp $(DIR_DATA)/PATH/TO/EDGELIST.edges $(DIR_DATA_PREPROCESSED)/multiplex_system-london.edgelist
 	@echo "'london transportation multiplex' unpacked!"
 
+# ========== Repo management ==========
+# --- Cleaning ---
+clean: clean_tmp clean_logs
+deepclean: clean clean_caches clean_downloaded
 
-setup: $(REQUIREMENTS)
-	@echo "Creating conda environment from $(REQUIREMENTS)..."
-	conda env create -f $(REQUIREMENTS)
-	conda activate $(ENV_NAME)
-
-
-clean:
-	@echo "Removing generated temporary files...\n"
+clean_tmp:
+	@echo "Removing generated temporary files"
 	@find ./ -type f -name "*.tmp" -delete
 
-deepclean:
-	@make clean
+clean_logs:
+	@echo "Removing generated log files"
+	@find ./ -type f -name "*.log" -delete
+
+clean_caches:
+	@echo "Removing python cache files"
+	@find ./ -type f -regextype egrep -regex ".*\.py[cod]" -delete
+	@find ./ -type d -name "__pycache__" -exec rm -rf {} \;
+
+clean_downloaded:
 	@echo "Removing downloaded multiplex data...\n"
-	@find $(DATA_DIR) -regextype egrep -regex ".*(arxiv|celegans|drosophila|london).*" -delete
-	@echo "Removing pycache files...\n"
-	@find ./ -name "__pycache__" -exec rm -rf {} \;
+	@find ./ -regextype egrep -regex ".*(arxiv|celegans|drosophila|london).*" -delete

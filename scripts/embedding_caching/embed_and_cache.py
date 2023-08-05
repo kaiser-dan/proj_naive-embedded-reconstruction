@@ -10,8 +10,6 @@ import argparse
 from enum import Enum
 from datetime import datetime
 
-# --- Scientific computing ---
-
 # --- Project source ---
 # PATH adjustments
 ROOT = os.path.join(*["..", "..", ""])
@@ -25,7 +23,9 @@ from src.data import caches
 
 # --- Miscellaneous ---
 import src.utils.logger
-logger = src.utils.logger.get_module_logger(name=__name__, filename=f".logs/custom_log_{datetime.today().strftime("%Y%m%d")}.log")
+logger = src.utils.logger.get_module_logger(
+    name=__name__,
+    filename=f".logs/custom_log_{datetime.today().strftime('%Y%m%d')}.log")
 
 # --- Globals ---
 ## Exit status

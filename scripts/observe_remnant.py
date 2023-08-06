@@ -1,44 +1,35 @@
-#!/usr/bin/env python
-"""Script to sample an observed training set from an duplex.
+"""CLI to sample an observed training set from an duplex.
 """
 # ================= SET-UP =======================
 # --- Standard library ---
-import sys
 import os
 import argparse
 import pickle
-from enum import Enum
 
-# --- Project source ---
-# PATH adjustments
-ROOT = os.path.join(*["..", "..", ""])
-SRC = os.path.join(*[ROOT, "src", ""])
-sys.path.append(ROOT)
-sys.path.append(SRC)
-
-# Source code imports
-from src.sampling.random import partial_information
-from src.data.io import read_file
+# --- Source code ---
+from embmplxrec.remnants import observer
+import embmplxrec.utils
 
 # --- Globals ---
-## Exit status
-class Status(Enum):
-    OK = 0
-    FILE = 1
-    PARAM = 2
-    OTHER = 3
-
 ## Fixed parameters
 # TODO: Find more robust way to track implemented sampling techniques
 VALID_STRATEGIES = ["RANDOM"]
 
 ## Filepaths & templates
-FILEPATH_TEMPLATE: str = "theta-{theta}_strategy-{strategy}_remrep-{rep}_{edgelist_filepath}"
+ROOT = os.path.join("..", "")
+DIR_REMNANTS = os.path.join(ROOT, "data", "input", "remnants", "")
+FILEPATH_TEMPLATE = "remnants_strategy-{strategy}_theta-{theta}_rep-{rep}_{basename}"
+
+## Logger
+logger = embmplxrec.utils.get_module_logger(
+    name=__name__,
+    filename=f".logs/observe_remnant_{embmplxrec.utils.get_today(time=True)}.log"
+)
 
 
 # ================= FUNCTIONS =======================
 # --- Command-line Interface ---
-def _setup_argument_parser():
+def setup_argument_parser():
     parser = argparse.ArgumentParser(
         description='Observes a training sub-multiplex for reconstruction.',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -55,27 +46,20 @@ def _setup_argument_parser():
 
     # Optional arguments, flags
     parser.add_argument(
-        "--strategy", dest="strategy",
-        type=str, default="RANDOM",
+        "--strategy",
+        default="RANDOM",
+        const="RANDOM",
+        nargs='?',
+        choices=["RANDOM", "SNOWBALL"],
         help="Observation strategy of training edges.")
     parser.add_argument(
         "--repeat", dest="reps",
         type=int, default=1,
         help="Number of remnants to gather on given multiplex.")
 
-    # Plain-text input
-    parser.add_argument(
-        "--plain",
-        action="store_true",
-        help="Expect plain-text edgelist file.")
-    parser.add_argument(
-        "--layers", nargs=2,
-        help="Layers of plain-text multiplex from which to induce a duplex."
-    )
-
     return parser
 
-def _verify_args(args):
+def verify_args(args):
     # - File input -
     if not os.path.isfile(args.filepath):
         raise FileNotFoundError(f"{args.filepath} not found!")
@@ -93,96 +77,56 @@ def _verify_args(args):
     return
 
 def gather_args():
-    _parser = _setup_argument_parser()
-    args = _parser.parse_args()
+    # Initialize argparse
+    parser = setup_argument_parser()
 
-    # Verify integrity of arguments
-    try:
-        _verify_args(args)
-    except FileNotFoundError as err:
-        print(str(err), file=sys.stderr)
-        quit(Status.FILE.value)
-    except (ValueError, NotImplementedError) as err:
-        print(str(err), file=sys.stderr)
-        quit(Status.PARAM.value)
-    except:
-        print(str(err), file=sys.stderr)
-        quit(Status.OTHER.value)
+    # Gather command-line arguments
+    args = vars(parser.parse_args())
+
+    # Verify arguments are acceptable
+    verify_args(args)
 
     return args
 
-# --- File I/O ---
-def load_duplex(filepath):
-    with open(filepath, "rb") as _fh:
-        duplex = pickle.load(_fh)
-
-    return duplex
-
-def save_data(data, filepath):
-    # Initialize passing exist status
-    status = Status.OK.value
-
-    # Open binary file handle and dump object
-    try:
-        filehandle = open(filepath, "wb")
-        pickle.dump(data, filehandle, pickle.HIGHEST_PROTOCOL)
-    # Note exceptions if they occur
-    except Exception as err:
-        print(str(err), file=sys.stderr)
-        status = Status.FILE.value
-    # Regardless of status, close file stream
-    finally:
-        filehandle.close()
-
-    # If non-OK status, force quit with status
-    if status:
-        quit(status)
-
-    return
-
 # --- Remnant observation ---
 # TODO: Update when alternative observation strategies are supported
-def observe_remnant(duplex, theta, strategy):
-    G, H = duplex
-    rem_G, rem_H, _, _ = partial_information(G, H, theta)
+def observe_remnants(duplex, theta, strategy):
+    logger.warning("`strategy` is currently ignored!")
+    remnant_multiplex = observer.partial_information(duplex, theta)
 
-    return rem_G, rem_H
+    return remnant_multiplex
 
 # ================= MAIN =======================
 def main():
     # Parse CL arguments
     args = gather_args()
 
-    # Main logic
-    edgelist_dir, edgelist_filepath = os.path.split(args.filepath)
+    # Separate directory and basename of input edgelist file
+    _, basename = os.path.split(args.filepath)
 
-    if args.plain:
-        l1, l2 = [int(l) for l in args.layers]
-        duplex = read_file(args.filepath)
-        duplex = [duplex[l1], duplex[l2]]
-        edgelist_filepath = os.path.splitext(edgelist_filepath)[0] + f"_l1-{l1}_l2-{l2}" + os.path.splitext(edgelist_filepath)[1]
-    else:
-        duplex = load_duplex(args.filepath)
-
+    # Attempt remnant observation for each repetitions
     for rep in range(args.reps):
-        filepath = os.path.join(
-            edgelist_dir,
-            "remnants_" + FILEPATH_TEMPLATE.format(
-                theta=args.theta,
-                strategy=args.strategy,
-                rep=rep,
-                edgelist_filepath=edgelist_filepath)
-        )
+        # Construct filepath
+        filepath_ = FILEPATH_TEMPLATE.format(
+            strategy=args.strategy,
+            theta=args.theta,
+            rep=rep,
+            basename=basename)
+        filepath = os.path.join(DIR_REMNANTS, filepath_)
 
+        # Check if file already exists
         if os.path.isfile(filepath):
-            print(f"File '{filepath}' already exists! Skipping")
+            print(f"File '{filepath_}' already exists! Skipping")
             return
 
-        rem_G, rem_H = observe_remnant(duplex, args.theta, args.strategy)
+        # Load edgelists and observe remnants
+        with open(args.filepath, 'rb') as _fh:
+            duplex = pickle.load(_fh)
+        remnant_multiplex = observe_remnants(duplex, args.theta, args.strategy)
 
-        save_data((rem_G, rem_H), filepath)
+        # Save RemnantMultiplex to disk
+        remnant_multiplex.save(filepath)
 
-    return
 
 if __name__ == "__main__":
     main()

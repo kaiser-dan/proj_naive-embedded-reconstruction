@@ -11,7 +11,6 @@ name = "embmplxrec"
 authors = [
     {name="Daniel Kaiser", email="kaiserd@iu.edu"},
 ]
-description = "[Description]"
 classifiers = ["License :: MIT License"]
 requires-python = ">=3.10"
 dependencies = [
@@ -21,7 +20,7 @@ dependencies = [
     "scipy>=1.9",
     "scikit-learn>=1.2"
 ]
-dynamic = ["version", "readme"]
+dynamic = ["version", "readme", "description"]
 
 [project.optional-dependencies]
 test = [
@@ -43,3 +42,4 @@ reproduce = [
 [tool.setuptools.dynamic]
 version = {attr = "embmplxrec.VERSION"}
 readme = {file = ["README.md"]}
+description = {attr = "embmplxrec.DESCRIPTION"}

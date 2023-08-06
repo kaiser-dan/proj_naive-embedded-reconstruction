@@ -18,7 +18,7 @@ VALID_STRATEGIES = ["RANDOM"]
 ## Filepaths & templates
 ROOT = os.path.join("..", "")
 DIR_REMNANTS = os.path.join(ROOT, "data", "input", "remnants", "")
-FILEPATH_TEMPLATE = "remnants_strategy-{strategy}_theta-{theta}_rep-{rep}_{basename}"
+FILEPATH_TEMPLATE = "remnants_strategy-{strategy}_theta-{theta}_remrep-{rep}_{basename}"
 
 ## Logger
 logger = embmplxrec.utils.get_module_logger(
@@ -105,7 +105,7 @@ def main():
     _, basename = os.path.split(args.filepath)
 
     # Attempt remnant observation for each repetitions
-    for rep in range(args.reps):
+    for rep in range(1, args.reps+1):
         # Construct filepath
         filepath_ = FILEPATH_TEMPLATE.format(
             strategy=args.strategy,
@@ -116,8 +116,8 @@ def main():
 
         # Check if file already exists
         if os.path.isfile(filepath):
-            print(f"File '{filepath_}' already exists! Skipping")
-            return
+            logger.info(f"File '{filepath_}' already exists! Skipping remnant observation.")
+            continue
 
         # Load edgelists and observe remnants
         with open(args.filepath, 'rb') as _fh:

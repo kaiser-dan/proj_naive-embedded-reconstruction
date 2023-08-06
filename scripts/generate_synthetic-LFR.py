@@ -124,7 +124,7 @@ def main():
     filepath_edges = f"{DIR_EDGES}/edgelists_{filepath_}"
     filepath_partitions = f"{DIR_PARTITIONS}/partitions_{filepath_}"
     if os.path.exists(filepath_edges) or os.path.exists(filepath_partitions):
-        logger.info(f"Desired data files already exist; skipping creation ({filepath_})")
+        logger.info(f"File '{filepath_}' already exists! Skipping LFR sampling.")
         return
 
     # Sample LFR duplexes

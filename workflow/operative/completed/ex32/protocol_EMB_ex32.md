@@ -1,1 +1,0 @@
-../../../../docs/experiments/operative/protocol_EMB_ex32.md

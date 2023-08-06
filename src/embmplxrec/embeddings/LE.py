@@ -14,8 +14,8 @@ from scipy.linalg import eigh  # eigensolver for dense matrices
 import networkx as nx
 
 # --- Miscellaneous ---
-from embmplxrec.embed.helpers import reindex_nodes, get_components, matrix_to_dict
-from embmplxrec.embed.embedding import Embedding
+from embmplxrec.embeddings.helpers import reindex_nodes, get_components, matrix_to_dict
+from embmplxrec.embeddings.embedding import Embedding
 
 
 # ============= FUNCTIONS =================

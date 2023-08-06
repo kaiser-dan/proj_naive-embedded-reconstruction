@@ -12,8 +12,8 @@ import networkx as nx
 from gensim.models import Word2Vec
 
 # --- Miscellaneous ---
-from embmplxrec.embed.helpers import get_contiguous_vectors
-from embmplxrec.embed.embedding import Embedding
+from embmplxrec.embeddings.helpers import get_contiguous_vectors
+from embmplxrec.embeddings.embedding import Embedding
 import embmplxrec.hypercomparison.utils
 import embmplxrec.hypercomparison.networks
 

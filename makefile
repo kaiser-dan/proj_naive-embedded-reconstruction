@@ -1,19 +1,23 @@
 # ========== PREFACE ==========
 # Make specifications
-.PHONY: all setup clean deepclean
+.PHONY: all install clean deepclean
 .DEFAULT_GOAL := all
 
 # Requirements for setup rule
 REQUIRMENTS=environment.yaml
 ENV_NAME=EmbeddedNaive
 
-# ========== Deployment ==========
-all: setup get_data_tarballs unpack_data
+# Flags
+INSTALL_TEST=1
+INSTALL_REPRODUCE=1
 
-setup: $(REQUIREMENTS)
-	@echo "Creating conda environment from $(REQUIREMENTS)..."
-	conda env create -f $(REQUIREMENTS)
-	conda activate $(ENV_NAME)
+# ========== Deployment ==========
+all: install test clean
+
+install:
+	pip install .
+	[ "${INSTALL_TEST}" = "1" ] && pip install .[test]
+	[ "${INSTALL_REPRODUCE}" = "1" ] && pip install .[reproduce]
 
 test:
 	pytest tests/
@@ -72,7 +76,7 @@ unpack_data: $(DIR_DATA)/arxiv.zip $(DIR_DATA)/celegans.zip $(DIR_DATA)/drosophi
 # ========== Repo management ==========
 # --- Cleaning ---
 clean: clean_tmp clean_logs
-deepclean: clean clean_caches clean_downloaded
+deepclean: clean clean_caches clean_downloaded clean_build
 
 clean_tmp:
 	@echo "Removing generated temporary files"
@@ -90,3 +94,8 @@ clean_caches:
 clean_downloaded:
 	@echo "Removing downloaded multiplex data...\n"
 	@find ./ -regextype egrep -regex ".*(arxiv|celegans|drosophila|london).*" -delete
+
+clean_build:
+	@echo "Removing build files"
+	@rm -rf build/
+	@rm -rf src/embmplxrec.egg-info

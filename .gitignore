@@ -173,5 +173,5 @@ data/interim/
 data/.depr/
 
 # Scratch work
-_research/
-scratch.tar.gz
+_scratch/
+workflow

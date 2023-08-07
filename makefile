@@ -15,7 +15,6 @@ INSTALL_REPRODUCE=1
 all: install test clean
 
 install:
-	pip install --upgrade pip
 	pip install .
 	[ "${INSTALL_TEST}" = "1" ] && pip install .[test]
 	[ "${INSTALL_REPRODUCE}" = "1" ] && pip install .[reproduce]

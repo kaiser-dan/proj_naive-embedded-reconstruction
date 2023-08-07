@@ -158,8 +158,8 @@ def generate_LFR_model(n,t1,t2,mu,avg_k,max_k, ROOT):
             "-t2", f"{t2}",
             "-mu", f"{mu}"
         ]),
-        stdout=open(os.devnull, 'w'),
-        stderr=open(os.devnull, 'w'),
+        # stdout=open(os.devnull, 'w'),
+        # stderr=open(os.devnull, 'w'),
         shell=True
     )
 

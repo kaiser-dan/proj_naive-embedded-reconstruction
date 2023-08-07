@@ -1,5 +1,4 @@
-# from data import benchmarks
+from embmplxrec.data import benchmarks
 from embmplxrec.data import io
-# from data import postprocessing
-# from data import preprocessing
-# from data import caches
+from embmplxrec.data import postprocessing
+from embmplxrec.data import preprocessing

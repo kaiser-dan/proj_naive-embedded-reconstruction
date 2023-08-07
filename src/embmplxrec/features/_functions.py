@@ -95,8 +95,8 @@ def _handle_mismatched_dims(x, y):
         raise ValueError("Value error encountered _not_ related to dimension mismatch!")
 
 def scale_probability(p):
-    if not (0 <= p <= 1):
-        logger.error("Given probability is not in valid domain [0,1]!")
+    if not (0 <= p and p <= 1):
+        logger.error(f"Given probability ({p}) is not in valid domain [0,1]!")
     else:
         return 2*p - 1
 

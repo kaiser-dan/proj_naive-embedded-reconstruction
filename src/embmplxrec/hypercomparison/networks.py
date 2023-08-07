@@ -2,13 +2,13 @@
 """
 Classes to handle network datasets
 """
-import hypercomparison.utils
+import embmplxrec.hypercomparison.utils
 import os
 import networkx as nx
 import numpy as np
 import math
 
-logger = hypercomparison.utils.get_logger(__name__)
+logger = embmplxrec.hypercomparison.utils.get_logger(__name__)
 
 package_directory = os.path.dirname(os.path.abspath(__file__))
 package_root_directory = os.path.dirname(package_directory)

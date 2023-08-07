@@ -20,7 +20,16 @@ def get_component_mapping(graph):
     return mapping
 
 
+# --- File management ---
+
+
 # --- Logging & debugging ---
+def get_today(time=False):
+    if time:
+        return datetime.today().strftime('%Y%m%d-%H%M%S')
+    else:
+        return datetime.today().strftime('%Y%m%d')
+
 def get_module_logger(
         # Logger
         name="main",

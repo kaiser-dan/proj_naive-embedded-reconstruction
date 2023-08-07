@@ -1,8 +1,0 @@
-BEFORE
-Configuration model : Intercept = 2.6623; Coefficient = -1.0257
-Ratio model : Intercept = 2.5794; Coefficient = -0.1830
-
-
-AFTER
-Configuration model : Intercept = 2.4075; Coefficient = 1.9899
-Ratio model : Intercept = 2.4578; Coefficient = -1.5637

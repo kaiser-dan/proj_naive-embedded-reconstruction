@@ -1,0 +1,50 @@
+# =========== BUILD ===========
+[build-system]
+build-backend = 'setuptools.build_meta'
+requires = [
+    'setuptools',
+]
+
+# ========== PROJECT ==========
+[project]
+name = "embmplxrec"
+version = "2.0.0"
+
+authors = [
+    {name="Daniel Kaiser", email="kaiserd@iu.edu"},
+]
+
+description = "Tools for the reconstruction of multiplex networks from partial structural observations via graph embeddings."
+readme = "README.md"
+classifiers = ["License :: MIT License"]
+
+requires-python = ">=3.10"
+dependencies = [
+    "networkx>=2.8",
+    "numpy>=1.23",
+    "pandas>=1.4",
+    "scipy>=1.9",
+    "scikit-learn>=1.2",
+    "gensim>=4.1"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7"
+]
+reproduce = [
+    "snakemake",
+    "matplotlib",
+    "seaborn"
+]
+
+# ========== DOCS ===========
+[project.urls]
+"Homepage" = "https://github.com/kaiserd/proj_naive-embedded-reconstruction"
+"Bug Tracker" = "https://github.com/kaiserd/proj_naive-embedded-reconstruction/issues"
+
+
+# ========== METADATA ===========
+# [tool.setuptools.dynamic]
+# version = {attr = "embmplxrec.VERSION"}
+# readme = {file = ["README.md"]}

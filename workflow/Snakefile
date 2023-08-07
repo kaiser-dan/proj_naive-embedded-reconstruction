@@ -1,0 +1,56 @@
+# ========
+# Pathing
+# ========
+include: "configurations/pathing.smk"
+
+# =========================
+# Experiment configuration
+# =========================
+include: "utils.smk"
+
+TARGET_LFRS = expand(
+    DIR_EDGELISTS + "multiplex-LFR_N-{N}_T1-{t1}_T2-{t2}_kavg-{kavg}_kmax-{kmax}_mu-{mu}_prob-{prob}.pkl",
+    **config["LFR"])
+TARGET_REMNANTS = expand(
+    DIR_REMNANTS + "remnants_strategy-{strategy}_theta-{theta}_remrep-{rep}_{basename}",
+    **config["remnants"],
+    basename=basenames(TARGET_LFRS))
+TARGET_EMBEDDINGS = expand(
+    DIR_EMBEDDINGS + "embeddings_method-{method}_dim-{dim}_embrep-{rep}_{basename}",
+    **config["embeddings"],
+    basename=basenames(TARGET_REMNANTS))
+TARGET_MODELS = expand(
+    DIR_MODELS + "model_normalized-{normalize}_{basename}",
+    **config["models"],
+    basename=basenames(TARGET_EMBEDDINGS))
+
+# =============
+# Target rules
+# =============
+include: "modules/synthetics.smk"
+include: "modules/remnants.smk"
+include: "modules/embeddings.smk"
+include: "modules/classifications.smk"
+
+# Main target rule - Gathers specified output data
+rule all:
+    input:
+        TARGET_LFRS,
+        TARGET_REMNANTS,
+        TARGET_EMBEDDINGS,
+        TARGET_MODELS
+
+# Figure rule - Gathers some go-to plots
+# rule figures:
+#     input:
+#         Y
+
+# Report rule - Gathers some snakemake reports and diagnostic figures
+# rule reports:
+#     input:
+#         Z
+#     output:
+#         rulegraph,
+#         report,
+#     shell:
+#         "snakemake --report; snakemake --rulegraph | dot XXX"

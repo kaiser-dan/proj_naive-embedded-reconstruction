@@ -20,11 +20,11 @@ MIN_COMMUNITY: int = 1
 REPS: int = 10
 
 ## Filepaths & templates
-ROOT = os.path.join("..", "")
+ROOT = os.path.join(".", "")
 DIR_EDGES = os.path.join(ROOT, "data", "input", "edgelists", "")
 DIR_PARTITIONS = os.path.join(ROOT, "data", "input", "partitions", "")
 FILEPATH_TEMPLATE: str = \
-    "multiplex-LFR_N-{N}_T1-{t1}_T2-{t2}_kavg-{kavg}-kmax-{kmax}_mu-{mu:.1f}_prob-{prob}.pkl"
+    "multiplex-LFR_N-{N}_T1-{t1}_T2-{t2}_kavg-{kavg}_kmax-{kmax}_mu-{mu:.1f}_prob-{prob}.pkl"
 
 ## Logging
 logger = embmplxrec.utils.get_module_logger(
@@ -35,6 +35,17 @@ logger = embmplxrec.utils.get_module_logger(
 
 # ================= FUNCTIONS =======================
 # --- CLI parsing ---
+def check_file_exists(args):
+    # Check if files exist already
+    filepath_ = FILEPATH_TEMPLATE.format(**args)
+    filepath_edges = f"{DIR_EDGES}/{filepath_}"
+    filepath_partitions = f"{DIR_PARTITIONS}/partitions_{filepath_}"
+    if os.path.exists(filepath_edges): # or os.path.exists(filepath_partitions):
+        logger.info(f"File '{filepath_}' already exists! Skipping LFR sampling.")
+        return True, (filepath_edges, filepath_partitions)
+    else:
+        return False, (filepath_edges, filepath_partitions)
+
 def setup_argument_parser():
     parser = argparse.ArgumentParser(
         description='Sample a single LFR duplex instance.',
@@ -72,7 +83,7 @@ def setup_argument_parser():
     return parser
 
 def verify_args(args):
-    if args.AVG_K >= args.kmax:
+    if args["kavg"] >= args["kmax"]:
         raise ValueError("Average degree exceeds maximum degree!")
 
 def gather_args():
@@ -83,7 +94,7 @@ def gather_args():
     args = vars(parser.parse_args())
 
     # Append calculated parameters to args
-    args.kmax = int(np.sqrt(args.N))
+    args["kmax"] = int(np.sqrt(args["N"]))
 
     # Verify arguments are acceptable
     verify_args(args)
@@ -96,13 +107,13 @@ def get_duplexes_and_partitions(args):
     # Generate naive LFR duplex
     D, sigma1, sigma2, _ = \
         generate_multiplex_LFR(
-            args.N,
-            args.t1, args.t2,
-            args.mu,
-            args.kavg, args.kmax,
+            args["N"],
+            args["t1"], args["t2"],
+            args["mu"],
+            args["kavg"], args["kmax"],
             MIN_COMMUNITY,
-            args.prob,
-            ROOT=ROOT
+            args["prob"],
+            ROOT="./"
         )
 
     # Preprocess duplex
@@ -119,12 +130,9 @@ def main():
     # Parse CL arguments
     args = gather_args()
 
-    # Check if files exist already
-    filepath_ = FILEPATH_TEMPLATE.format(**vars(args))
-    filepath_edges = f"{DIR_EDGES}/edgelists_{filepath_}"
-    filepath_partitions = f"{DIR_PARTITIONS}/partitions_{filepath_}"
-    if os.path.exists(filepath_edges) or os.path.exists(filepath_partitions):
-        logger.info(f"File '{filepath_}' already exists! Skipping LFR sampling.")
+    # Check if file exists
+    check, (filepath_edges, filepath_partitions) = check_file_exists(args)
+    if check:
         return
 
     # Sample LFR duplexes

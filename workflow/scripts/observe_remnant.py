@@ -16,8 +16,8 @@ import embmplxrec.utils
 VALID_STRATEGIES = ["RANDOM"]
 
 ## Filepaths & templates
-ROOT = os.path.join("..", "")
-DIR_REMNANTS = os.path.join(ROOT, "data", "input", "remnants", "")
+# * Relative to project root!
+DIR_REMNANTS = os.path.join("data", "input", "remnants", "")
 FILEPATH_TEMPLATE = "remnants_strategy-{strategy}_theta-{theta}_remrep-{rep}_{basename}"
 
 ## Logger
@@ -53,9 +53,9 @@ def setup_argument_parser():
         choices=["RANDOM", "SNOWBALL"],
         help="Observation strategy of training edges.")
     parser.add_argument(
-        "--repeat", dest="reps",
+        "-r", "--repetition", dest="rep",
         type=int, default=1,
-        help="Number of remnants to gather on given multiplex.")
+        help="Remnants repeition identifier.")
 
     return parser
 
@@ -67,8 +67,6 @@ def verify_args(args):
     # - Numeric parameters -
     if args.theta < 0.0 or args.theta > 1.0:
         raise ValueError("Theta must be between 0.0 and 1.0 (inclusive)!")
-    if args.reps <= 0:
-        raise ValueError("Number of repetitions must be a positive integer!")
 
     # - String parameters -
     if args.strategy.upper() not in VALID_STRATEGIES:
@@ -81,7 +79,7 @@ def gather_args():
     parser = setup_argument_parser()
 
     # Gather command-line arguments
-    args = vars(parser.parse_args())
+    args = parser.parse_args()
 
     # Verify arguments are acceptable
     verify_args(args)
@@ -104,28 +102,26 @@ def main():
     # Separate directory and basename of input edgelist file
     _, basename = os.path.split(args.filepath)
 
-    # Attempt remnant observation for each repetitions
-    for rep in range(1, args.reps+1):
-        # Construct filepath
-        filepath_ = FILEPATH_TEMPLATE.format(
-            strategy=args.strategy,
-            theta=args.theta,
-            rep=rep,
-            basename=basename)
-        filepath = os.path.join(DIR_REMNANTS, filepath_)
+    # Construct filepath
+    filepath_ = FILEPATH_TEMPLATE.format(
+        strategy=args.strategy,
+        theta=args.theta,
+        rep=args.rep,
+        basename=basename)
+    filepath = os.path.join(DIR_REMNANTS, filepath_)
 
-        # Check if file already exists
-        if os.path.isfile(filepath):
-            logger.info(f"File '{filepath_}' already exists! Skipping remnant observation.")
-            continue
+    # Check if file already exists
+    if os.path.isfile(filepath):
+        logger.info(f"File '{filepath_}' already exists! Skipping remnant observation.")
+        return
 
-        # Load edgelists and observe remnants
-        with open(args.filepath, 'rb') as _fh:
-            duplex = pickle.load(_fh)
-        remnant_multiplex = observe_remnants(duplex, args.theta, args.strategy)
+    # Load edgelists and observe remnants
+    with open(args.filepath, 'rb') as _fh:
+        duplex = pickle.load(_fh)
+    remnant_multiplex = observe_remnants(duplex, args.theta, args.strategy)
 
-        # Save RemnantMultiplex to disk
-        remnant_multiplex.save(filepath)
+    # Save RemnantMultiplex to disk
+    remnant_multiplex.save(filepath)
 
 
 if __name__ == "__main__":

@@ -41,8 +41,8 @@ class RemnantMultiplex:
     metadata: dict = field(default_factory=dict)
     # Inferred data
     labels_to_layers: dict = field(init=False, repr=False)  # label (int) -> layer (RemnantNetwork)
-    observed: AbstractEdges = field(init=False, repr=False)
-    unobserved: AbstractEdges = field(init=False, repr=False)
+    observed: List[tuple[int, int]] = field(init=False, repr=False)
+    unobserved: List[tuple[int, int]] = field(init=False, repr=False)
 
     # --- Private methods ---
     def __post_init__(self):
@@ -59,11 +59,14 @@ class RemnantMultiplex:
             self.labels_to_layers[label] = self.layers[idx]
 
     def _build_edge_sets(self):
-        self.observed = set()
-        self.unobserved = set()
-        for layer in self.layers:
+        self.observed = set(self.layers[0].observed)
+        self.unobserved = set(self.layers[0].unobserved)
+        for layer in self.layers[1:]:
             self.observed.update(layer.observed)
-            self.unobserved.update(layer.unobserved)
+            self.unobserved.intersection_update(layer.unobserved)
+
+        self.observed = sorted(list(self.observed))
+        self.unobserved = sorted(list(self.unobserved))
 
     def _check_nodes(self):
         node_counts = [

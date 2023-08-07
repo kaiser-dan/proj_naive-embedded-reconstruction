@@ -45,8 +45,12 @@ class Embedding:
         self.vectors = vectors
         self.embedder = embedder
 
+        # Property initialization
         self._aligned = aligned
         self._scaled = scaled
+
+        # Post-init processing
+        # self._fix_types()
 
         return
 
@@ -81,6 +85,9 @@ class Embedding:
     def __eq__(self, other):
         return self.vectors == other.vectors
 
+    def _fix_types(self):
+        self.vectors = {int(key): val for key, val in self.vectors.items()}
+
 
     # --- Public methods ---
     # > Vector pre-processing >
@@ -99,7 +106,7 @@ class Embedding:
             # Translate each vector by center of mass
             # & Has effect of recentering vectors about the origin
             for vector_id in component:
-                self.vectors[vector_id] -= component_center
+                self.vectors[vector_id] = self.vectors[vector_id] - component_center
 
         self.aligned = True
 
@@ -121,7 +128,7 @@ class Embedding:
             # Normalize vectors
             # & Has effect that norms sum to unity
             for vector_id in component:
-                self.vectors[vector_id] /= component_total_norm
+                self.vectors[vector_id] = self.vectors[vector_id] / component_total_norm
 
         self.scaled = True
 

@@ -64,7 +64,7 @@ class Node2Vec:
         #temp_embeddings -= center_point #
         #self.embeddings = {str(self.id2node[i]): temp_embeddings[i] for i in range(len(self.id2node))}
         self.embeddings = {
-            str(self.id2node[i]): model.wv[str(self.id2node[i])] for i in range(len(self.id2node))
+            int(self.id2node[i]): model.wv[str(self.id2node[i])] for i in range(len(self.id2node))
         }
         return self.embeddings
 

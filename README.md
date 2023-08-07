@@ -13,11 +13,10 @@ This project provides source code for the reconstruction of multiplex networks f
   - [Installing](#installing)
   - [Quick Start](#quick-start)
 - [Usage](#usage)
-  - [Repository Structure](#repository-structure)
   - [Reproducing experiments](#reproducing-experiments)
+  - [Package Structure](#package-structure)
 - [Documentation](#documentation)
-- [Running the tests](#running-the-tests)
-  - [Test Suite Organization](#test-suite-organization)
+- [Tests](#tests)
 - [Other Information](#other-information)
   - [Built With](#built-with)
   - [Contributing](#contributing)
@@ -38,27 +37,44 @@ your local machine for development, testing, and analysis purposes.
 
 A compatible Python install is needed to begin - the package management is handled by Conda as described below.
 - [Python \[3.10+\]](https://python.org/downloads/)
-- [Conda \[4.14+\]](https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html)
 - [GNU Make \[4.2+\]](https://www.gnu.org/software/make/) (only needed for our provided `makefile` - see [Reproducing Experiments](#reproducing-experiments))
 
-A complete list of packages is available in the `environment.yaml` file. Instructions for creating a controlled environment from this manifest is available below, in the [Installing](#installing) section.
+A complete list of utilized packages is available in the `requirements.txt` file. There is, however, a package dependency hierarchy where some packages in the `requirements.txt` are not strictly necessary for the utilization of package infrastructure. The core requirements are listed as dependencies in the build instructions. Further instructions for creating a controlled environment from this manifest is available below, in the [Installing](#installing) section.
 
-> _Note: We personally recommend using mambaforge, an extension of conda that is considerably faster and more robust. Further information can be found in the [Mamba docs](https://mamba.readthedocs.io/en/latest/index.html)_.
+<!-- > _Note: We personally recommend using mambaforge, an extension of conda that is considerably faster and more robust. Further information can be found in the [Mamba docs](https://mamba.readthedocs.io/en/latest/index.html)_. -->
 
 ## Installing
 
 To (locally) reproduce this project, do the following:
 
 1. Download this code base. Notice that raw data are typically not included in the git-history and may need to be downloaded independently - see [Reproducing Experiments](#reproducing-experiments) for more information.
-2. Open a terminal with Python and Conda installed and run the commands:
+2. (Optional) Open a terminal with Python installed and create a new virtual environment:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
    ```
-   $> conda env create -f environment.yaml
-   $> conda activate EmbeddedNaive
+3. Install the package
+   ```bash
+   pip install .
+   ```
+   > **NOTE:** We recommend you use the provided `makefile` to handle installations and automatic testing. You can install the package, testing and plotting packages, and run the package tests all with the default `make` target, i.e., by running `make`.
+4. (Optional) If you wish to reproduce the experiments (and did run the `make` command), install the additional package dependencies to use Snakemake
+   ```bash
+   pip install .[reproduce]
    ```
 
-This will install all necessary packages for you to be able to run the scripts and everything should work out of the box. 
+
+This will install all necessary packages for you to be able to run the scripts and everything should work out of the box.
 
 ## Quick Start
+
+**CREATE A SMALL LIL BABY EXAMPLE**
+
+# Usage
+
+[Usage guide]
+
+## Reproducing experiments
 
 In the interest of reproducibility and scientific rigor, we have prepared a `makefile` that will reproduce the main analyses present in the accompanying manuscript. Broadly, this `makefile` will do the following:
 1. Setup python environment.
@@ -69,40 +85,27 @@ In the interest of reproducibility and scientific rigor, we have prepared a `mak
 This `makefile` also contains rules for cleaning downloaded and temporary files as well as retrieving binaries for sampling LFR benchmarks.
 
 To use this `makefile`, which requires `GNUMake`, simply run
-  ```
-  $> make
+  ```bash
+  make
   ```
 to install the necessary packages to use our source code.
 
-Reproducing our experiments can be done with
-  ```
-  $> make reproduce
-  ```
-
-
-Finally, cleaning all downloaded/generated files can be accomplished with
-  ```
-  $> make clean
+Reproducing our experiments on real datasets can be done with
+  ```bash
+  make reproduce
   ```
 
-# Usage
+Reproducing our experiments on synthetic datasets can be done with
+  ```
+  snakemake --cores [num_cores] --configfile workflow/configurations/all.yaml
+  ```
 
-[Usage guide]
+> **NOTE:** Running all synthetic experiments in one jobset as above is very computationally expensive. We originally ran our results in chunks and on different machines simultaneously. This can be done using the provided `workflow/configurations/ex[##].yaml` files with the same snakemake command structure as above.
 
-## Repository Structure
+
+## Package Structure
 
 [Fill in here]
-
-## Reproducing experiments
-
-As mentioned above, the experiments can be reproduced in their entirety with the command
-```
-$> make reproduce
-```
-
-This will reproduce all analyses present within the manuscript within their respective order. It will take a fair bit of time as many multiplexes are generated, embedded, reconstructed, and compared throughout. It is generally recommended you do _not_ run this command directly.
-
-Each figure in the manuscript has a corresponding script which will reproduce _only_ the experiments necessary to create that figure (and actually do the figure synthesis and save to disk as well). These are located in the `script/` directory and it is highly recommended that you utilize these scripts if you only want to reproduce a portion of the manuscript. Additional information can be found in `scripts/REPRODUCING_RESULTS.md`
 
 # Documentation
 
@@ -112,12 +115,25 @@ We have, however, kept all experimental protocols related to the final experimen
 
 <!-- Additionally, a copy of individual derivations can be found in `docs/` that are highly suggestive of methodological choices and implications for our work. -->
 
-# Running the tests
+# Tests
 
-All unit tests are written with [XXX test utility]().
+All unit tests are written with [pytest](docs.pytest.org).
 
+Tests can be run directly with the commands:
+```bash
+pip install pytest
+pytest tests/
+```
 
-## Test Suite Organization
+As above, we recommend making use of the included `makefile` to handle installations and testing. The default target will ensure all dependencies are up to date and tests are reran.
+```bash
+make
+```
+
+Alternatively, the tests alone can be conducted with
+```bash
+make test
+```
 
 
 # Other Information

@@ -41,8 +41,8 @@ class MDSBase:
 
 
 class Isomap_(MDSBase):
-    def __init__(self, dimension=2):
-        super(Isomap_, self).__init__(dimension)
+    def __init__(self, dimensions=2):
+        super(Isomap_, self).__init__(dimensions)
 
     def _get_embedding(self):
         return manifold.MDS(

@@ -23,8 +23,8 @@ Implementations of Isomap
 Metric MDS + shortest path length matrix of a network
 """
 class MDSBase:
-    def __init__(self, dimension):
-        self.dimension = dimension
+    def __init__(self, dimensions):
+        self.dimension = dimensions
 
     def train(self, network):
         self.network = network

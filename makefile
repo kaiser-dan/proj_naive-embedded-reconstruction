@@ -1,6 +1,6 @@
 # ========== PREFACE ==========
 # Make specifications
-.PHONY: all install clean deepclean
+.PHONY: all install check clean deepclean
 .DEFAULT_GOAL := all
 
 # Requirements for setup rule
@@ -12,14 +12,14 @@ INSTALL_TEST=1
 INSTALL_REPRODUCE=1
 
 # ========== Deployment ==========
-all: install test clean
+all: install check clean
 
 install:
 	pip install .
 	[ "${INSTALL_TEST}" = "1" ] && pip install .[test]
 	[ "${INSTALL_REPRODUCE}" = "1" ] && pip install .[reproduce]
 
-test:
+check:
 	pytest tests/
 
 # ========== Workflow reproduction ==========

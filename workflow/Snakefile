@@ -11,10 +11,34 @@ include: "utils.smk"
 TARGET_LFRS = expand(
     DIR_EDGELISTS + "multiplex-LFR_N-{N}_T1-{t1}_T2-{t2}_kavg-{kavg}_kmax-{kmax}_mu-{mu}_prob-{prob}.pkl",
     **config["LFR"])
+
+# Reals
+TARGET_REALS = [
+    # arxiv
+    DIR_EDGELISTS + "multiplex-arxiv_l1-2_l2-6.pkl",
+    DIR_EDGELISTS + "multiplex-arxiv_l1-2_l2-7.pkl",
+    DIR_EDGELISTS + "multiplex-arxiv_l1-6_l2-7.pkl",
+    # celegans
+    DIR_EDGELISTS + "multiplex-celegans_l1-1_l2-2.pkl",
+    DIR_EDGELISTS + "multiplex-celegans_l1-1_l2-3.pkl",
+    DIR_EDGELISTS + "multiplex-celegans_l1-2_l2-3.pkl",
+    # drosophila
+    DIR_EDGELISTS + "multiplex-drosophila_l1-1_l2-2.pkl",
+    DIR_EDGELISTS + "multiplex-drosophila_l1-1_l2-3.pkl",
+    DIR_EDGELISTS + "multiplex-drosophila_l1-2_l2-3.pkl",
+    # london
+    DIR_EDGELISTS + "multiplex-london_l1-1_l2-2.pkl",
+    DIR_EDGELISTS + "multiplex-london_l1-1_l2-3.pkl",
+    DIR_EDGELISTS + "multiplex-london_l1-2_l2-3.pkl",
+]
+
+TARGET_EDGELISTS = TARGET_LFRS # + TARGET_REALS
+
+# Remnant multiplexes
 TARGET_REMNANTS = expand(
     DIR_REMNANTS + "remnants_strategy-{strategy}_theta-{theta}_remrep-{rep}_{basename}",
     **config["remnants"],
-    basename=basenames(TARGET_LFRS))
+    basename=basenames(TARGET_EDGELISTS))
 TARGET_EMBEDDINGS = expand(
     DIR_EMBEDDINGS + "embeddings_method-{method}_dim-{dim}_embrep-{rep}_{basename}",
     **config["embeddings"],

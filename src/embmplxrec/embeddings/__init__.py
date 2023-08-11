@@ -1,6 +1,7 @@
-from embmplxrec.embeddings import embedding
-from embmplxrec.embeddings import helpers
-from embmplxrec.embeddings import HOPE
-from embmplxrec.embeddings import Isomap
-from embmplxrec.embeddings import N2V
-from embmplxrec.embeddings import LE
+from . import embedding
+from . import helpers
+from . import HOPE
+from . import Isomap
+from . import N2V
+from . import LE
+

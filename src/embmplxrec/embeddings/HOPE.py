@@ -1,9 +1,6 @@
 """Project source code for applying HOPE embedding.
 """
 # ============= SET-UP =================
-# --- Standard library ---
-import os
-
 # --- Scientific computing ---
 import numpy as np
 import scipy.sparse as sp
@@ -18,7 +15,7 @@ from embmplxrec.embeddings.embedding import Embedding
 
 
 # ============= CLASSES =================
-class HOPE:
+class HOPE_:
     """
     Ou, Mingdong, et al. Asymmetric transitivity preserving graph embedding.
     Proceedings of the 22nd ACM SIGKDD international conference on Knowledge
@@ -33,8 +30,8 @@ class HOPE:
     To disable it, export OPENBLAS_NUM_THREADS=1 or MKL_NUM_THREADS=1
     in shell depending on the backend of the numpy installation.
     """
-    def __init__(self, dimension=128, beta=0.01):
-        self.dimension = dimension
+    def __init__(self, dimensions=128, beta=0.01):
+        self.dimension = dimensions
         self.beta = beta
 
     def train(self, G):
@@ -108,12 +105,16 @@ def HOPE(
     vectors = _dispatch(graph, parameters)
 
     # Converting type
-    if eigenvectors is np.ndarray:
-        eigenvectors = matrix_to_dict(eigenvectors)
+    if vectors is np.ndarray:
+        vectors = matrix_to_dict(vectors)
 
     # Apply node reindexing
-    for node, node_adjusted in node_index.items():
-        vectors[node] = eigenvectors[node_adjusted]
+    # ! >>> BROKEN >>>
+    #for node, node_adjusted in node_index.items():
+    #    vectors_return[node] = vectors[node_adjusted]
+    # ! --- HOT-FIX ---
+    vectors_return = vectors
+    # ! <<< BROKEN <<<
 
     # Construct Embedding instance
     embedding = Embedding(vectors, "HOPE" if not per_component else "HOPE-PC")
@@ -122,7 +123,7 @@ def HOPE(
 
 # --- Primary computations ---
 def _HOPE(graph, parameters):
-    vectors = HOPE(**parameters).train(graph)
+    vectors = HOPE_(**parameters).train(graph)
 
     return vectors
 

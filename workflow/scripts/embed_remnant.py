@@ -36,7 +36,7 @@ def setup_argument_parser():
         help="Filepath of pickled remnant duplex.")
     parser.add_argument(
         "embedding",
-        choices=["N2V", "LE", "ISOMAP"],
+        choices=["N2V", "LE", "ISOMAP", "HOPE"],
         help="Embedding method.")
     parser.add_argument(
         "dimensions",
@@ -122,9 +122,8 @@ def main():
             embedding_function = embeddings.LE.LE
         case "ISOMAP":
             embedding_function = embeddings.Isomap.Isomap
-        # TODO: Fix HOPE embedding
         case "HOPE":
-            raise NotImplementedError("HOPE is currently not implemented!")
+            embedding_function = embeddings.HOPE.HOPE
 
     ## Set kwargs for N2V/Gensim
     parameters = {"dimensions": args.dimensions}

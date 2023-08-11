@@ -1,6 +1,9 @@
 """Partial multiplex structural information sampling techniques.
 """
 # ============= SET-UP =================
+
+__all__ = ["partial_information", "random_observation"]
+
 # --- Scientific computing ---
 from numpy.random import default_rng as rng_
 
@@ -9,7 +12,6 @@ from embmplxrec.remnants.remnant import RemnantNetwork, RemnantMultiplex
 
 # --- Aliases ---
 from embmplxrec._types import MaybePrevs
-
 
 
 # ============= FUNCTIONS =================

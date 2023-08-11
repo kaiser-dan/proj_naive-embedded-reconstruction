@@ -1,6 +1,9 @@
 """Project source code for applying HOPE embedding.
 """
 # ============= SET-UP =================
+
+__all__ = ["HOPE"]
+
 # --- Scientific computing ---
 import numpy as np
 import scipy.sparse as sp
@@ -48,7 +51,7 @@ class HOPE_:
         #center_point = self.embeddings_matrix.mean(axis=0) # centering the coordinates
         #self.embeddings_matrix -= center_point # centering the coordinates
         self.embeddings = {
-            str(self.id2node[i]): self.embeddings_matrix[i] for i in range(len(self.id2node))
+            int(self.id2node[i]): self.embeddings_matrix[i] for i in range(len(self.id2node))
         }
 
         return self.embeddings

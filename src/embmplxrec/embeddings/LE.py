@@ -1,6 +1,9 @@
 """Project source code for applying Laplacian Eigenmap embedding.
 """
 # ============= SET-UP =================
+
+__all__ = ["LE"]
+
 # --- Standard library ---
 from typing import Union
 

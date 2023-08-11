@@ -1,6 +1,9 @@
 """Classes for handling remnant multiplexes in the multiplex reconstruction setting.
 """
 # ============= SET-UP =================
+
+__all__ = ["RemnantNetwork", "RemnantMultiplex"]
+
 # --- Standard library ---
 import pickle
 from dataclasses import dataclass, field

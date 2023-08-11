@@ -1,8 +1,8 @@
 """Project source code for applying Isomap embedding.
 """
 # ============= SET-UP =================
-# --- Standard library ---
-import os
+
+__all__ = ["Isomap"]
 
 # --- Scientific computing ---
 from numpy import ndarray

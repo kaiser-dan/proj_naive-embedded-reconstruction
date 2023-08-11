@@ -37,15 +37,13 @@ TARGET_REALS = [
     DIR_EDGELISTS + "multiplex-london_l1-2_l2-3.pkl",
 ]
 
-TARGET_EDGELISTS = TARGET_LFRS + TARGET_REALS
+TARGET_EDGELISTS = TARGET_LFRS # + TARGET_REALS
 
 # Remnant multiplexes
 TARGET_REMNANTS = expand(
     DIR_REMNANTS + "remnants_strategy-{strategy}_theta-{theta}_remrep-{rep}_{basename}",
     **config["remnants"],
     basename=basenames(TARGET_EDGELISTS))
-
-# Remnant embeddings
 TARGET_EMBEDDINGS = expand(
     DIR_EMBEDDINGS + "embeddings_method-{method}_dim-{dim}_embrep-{rep}_{basename}",
     **config["embeddings"],

@@ -4,6 +4,9 @@ Wrapper for node2vec package with
 additional post-processing for non-consecutive node ids.
 """
 # ============= SET-UP =================
+
+__all__ = ["N2V"]
+
 # --- Standard library ---
 import random
 

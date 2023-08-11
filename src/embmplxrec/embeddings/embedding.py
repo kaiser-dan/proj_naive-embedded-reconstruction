@@ -1,6 +1,9 @@
 """Source code for Embedding class object.
 """
 # ============= SET-UP =================
+
+__all__ = ["Embedding"]
+
 # --- Standard library ---
 import sys
 import pickle
@@ -50,7 +53,7 @@ class Embedding:
         self._scaled = scaled
 
         # Post-init processing
-        # self._fix_types()
+        self._fix_types()
 
         return
 

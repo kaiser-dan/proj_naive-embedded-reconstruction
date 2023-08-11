@@ -4,8 +4,14 @@ authors:
 - family-names: "Kaiser"
   given-names: "Daniel"
   orcid: "https://orcid.org/0000-0003-1346-451X"
+- family-names: "Patwardhan"
+  given-names: "Siddharth"
+- family-names: "Kim"
+  given-names: "Minsuk"
+- family-names: "Radicchi"
+  given-names: "Filippo"
 title: "proj_naive-embedded-reconstruction"
-version: 0.2.0-alpha
+version: 2.0.0
 doi:
-date-released:
+date-released: 2023-08-06
 url: "https://github.com/kaiser-dan/proj_naive-embedded-reconstruction"

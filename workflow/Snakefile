@@ -8,6 +8,11 @@ include: "configurations/pathing.smk"
 # =========================
 include: "utils.smk"
 
+
+# =============
+# File targets
+# =============
+# Multiplex topologies
 TARGET_LFRS = expand(
     DIR_EDGELISTS + "multiplex-LFR_N-{N}_T1-{t1}_T2-{t2}_kavg-{kavg}_kmax-{kmax}_mu-{mu}_prob-{prob}.pkl",
     **config["LFR"])
@@ -32,17 +37,28 @@ TARGET_REALS = [
     DIR_EDGELISTS + "multiplex-london_l1-2_l2-3.pkl",
 ]
 
+<<<<<<< HEAD
 TARGET_EDGELISTS = TARGET_LFRS # + TARGET_REALS
+=======
+TARGET_EDGELISTS = TARGET_LFRS + TARGET_REALS
+>>>>>>> master
 
 # Remnant multiplexes
 TARGET_REMNANTS = expand(
     DIR_REMNANTS + "remnants_strategy-{strategy}_theta-{theta}_remrep-{rep}_{basename}",
     **config["remnants"],
     basename=basenames(TARGET_EDGELISTS))
+<<<<<<< HEAD
+=======
+
+# Remnant embeddings
+>>>>>>> master
 TARGET_EMBEDDINGS = expand(
     DIR_EMBEDDINGS + "embeddings_method-{method}_dim-{dim}_embrep-{rep}_{basename}",
     **config["embeddings"],
     basename=basenames(TARGET_REMNANTS))
+
+# Reconstruciton models
 TARGET_MODELS = expand(
     DIR_MODELS + "model_normalized-{normalize}_{basename}",
     **config["models"],
@@ -59,7 +75,7 @@ include: "modules/classifications.smk"
 # Main target rule - Gathers specified output data
 rule all:
     input:
-        TARGET_LFRS,
+        TARGET_EDGELISTS,
         TARGET_REMNANTS,
         TARGET_EMBEDDINGS,
         TARGET_MODELS

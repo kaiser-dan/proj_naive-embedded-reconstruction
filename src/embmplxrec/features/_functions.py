@@ -15,6 +15,7 @@ logger = embmplxrec.utils.get_module_logger(
 
 # --- Globals ---
 TOLERANCE = 1e-10  # absolute tolerance on comparisons to 0
+SUPREMUM = 1e12
 
 # ========== FUNCTIONS ==========
 # --- Likelihoods ---
@@ -24,11 +25,12 @@ def inverse(x):
     if not np.isclose(x, 0, atol=TOLERANCE):
         return 1/x
     else:
-        logger.warning("Quantity too close to zero, returning np.inf instead.")
-        return np.inf
+        logger.warning(f"Denominator within tolerance of zero (atol = {TOLERANCE}), returning {SUPREMUM} instead.")
+        return SUPREMUM
 
 # TODO: Add floating-point comparison safety for small floats
 # TODO: See python docs on sys.float_info.epsilon versus sys.float_info.min
+# ? Depreciate in favor of single inverse function
 def bounded_inverse(x, tolerance=sys.float_info.epsilon):
     # Ensure x has float dtype
     x = x.astype(float)
@@ -95,7 +97,7 @@ def _handle_mismatched_dims(x, y):
         raise ValueError("Value error encountered _not_ related to dimension mismatch!")
 
 def scale_probability(p):
-    if not (0 <= p and p <= 1):
+    if not (0 <= p <= 1):
         logger.error(f"Given probability ({p}) is not in valid domain [0,1]!")
     else:
         return 2*p - 1

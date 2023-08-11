@@ -175,3 +175,7 @@ data/.depr/
 # Scratch work
 _scratch/
 workflow
+community.dat
+network.dat
+statistics.dat
+time_seed.dat

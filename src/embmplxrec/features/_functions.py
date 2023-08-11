@@ -7,11 +7,7 @@ import sys
 import numpy as np
 
 # --- Source code ---
-import embmplxrec.utils
-logger = embmplxrec.utils.get_module_logger(
-    name=__name__,
-    file_level=10,
-    console_level=30)
+from . import LOGGER
 
 # --- Globals ---
 TOLERANCE = 1e-10  # absolute tolerance on comparisons to 0
@@ -25,7 +21,7 @@ def inverse(x):
     if not np.isclose(x, 0, atol=TOLERANCE):
         return 1/x
     else:
-        logger.warning(f"Denominator within tolerance of zero (atol = {TOLERANCE}), returning {SUPREMUM} instead.")
+        LOGGER.warning(f"Denominator within tolerance of zero (atol = {TOLERANCE}, val = {x}), returning {SUPREMUM} instead.")
         return SUPREMUM
 
 # TODO: Add floating-point comparison safety for small floats
@@ -90,7 +86,7 @@ def poincare_disk_metric(x, y): raise NotImplementedError("Hyperbolic distance n
 
 # --- Helpers ---
 def _handle_mismatched_dims(x, y):
-    logger.warning("Attempting to add vectors of different sizes; casting as np.inf instead (for disconnected components)")
+    LOGGER.warning("Attempting to add vectors of different sizes; casting as np.inf instead (for disconnected components)")
     if len(x) != len(y):
         return np.inf
     else:
@@ -98,7 +94,7 @@ def _handle_mismatched_dims(x, y):
 
 def scale_probability(p):
     if not (0 <= p <= 1):
-        logger.error(f"Given probability ({p}) is not in valid domain [0,1]!")
+        LOGGER.error(f"Given probability ({p}) is not in valid domain [0,1]!")
     else:
         return 2*p - 1
 

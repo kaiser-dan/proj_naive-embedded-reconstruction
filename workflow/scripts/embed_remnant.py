@@ -9,7 +9,6 @@ import argparse
 # --- Source code ---
 from embmplxrec.data import io
 from embmplxrec import embeddings
-import embmplxrec.utils
 
 # --- Globals ---
 ## Filepaths & templates

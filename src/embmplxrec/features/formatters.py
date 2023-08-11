@@ -1,19 +1,17 @@
 """Formatting tools for pre-processing features in multiplex reconstruction setting.
 """
 # ========== SET-UP ==========
+
+__all__ = ["as_configuration", "format_feature_matrix"]
+
 # --- Scientific computing ---
 import numpy as np
 
 # --- Project source ---
 import embmplxrec.features._functions as fcns
 
-import embmplxrec.utils
-
 # --- Miscellaneous ---
-logger = embmplxrec.utils.get_module_logger(
-    name=__name__,
-    file_level=10,
-    console_level=10)
+from . import LOGGER
 
 
 # ========== FUNCTIONS ==========

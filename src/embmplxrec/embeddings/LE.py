@@ -1,6 +1,9 @@
 """Project source code for applying Laplacian Eigenmap embedding.
 """
 # ============= SET-UP =================
+
+__all__ = ["LE"]
+
 # --- Standard library ---
 from typing import Union
 
@@ -47,6 +50,7 @@ def LE(
 
     """
     # >>> Book-keeping >>>
+    parameters["k"] = parameters["dimensions"]  # to fit eigsh
     _dispatch = _LE  # default embedding sub-method
 
     # ! >>> Temp NCV fix >>>
@@ -96,6 +100,8 @@ def LE(
 
 # --- Main computations ---
 def _LE(graph, parameters, hyperparameters, nodelist):
+    parameters = {k: v for k, v in parameters.items() if k != "dimensions"}
+
     # Calculate normalized Laplacian matrix
     L = nx.normalized_laplacian_matrix(graph, nodelist=nodelist)
 

@@ -1,8 +1,8 @@
 """Project source code for applying Isomap embedding.
 """
 # ============= SET-UP =================
-# --- Standard library ---
-import os
+
+__all__ = ["Isomap"]
 
 # --- Scientific computing ---
 from numpy import ndarray
@@ -23,8 +23,8 @@ Implementations of Isomap
 Metric MDS + shortest path length matrix of a network
 """
 class MDSBase:
-    def __init__(self, dimension):
-        self.dimension = dimension
+    def __init__(self, dimensions):
+        self.dimension = dimensions
 
     def train(self, network):
         self.network = network
@@ -41,8 +41,8 @@ class MDSBase:
 
 
 class Isomap_(MDSBase):
-    def __init__(self, dimension=2):
-        super(Isomap_, self).__init__(dimension)
+    def __init__(self, dimensions=2):
+        super(Isomap_, self).__init__(dimensions)
 
     def _get_embedding(self):
         return manifold.MDS(

@@ -8,7 +8,7 @@ requires = [
 # ========== PROJECT ==========
 [project]
 name = "embmplxrec"
-version = "2.1.0"
+version = "2.2.1"
 
 authors = [
     {name="Daniel Kaiser", email="kaiserd@iu.edu"},

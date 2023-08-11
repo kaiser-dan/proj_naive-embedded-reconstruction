@@ -18,9 +18,7 @@ DIR_EMBEDDINGS = os.path.join("data", "interim", "embeddings", "")
 FILEPATH_TEMPLATE = "embeddings_method-{method}_dim-{dim}_embrep-{rep}_{basename}"
 
 ## Logging
-logger = embmplxrec.utils.get_module_logger(
-    name=__name__,
-    filename=f".logs/embed_remnant_{embmplxrec.utils.get_today(time=True)}.log")
+from embmplxrec.embeddings import LOGGER
 
 # ================ FUNCTIONS ======================
 # --- Command-line Interface ---
@@ -106,7 +104,7 @@ def main():
 
     # Check if file already exists
     if os.path.isfile(filepath):
-        logger.info(f"File '{filepath_}' already exists! Skipping remnant embedding.")
+        LOGGER.info(f"File '{filepath_}' already exists! Skipping remnant embedding.")
         return
 
     # Load RemnantMultiplex
@@ -117,13 +115,14 @@ def main():
     ## Declare dispatch
     match args.embedding:
         case "N2V":
-            embedding_function = embeddings.N2V.N2V
+            embedding_function = embeddings.N2V
         case "LE":
-            embedding_function = embeddings.LE.LE
+            embedding_function = embeddings.LE
         case "ISOMAP":
-            embedding_function = embeddings.Isomap.Isomap
+            embedding_function = embeddings.Isomap
         case "HOPE":
-            embedding_function = embeddings.HOPE.HOPE
+            LOGGER.debug("Applying HOPE embedding")
+            embedding_function = embeddings.HOPE
 
     ## Set kwargs for N2V/Gensim
     parameters = {"dimensions": args.dimensions}

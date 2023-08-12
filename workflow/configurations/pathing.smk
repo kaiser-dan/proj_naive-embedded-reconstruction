@@ -17,7 +17,8 @@ DIR_PARTITIONS = jn(DIR_INPUT, "partitions", "")
 DIR_REMNANTS = jn(DIR_INPUT, "remnants", "")
 
 DIR_EMBEDDINGS = jn(DIR_INTERIM, "embeddings", "")
-DIR_MODELS = jn(DIR_INTERIM, "models", "")
+# DIR_MODELS = jn(DIR_INTERIM, "models", "")
+DIR_MODELS = jn(DIR_INTERIM, "debug_models", "")
 
 DIR_DATAFRAMES = jn(DIR_OUTPUT, "dataframes", "")
 DIR_FIGURES = jn(DIR_OUTPUT, "figures", "")

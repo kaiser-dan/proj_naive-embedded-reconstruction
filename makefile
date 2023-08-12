@@ -3,10 +3,6 @@
 .PHONY: all install check clean deepclean
 .DEFAULT_GOAL := all
 
-# Requirements for setup rule
-REQUIRMENTS=environment.yaml
-ENV_NAME=EmbeddedNaive
-
 # Flags
 INSTALL_TEST=1
 INSTALL_REPRODUCE=1
@@ -16,11 +12,13 @@ all: install check clean
 
 install:
 	pip install .
-	[ "${INSTALL_TEST}" = "1" ] && pip install .[test]
-	[ "${INSTALL_REPRODUCE}" = "1" ] && pip install .[reproduce]
+	# [ "${INSTALL_TEST}" = "1" ] && pip install .[test]
+	# [ "${INSTALL_REPRODUCE}" = "1" ] && pip install .[reproduce]
 
 check:
 	pytest tests/
+	@find ./ -type f -name "*.tmp" -delete
+	@find ./ -regextype egrep -regex ".*(network|community|time_seed|statistics).dat" -delete
 
 # ========== Workflow reproduction ==========
 # --- Data acquisition & preparations ---
@@ -81,6 +79,7 @@ deepclean: clean clean_caches clean_downloaded clean_build
 clean_tmp:
 	@echo "Removing generated temporary files"
 	@find ./ -type f -name "*.tmp" -delete
+	@find ./ -regextype egrep -regex ".*(network|community|time_seed|statistics).dat" -delete
 
 clean_logs:
 	@echo "Removing generated log files"

@@ -25,7 +25,7 @@ DIR_EDGELISTS = os.path.join("data", "input", "edgelists", "")
 DIR_REMNANTS = os.path.join("data", "input", "remnants", "")
 DIR_EMBEDDINGS = os.path.join("data", "interim", "caches", "")
 
-DIR_MODELS = os.path.join("data", "interim", "models", "")
+DIR_MODELS = os.path.join("data", "interim", "debug_models", "")
 FILEPATH_TEMPLATE = "model_normalized-{normalize}_{basename}"
 
 
@@ -43,10 +43,6 @@ def setup_argument_parser():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     # Positional arguments
-    # parser.add_argument(
-    #     "filepath_edgelists",
-    #     type=str,
-    #     help="Filepath of pickled ground truth duplex.")
     parser.add_argument(
         "filepath_remnants",
         type=str,
@@ -85,91 +81,51 @@ def gather_args():
     return args
 
 # --- Feature calculations ---
-# - Training -
-def get_training_features(remnant_multiplex, remnant_embeddings):
-    # Calculate model features
-    ## Degree product
-    degree_products = [
-        features.degrees.get_degrees(
-            remnant_layer.graph,
-            remnant_multiplex.observed)
-        for remnant_layer in remnant_multiplex.layers
-    ]
+def get_degree_feature(graphs, edges):
+    # Initialize product of degrees
+    degree_products = []
+
+    # For every edge, find product of incident node degrees
+    # Repeat for every layer in remnant multiplex
+    for graph in graphs:
+        degree_products.append(features.degrees.get_degrees(graph, edges))
+
+    # Formulate degree products as k_i^ak_j^a / (k_i^ak_j^a + k_i^bk_j^b)
     feature_degrees = features.formatters.as_configuration(
         *degree_products,
         transform=lambda x: x)
 
-    ## Vector distances
-    vector_distances = [
-        features.distances.get_distances(
-            embedding.vectors,
-            remnant_multiplex.observed)
-        for embedding in remnant_embeddings
-    ]
+    return feature_degrees
+
+def get_distance_feature(vectors, edges):
+    # Initialize vector distances
+    vector_distances = []
+
+    for vectors_ in vectors:
+        vector_distances.append(features.distances.get_distances(vectors_, edges))
+
+    # Formulate degree products as 1/d_e^a / (1/d_e^a + 1/d_e^b)
+    # * Note: 1/d applied automatically as preprocessing step
+    # * in `as_configuration`
+    # ? Move this ^ (comment) functionality?
     feature_distances = features.formatters.as_configuration(*vector_distances)
 
-    # Format feature matrix
-    X_train = features.formatters.format_feature_matrix(feature_degrees, feature_distances)
+    return feature_distances
 
-    return X_train
 
-# TODO: Add to source code, generalize beyond two layers
-def get_training_labels(remnant_multiplex):
-    # Retrieve training labels
-    Y_train = []
-    for edge in remnant_multiplex.observed:
-        layer = 0
-        if edge in remnant_multiplex.layers[-1].observed:
-            layer = 1
-        Y_train.append(layer)
+def calculate_feature_matrix(graphs, edges, vectors):
+    # Calculate each feature
+    feature_degrees = get_degree_feature(graphs, edges)
+    feature_distances = get_distance_feature(vectors, edges)
 
-    return Y_train
+    # Format as a unified feature matrix
+    # ^ sklearn models require single numpy array for features
+    X = features.formatters.format_feature_matrix(feature_degrees, feature_distances)
 
-# - Testing -
-def get_testing_features(remnant_multiplex, remnant_embeddings):
-    # Calculate model features
-    ## Degree product
-    degree_products = [
-        features.degrees.get_degrees(
-            remnant_layer.graph,
-            remnant_multiplex.unobserved)
-        for remnant_layer in remnant_multiplex.layers
-    ]
-    feature_degrees = features.formatters.as_configuration(
-        *degree_products,
-        transform=lambda x: x)
+    return X
 
-    ## Vector distances
-    vector_distances = [
-        features.distances.get_distances(
-            embedding.vectors,
-            remnant_multiplex.unobserved)
-        for embedding in remnant_embeddings
-    ]
-    feature_distances = features.formatters.as_configuration(*vector_distances)
-
-    # Format feature matrix
-    X_test = features.formatters.format_feature_matrix(feature_degrees, feature_distances)
-
-    return X_test
-
-# TODO: Add to source code, generalize beyond two layers
-def get_testing_labels(remnant_multiplex, filepath_remnants):
-    # Get ground truth
-    edgelists_fp = f"{DIR_EDGELISTS}/multiplex-{filepath_remnants.split('multiplex-')[1]}"
-    with open(edgelists_fp, 'rb') as _fh:
-        edgelists = pickle.load(_fh)
-
-    # Retrieve testing labels
-    Y_test = []
-    for edge in remnant_multiplex.unobserved:
-        layer = 0
-        if edgelists.layers[-1].graph.has_edge(*edge):
-            layer = 1
-        Y_test.append(layer)
-
-    return Y_test
-
+def get_edge_sets(remnant_multiplex):
+    return remnant_multiplex.observed, remnant_multiplex.unobserved
 
 # ================ MAIN ======================
 def main():
@@ -182,28 +138,6 @@ def main():
     with open(args.filepath_embeddings, 'rb') as _fh:
         remnant_embeddings = pickle.load(_fh)
 
-    # & >>> Debug >>>
-    logger.debug(f"Examining first remnant layer...")
-    layer_ = remnant_multiplex.layers[0]
-    embedding_ = remnant_embeddings[0]
-    logger.debug(f"Number of nodes: {layer_.graph.number_of_nodes()}")
-    logger.debug(f"Minimum node index: {min(layer_.graph.nodes())}")
-    logger.debug(f"Minimum vector index: {min(embedding_.vectors.keys())}")
-    logger.debug(f"0 in nodes? {0 in layer_.graph}")
-    logger.debug(f"0 in vectors? {0 in embedding_.vectors}")
-
-    logger.debug(f"Examining second remnant layer...")
-    layer_ = remnant_multiplex.layers[1]
-    embedding_ = remnant_embeddings[1]
-    logger.debug(f"Number of nodes: {layer_.graph.number_of_nodes()}")
-    logger.debug(f"Minimum node index: {min(layer_.graph.nodes())}")
-    logger.debug(f"Minimum vector index: {min(embedding_.vectors.keys())}")
-    logger.debug(f"0 in nodes? {0 in layer_.graph}")
-    logger.debug(f"0 in vectors? {0 in embedding_.vectors}")
-
-    logger.debug(f"Type of vectors: {type(list(embedding_.vectors.keys())[0])}")
-    # & <<< Debug <<<
-
     # Normalize vectors
     if args.normalize:
         logger.info("Normalizing embedded vectors")
@@ -212,14 +146,27 @@ def main():
     else:
         logger.warning("*NOT* normalizing embedded vectors!")
 
+    # Retrieve edges -> layers mappings
+    training_edges, testing_edges = get_edge_sets(remnant_multiplex)
+
+    # Alias data used to calculate features
+    graphs = [
+        layer.graph
+        for layer in remnant_multiplex.layers
+    ]
+    print("AHHH", graphs)
+    vectors = [
+        emb.vectors
+        for emb in remnant_embeddings
+    ]
 
     # Calculate training features
-    X_train = get_training_features(remnant_multiplex, remnant_embeddings)
-    Y_train = get_training_labels(remnant_multiplex)
+    X_train = calculate_feature_matrix(graphs, training_edges.keys(), vectors)
+    Y_train = list(training_edges.values())
 
     # Calculate testing features
-    X_test = get_testing_features(remnant_multiplex, remnant_embeddings)
-    Y_test = get_testing_labels(remnant_multiplex, os.path.basename(args.filepath_remnants))
+    X_test = calculate_feature_matrix(graphs, testing_edges.keys(), vectors)
+    Y_test = list(testing_edges.values())
 
     # Train reconstruction model
     model = classifiers.models.LogReg(

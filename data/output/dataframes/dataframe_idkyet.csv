@@ -1,0 +1,2 @@
+normalized,method,dim,embrep,strategy,theta,remrep,multiplex,N,T1,T2,kavg,kmax,mu,prob,auroc,accuracy,pr
+True,LE,128,1,RANDOM,0.1,1,LFR,1000,2.1,1.0,6.0,31,0.1,1.0.pkl,0.460956060515228,0.524906175366769,0.4686267883041292

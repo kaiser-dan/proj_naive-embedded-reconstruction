@@ -11,4 +11,13 @@ rule train_models:
     shell:
         "python " + SCRIPTS + "train_model.py {input.remnants} {input.embeddings} --normalize"
 
-# rule evaluate_models:
+rule evaluate_models:
+    input:
+        expand(
+            DIR_MODELS + "{filepath}",
+            filepath=os.listdir(DIR_MODELS)
+        )
+    output:
+        DIR_DATAFRAMES + "dataframe_idkyet.csv"
+    shell:
+        "python " + SCRIPTS + "evaluate_models.py {input} {output}"

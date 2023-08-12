@@ -7,7 +7,9 @@ LOGGER = get_module_logger(
     file_level=10,
     console_level=30)
 
-__all__ = ["LOGGER"]
+CHECK_SETS = True
+
+__all__ = ["LOGGER", "CHECK_SETS"]
 
 from . import observer
 from . import remnant

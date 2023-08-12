@@ -117,7 +117,7 @@ def main():
 
     # Load edgelists and observe remnants
     with open(args.filepath, 'rb') as _fh:
-        duplex = pickle.load(_fh)
+        duplex = list(pickle.load(_fh))
     remnant_multiplex = observe_remnants(duplex, args.theta, args.strategy)
 
     # Save RemnantMultiplex to disk

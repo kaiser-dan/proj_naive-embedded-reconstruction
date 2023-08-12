@@ -6,6 +6,7 @@ include: "configurations/pathing.smk"
 # =========================
 # Experiment configuration
 # =========================
+configfile: "workflow/configurations/debug.yaml"
 include: "utils.smk"
 
 

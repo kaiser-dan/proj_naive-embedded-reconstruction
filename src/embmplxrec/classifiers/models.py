@@ -139,13 +139,13 @@ class LogReg(ReconstructionModel):
         return eval_
 
     def auroc(self, X, Y, class_ = 1):
-        return performance.auroc(self, X, Y, class_)
+        return performance.auroc(self._model, X, Y, class_)
 
     def accuracy(self, X, Y):
-        return performance.accuracy(self, X, Y)
+        return performance.accuracy(self._model, X, Y)
 
     def pr(self, X, Y, class_ = 1):
-        return performance.pr(self, X, Y, class_)
+        return performance.pr(self._model, X, Y, class_)
 
     # > Model application >
     def decision_function(self, X_):

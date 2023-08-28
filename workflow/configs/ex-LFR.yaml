@@ -1,0 +1,7 @@
+# Target
+targets: [
+  "ex-LFR-N2V",
+  "ex-LFR-LE",
+  "ex-LFR-Isomap",
+  "ex-LFR-HOPE",
+]

@@ -1,0 +1,8 @@
+# Target
+targets: [
+  "ex-LFR-LE",
+  "ex-arxiv-LE",
+  "ex-celegans-LE",
+  "ex-drosophila-LE",
+  "ex-london-LE"
+]

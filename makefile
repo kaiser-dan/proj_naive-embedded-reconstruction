@@ -1,6 +1,7 @@
 .PHONY: all build check clean
 .DEFAULT_GOAL: all
 
+
 # --- Default target ---
 all: build check
 

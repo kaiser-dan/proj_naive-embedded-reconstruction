@@ -41,13 +41,15 @@ A compatible Python install is needed to begin - the package management is handl
 
 A complete list of utilized packages is available in the `requirements.txt` file. There is, however, a package dependency hierarchy where some packages in the `requirements.txt` are not strictly necessary for the utilization of package infrastructure. The core requirements are listed as dependencies in the build instructions. Further instructions for creating a controlled environment from this manifest is available below, in the [Installing](#installing) section.
 
-<!-- > _Note: We personally recommend using mambaforge, an extension of conda that is considerably faster and more robust. Further information can be found in the [Mamba docs](https://mamba.readthedocs.io/en/latest/index.html)_. -->
 
 ## Installing
 
 To (locally) reproduce this project, do the following:
 
 1. Download this code base. Notice that raw data are typically not included in the git-history and may need to be downloaded independently - see [Reproducing Experiments](#reproducing-experiments) for more information.
+    ```bash
+    git clone --depth 1 GITADDRHERE
+    ```
 2. (Optional) Open a terminal with Python installed and create a new virtual environment:
    ```bash
    python -m venv .venv
@@ -58,9 +60,9 @@ To (locally) reproduce this project, do the following:
    pip install .
    ```
    > **NOTE:** We recommend you use the provided `makefile` to handle installations and automatic testing. You can install the package, testing and plotting packages, and run the package tests all with the default `make` target, i.e., by running `make`.
-4. (Optional) If you wish to reproduce the experiments (and did run the `make` command), install the additional package dependencies to use Snakemake
+4. (Optional) If you wish to reproduce the experiments (and not did run the `make` command), install the additional package dependencies to use Snakemake
    ```bash
-   pip install .[reproduce]
+   pip install .[workflow]
    ```
 
 
@@ -100,7 +102,7 @@ Reproducing our experiments on synthetic datasets can be done with
   snakemake --cores [num_cores] --configfile workflow/configurations/all.yaml
   ```
 
-> **NOTE:** Running all synthetic experiments in one jobset as above is very computationally expensive. We originally ran our results in chunks and on different machines simultaneously. This can be done using the provided `workflow/configurations/ex[##].yaml` files with the same snakemake command structure as above.
+> **NOTE:** Running all synthetic experiments in one jobset, as above, is _extremely_ computationally expensive. We originally ran our results in chunks and on different machines simultaneously. This can be done using the provided `workflow/configurations/ex[##].yaml` files. Simply swap out `all.yaml` with `ex[##].yaml` in the same snakemake command above.
 
 
 ## Package Structure
@@ -111,9 +113,8 @@ Reproducing our experiments on synthetic datasets can be done with
 
 This repository does not maintain extensive independent documentation for its source code. We do, however, include documentation and notes on scientific experiments we've conducted throughout the project. If you are interested in seeing these notes, please email [Daniel Kaiser](mailto:kaiserd@iu.edu) with your inquiry.
 
-We have, however, kept all experimental protocols related to the final experimental designs of the published results in this public repository. These can be found in `docs/experiments/` with the appropriate names matching the results as presented in the manuscript.
+We have, however, kept all experimental protocols related to the final experimental designs of the published results in this public repository. These can be found in `docs/` with the appropriate names matching the results as presented in the manuscript.
 
-<!-- Additionally, a copy of individual derivations can be found in `docs/` that are highly suggestive of methodological choices and implications for our work. -->
 
 # Tests
 
@@ -121,7 +122,7 @@ All unit tests are written with [pytest](docs.pytest.org).
 
 Tests can be run directly with the commands:
 ```bash
-pip install pytest
+pip install .[test]
 pytest tests/
 ```
 
@@ -132,7 +133,7 @@ make
 
 Alternatively, the tests alone can be conducted with
 ```bash
-make test
+make check
 ```
 
 

@@ -9,7 +9,7 @@ requires = [
 [project]
 # Basic metadata
 name = 'EMB'
-version = '3.0.0'
+version = '3.1.0'
 authors = [
     {name='Daniel Kaiser', email='kaiserd@iu.edu'},
 ]

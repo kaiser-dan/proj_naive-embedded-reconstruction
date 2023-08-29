@@ -10,9 +10,8 @@ This document briefly summarizes the experimental configurations.
   - [ex03](#ex03)
   - [ex04](#ex04)
   - [ex05](#ex05)
-  - [ex06](#ex06)
 - [Real multiplex reconstruction](#real-multiplex-reconstruction)
-  - [ex07](#ex07)
+  - [ex06](#ex06)
 
 # Global hyperparameters
 
@@ -75,7 +74,7 @@ Reconstruct synthetic LFR with mediocre community structure and midly heterogene
   - $t_1 = 2.7$
   - $\mu = 0.3$
 
-## ex06
+<!-- ## ex06
 
 Reconstruct synthetic LFR with imbalanced class sizes.
 
@@ -83,10 +82,10 @@ Reconstruct synthetic LFR with imbalanced class sizes.
 - Notable parameters:
   - $t_1 = 2.1$
   - $\mu = 0.1$
-- Note that one layer has 1000 nodes and the other has 10,000.
+- Note that one layer has 1000 nodes and the other has 10,000. -->
 
 # Real multiplex reconstruction
-## ex07
+## ex06
 
 Reconstruct arXiv collaboration multiplex.
 

@@ -1,0 +1,6 @@
+targets: [
+  "system-arxiv_l1-x_l2-y_embedding-N2V",
+  "system-arxiv_l1-x_l2-y_embedding-LE",
+  "system-arxiv_l1-x_l2-y_embedding-Isomap",
+  "system-arxiv_l1-x_l2-y_embedding-HOPE",
+]

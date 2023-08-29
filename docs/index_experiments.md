@@ -3,11 +3,18 @@
 This document briefly summarizes the experimental configurations.
 
 - [Experiment Index](#experiment-index)
-  - [Global hyperparameters](#global-hyperparameters)
+- [Global hyperparameters](#global-hyperparameters)
+- [Synthetic Multiplex Reconstruction](#synthetic-multiplex-reconstruction)
   - [ex01](#ex01)
   - [ex02](#ex02)
+  - [ex03](#ex03)
+  - [ex04](#ex04)
+  - [ex05](#ex05)
+  - [ex06](#ex06)
+- [Real multiplex reconstruction](#real-multiplex-reconstruction)
+  - [ex07](#ex07)
 
-## Global hyperparameters
+# Global hyperparameters
 
 All files specified by 'Configuration' are in `workflow/configs/` directory.
 
@@ -22,6 +29,7 @@ This is because $\theta \in \{0,1\}$ are nonsensical, having either no training 
 
 Additionally, the exponent of the community size distribution is fixed at $t_2 = 1.0$.
 
+# Synthetic Multiplex Reconstruction
 ## ex01
 
 Reconstruct synthetic LFR model in "easy" case.
@@ -39,4 +47,46 @@ Reconstruct synthetic LFR models as $\mu$ varies.
 - Notable parameters
   - $t_1 = 2.1$
   - $\mu \in \{0.1, 0.2, 0.3, 0.4, 0.5\}$
+
+## ex03
+
+Reconstruct synthetic LFR with strong community structure and homogeneous degrees.
+
+- Configuration: `ex03.yaml`
+- Notable parameters:
+  - $t_1 = 4.0$
+  - $\mu = 0.1$
+
+## ex04
+
+Reconstruct synthetic LFR with weak community structure and heterogenous degrees.
+
+- Configuration: `ex04.yaml`
+- Notable parameters:
+  - $t_1 = 2.1$
+  - $\mu = 0.5$
+
+## ex05
+
+Reconstruct synthetic LFR with mediocre community structure and midly heterogeneous degrees.
+
+- Configuration: `ex05.yaml`
+- Notable parameters:
+  - $t_1 = 2.7$
+  - $\mu = 0.3$
+
+## ex06
+
+Reconstruct synthetic LFR with imbalanced class sizes.
+
+- Configuration: `ex06.yaml`
+- Notable parameters:
+  - $t_1 = 2.1$
+  - $\mu = 0.1$
+- Note that one layer has 1000 nodes and the other has 10,000.
+
+# Real multiplex reconstruction
+## ex07
+
+Reconstruct arXiv collaboration multiplex.
 

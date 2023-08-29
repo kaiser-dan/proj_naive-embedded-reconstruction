@@ -1,8 +1,0 @@
-# Target
-targets: [
-  "ex-LFR-Isomap",
-  "ex-arxiv-Isomap",
-  "ex-celegans-Isomap",
-  "ex-drosophila-Isomap",
-  "ex-london-Isomap"
-]

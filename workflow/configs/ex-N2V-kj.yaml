@@ -1,8 +1,0 @@
-# Target
-targets: [
-  "ex-LFR-N2V",
-  "ex-arxiv-N2V",
-  "ex-celegans-N2V",
-  "ex-drosophila-N2V",
-  "ex-london-N2V"
-]

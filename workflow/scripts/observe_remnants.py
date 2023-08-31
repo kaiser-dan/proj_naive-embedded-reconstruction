@@ -63,14 +63,14 @@ if __name__ == "__main__":
         # "clean-multiplex-london_l1-1_l2-2.mplx",
         # "clean-multiplex-london_l1-1_l2-3.mplx",
         # "clean-multiplex-london_l1-2_l2-3.mplx",
-        # "multiplex-LFR_N-10000_T1-2.1_T2-1.0_kavg-6.0_kmax-100_mu-0.1_prob-1.0.mplx",
-        # "multiplex-LFR_N-10000_T1-2.1_T2-1.0_kavg-6.0_kmax-100_mu-0.2_prob-1.0.mplx",
-        # "multiplex-LFR_N-10000_T1-2.1_T2-1.0_kavg-6.0_kmax-100_mu-0.3_prob-1.0.mplx",
-        # "multiplex-LFR_N-10000_T1-2.1_T2-1.0_kavg-6.0_kmax-100_mu-0.4_prob-1.0.mplx",
-        # "multiplex-LFR_N-10000_T1-2.1_T2-1.0_kavg-6.0_kmax-100_mu-0.5_prob-1.0.mplx",
-        "multiplex-LFR_N-10000_T1-4.0_T2-1.0_kavg-6.0_kmax-100_mu-0.1_prob-1.0.mplx",
+        "multiplex-LFR_N-10000_T1-2.1_T2-1.0_kavg-6.0_kmax-100_mu-0.1_prob-1.0.mplx",
+        "multiplex-LFR_N-10000_T1-2.1_T2-1.0_kavg-6.0_kmax-100_mu-0.2_prob-1.0.mplx",
+        "multiplex-LFR_N-10000_T1-2.1_T2-1.0_kavg-6.0_kmax-100_mu-0.3_prob-1.0.mplx",
+        "multiplex-LFR_N-10000_T1-2.1_T2-1.0_kavg-6.0_kmax-100_mu-0.4_prob-1.0.mplx",
         "multiplex-LFR_N-10000_T1-2.1_T2-1.0_kavg-6.0_kmax-100_mu-0.5_prob-1.0.mplx",
-        "multiplex-LFR_N-10000_T1-2.7_T2-1.0_kavg-6.0_kmax-100_mu-0.3_prob-1.0.mplx",
+        # "multiplex-LFR_N-10000_T1-4.0_T2-1.0_kavg-6.0_kmax-100_mu-0.1_prob-1.0.mplx",
+        # "multiplex-LFR_N-10000_T1-2.1_T2-1.0_kavg-6.0_kmax-100_mu-0.5_prob-1.0.mplx",
+        # "multiplex-LFR_N-10000_T1-2.7_T2-1.0_kavg-6.0_kmax-100_mu-0.3_prob-1.0.mplx",
     ]
 
     for ntwk in ntwks:

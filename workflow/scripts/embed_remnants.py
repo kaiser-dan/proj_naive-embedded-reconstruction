@@ -34,13 +34,13 @@ def main(filepath_input, embedding, filepath_output):
     # Embed with selected embedding method
     match embedding:
         case "N2V":
-            vectors = embeddings.embed_multiplex_N2V(remnant_multiplex)
+            vectors = embeddings.embed_multiplex_N2V(remnant_multiplex, dimensions=128)
         case "LE":
-            vectors = embeddings.embed_multiplex_LE(remnant_multiplex)
+            vectors = embeddings.embed_multiplex_LE(remnant_multiplex, k=128)
         case "Isomap":
-            vectors = embeddings.embed_multiplex_Isomap(remnant_multiplex)
+            vectors = embeddings.embed_multiplex_Isomap(remnant_multiplex, dimensions=128)
         case "HOPE":
-            vectors = embeddings.embed_multiplex_HOPE(remnant_multiplex)
+            vectors = embeddings.embed_multiplex_HOPE(remnant_multiplex, dimensions=128)
         case _:
             raise NotImplementedError(embedding)
 

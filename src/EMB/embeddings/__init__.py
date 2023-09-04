@@ -4,7 +4,7 @@ LOGGER = logger.get_module_logger(
     name="embeddings",
     filename=f".logs/embeddings_{logger.get_today(time=False)}.log",
     mode='a',
-    file_level=10,
+    file_level=40,
     console_level=20)
 __all__ = ["LOGGER"]
 

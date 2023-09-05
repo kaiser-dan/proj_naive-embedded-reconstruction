@@ -9,8 +9,8 @@ all: build check
 # --- Package compilation & testing ---
 build:
 	pip install .
-	# pip install .[test]
-	# pip install .[workflow]
+	pip install .[test]
+	pip install .[workflow]
 
 check:
 	pytest -v

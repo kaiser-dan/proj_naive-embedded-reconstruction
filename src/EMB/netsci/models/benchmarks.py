@@ -24,7 +24,6 @@ def generate_network_LFR(
         id_adjustment: int = 1,
         ROOT = os.path.join("..", "")):
 
-    print(os.getcwd())
     # Generate LFR from binary
     subprocess.call(
         " ".join([
@@ -36,7 +35,9 @@ def generate_network_LFR(
             "-k", str(degree_average),
             "-maxk", str(degree_max)
         ]),
-        shell=True
+        shell=True,
+        stdout=open(os.devnull, 'w'),
+        stderr=open(os.devnull, 'w')
     )
 
     # Format resultant network as networkx Graph

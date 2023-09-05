@@ -1,4 +1,4 @@
-.PHONY: all build check clean
+.PHONY: all build check clean fullbuild
 .DEFAULT_GOAL: all
 
 
@@ -8,6 +8,9 @@ all: build check
 
 # --- Package compilation & testing ---
 build:
+	pip install .
+
+fullbuild:
 	pip install .
 	pip install .[test]
 	pip install .[workflow]

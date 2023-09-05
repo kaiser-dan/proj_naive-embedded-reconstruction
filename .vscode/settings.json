@@ -1,9 +1,16 @@
 {
     "python.testing.pytestArgs": [
-        "test"
+        "tests"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
-    "git.ignoreLimitWarning": true,
-    "python.analysis.typeCheckingMode": "off"
+
+    "material-icon-theme.files.associations": {
+        "Snakefile": "makefile",
+        "**.smk": "makefile"
+    },
+    "material-icon-theme.folders.associations": {
+        "workflow": "Scripts",
+        "src/EMB": "src"
+    }
 }

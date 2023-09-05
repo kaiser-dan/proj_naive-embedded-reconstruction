@@ -104,6 +104,8 @@ def main(filepath_input_gt, filepath_input_rmnt, filepath_input_emb, filepath_ou
     ## LFR identifiers
     if "LFR" in filepath_input_emb:
         for part in parts:
+            if "N" in part:
+                N = getval(part)
             if "mu" in part:
                 mu = getval(part)
             elif "T1" in part:
@@ -113,7 +115,7 @@ def main(filepath_input_gt, filepath_input_rmnt, filepath_input_emb, filepath_ou
             elif "prob" in part:
                 prob = getval(part).split(".")[0]
 
-        print(f"{system},{theta},{embedding},{mu},{t1},{t2},{prob},{accuracy},{auroc},{pr},{model.intercept_[0]},{model.coef_[0][0]},{model.coef_[0][1]}")
+        print(f"{system},{N},{theta},{embedding},{mu},{t1},{t2},{prob},{accuracy},{auroc},{pr},{model.intercept_[0]},{model.coef_[0][0]},{model.coef_[0][1]}")
 
     ## Real identifiers
     else:

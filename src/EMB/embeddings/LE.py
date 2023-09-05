@@ -5,6 +5,7 @@ __all__ = ["embed_LE", "embed_multiplex_LE"]
 
 # --- Scientific computing ---
 from scipy.sparse.linalg import eigsh  # eigensolver
+from scipy.linalg import eigh  # dense eigensolver (remnants of small networks)
 
 # --- Network science ---
 import networkx as nx
@@ -21,15 +22,21 @@ def embed_LE(graph, nodelist=None, **kwargs):
         graph.add_nodes_from(nodelist)
 
     # Calculate normalized Laplacian matrix
-    try:
-        L = nx.normalized_laplacian_matrix(graph, nodelist=nodelist)
-    except:
-        LOGGER.critical()
+    L = nx.normalized_laplacian_matrix(graph, nodelist=nodelist)
+
+    # Ensure valid dimension
+    kwargs['k'] = min(kwargs['k'], graph.number_of_nodes())
 
     # Compute the eigenspectra of the normalized Laplacian matrix
-    _, eigenvectors = eigsh(L,
-        which="SM", maxiter=100*L.shape[0], tol=1e-4,
-        **kwargs)
+    try:
+        _, eigenvectors = eigsh(L,
+            which="SM", maxiter=100*L.shape[0], tol=1e-4,
+            **kwargs)
+    except TypeError:
+        LOGGER.info("Encountered type error, retrying with dense eigensolver...")
+        _, eigenvectors = eigh(L.toarray())
+    except:
+        LOGGER.critical("Previously unencountered error!")
 
     return eigenvectors[:, 1:]
 

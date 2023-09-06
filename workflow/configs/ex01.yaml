@@ -1,6 +1,6 @@
 targets: [
   "system-LFR_mu-0.1_embedding-N2V",
   "system-LFR_mu-0.1_embedding-LE",
-  "system-LFR_mu-0.1_embedding-Isomap",
+  # "system-LFR_mu-0.1_embedding-Isomap",
   "system-LFR_mu-0.1_embedding-HOPE",
 ]

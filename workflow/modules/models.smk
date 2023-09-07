@@ -18,7 +18,7 @@ rule train_models_real:
         rmnt=DIR_REMNANTS+"remnants_theta-{theta}_rep-{rep}_clean-multiplex-{system}_l1-{l1}_l2-{l2}.rmnt",
         emb=DIR_EMBEDDINGS+"embed-{embedding}_remnants_theta-{theta}_rep-{rep}_clean-multiplex-{system}_l1-{l1}_l2-{l2}.vecs"
     output:
-        DIR_MODELS+"model_embed-{embedding}_remnants_theta-{theta}_rep-{rep}_clean-multiplex-{system}_l1-{l1}_l2-{l2}.model"
+        DIR_MODELS+"model_embed-{embedding}_remnants_theta-{theta}_rep-{rep}_clean-multiplex-{system}_{l1}-{l2}.model"
     log:
         DIR_LOGS+"model_{embedding}_{theta}-{rep}_{system}_{l1}-{l2}.log"
     shell:

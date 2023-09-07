@@ -9,7 +9,7 @@ _REPS = np.arange(1,5)
 _LAYERS = ["1-2", "1-3", "2-3"]
 
 TARGETS_ = expand(
-        DIR_MODELS+"model_embed-HOPE_remnants_theta-{theta}_rep-{rep}_clean-multiplex-drosophila_{layerpair}.model",
+        DIR_MODELS+"model_embed-N2V_remnants_theta-{theta}_rep-{rep}_clean-multiplex-drosophila_{layerpair}.model",
         theta=_THETAS,
         rep=_REPS,
         layerpair=_LAYERS

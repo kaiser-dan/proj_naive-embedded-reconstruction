@@ -10,8 +10,12 @@ This document briefly summarizes the experimental configurations.
   - [ex03](#ex03)
   - [ex04](#ex04)
   - [ex05](#ex05)
+  - [ex-imbalanced](#ex-imbalanced)
+  - [ex-profiling](#ex-profiling)
+  - [ex-avg-dists](#ex-avg-dists)
+  - [ex-size-effect](#ex-size-effect)
 - [Real multiplex reconstruction](#real-multiplex-reconstruction)
-  - [ex06](#ex06)
+  - [ex-arxiv](#ex-arxiv)
 
 # Global hyperparameters
 
@@ -74,18 +78,38 @@ Reconstruct synthetic LFR with mediocre community structure and midly heterogene
   - $t_1 = 2.7$
   - $\mu = 0.3$
 
-<!-- ## ex06
+## ex-imbalanced
 
 Reconstruct synthetic LFR with imbalanced class sizes.
 
-- Configuration: `ex06.yaml`
-- Notable parameters:
-  - $t_1 = 2.1$
-  - $\mu = 0.1$
-- Note that one layer has 1000 nodes and the other has 10,000. -->
+- Notebook: `workflow/notebooks/exp-imbalanced.ipynb`
+- HMM
+
+## ex-profiling
+
+Profile time complexity of reconstruction algorithm.
+
+- Script: `workflow/scripts/exp-profiling.sh`
+- HMM
+
+## ex-avg-dists
+
+Explore size effects on embedded vector distances.
+
+- Notebook: `workflow/notebooks/exp-avg-dists.ipynb`
+- HMM
+
+## ex-size-effect
+
+Explore across network sizes.
+
+- Configuration: `ex-size-effect.yaml`
+- HMMM
+
 
 # Real multiplex reconstruction
-## ex06
+## ex-arxiv
 
 Reconstruct arXiv collaboration multiplex.
 
+- Configuration: `ex-arxiv.yaml`

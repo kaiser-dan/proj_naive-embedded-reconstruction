@@ -1,6 +1,5 @@
-"""
-"""
 # =========== SETUP ==========
+import sys
 import os
 import time
 
@@ -22,7 +21,7 @@ def stopwatch(previous=None, verbose=False):
 
 
 # ========== MAIN ===========
-def main():
+def main(EMBEDDING):
     times = dict()
     print("N,total_time")
     for N in np.geomspace(100, 10_000, num=10, endpoint=True):
@@ -40,7 +39,14 @@ def main():
 
         # 3 Embed multiplex - timed
         timer_emb = stopwatch()
-        vectors = EMB.embeddings.embed_multiplex_Isomap(remnant_multiplex, dimensions=128)
+        if EMBEDDING == "N2V":
+            vectors = EMB.embeddings.embed_multiplex_N2V(remnant_multiplex, dimensions=128)
+        elif EMBEDDING == "LE":
+            vectors = EMB.embeddings.embed_multiplex_LE(remannt_multiplex, k=128)
+        elif EMBEDDING == "Isomap":
+            vectors = EMB.embeddings.embed_multiplex_Isomap(remnant_multiplex, dimensions=128)
+        elif EMBEDDING == "HOPE":
+            vectors = EMB.embeddings.embed_multiplex_HOPE(remnant_multiplex, dimensions=128)
         timer_emb = stopwatch(timer_emb)
 
         # 4 Calculate features - timed
@@ -91,6 +97,10 @@ def main():
 
 
 if __name__ == "__main__":
-    print("Beginning workflow profiling...")
-    main()
-    print("Finished profiling!")
+    if len(sys.argv) > 1:
+        EMBEDDING = sys.argv[1]
+    else:
+        EMBEDDING = "N2V"
+
+    main(EMBEDDING)
+

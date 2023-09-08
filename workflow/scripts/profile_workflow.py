@@ -42,7 +42,7 @@ def main(EMBEDDING):
         if EMBEDDING == "N2V":
             vectors = EMB.embeddings.embed_multiplex_N2V(remnant_multiplex, dimensions=128)
         elif EMBEDDING == "LE":
-            vectors = EMB.embeddings.embed_multiplex_LE(remannt_multiplex, k=128)
+            vectors = EMB.embeddings.embed_multiplex_LE(remnant_multiplex, k=128)
         elif EMBEDDING == "Isomap":
             vectors = EMB.embeddings.embed_multiplex_Isomap(remnant_multiplex, dimensions=128)
         elif EMBEDDING == "HOPE":

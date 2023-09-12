@@ -24,12 +24,16 @@ def align_vectors(vectors, components, node2id=dict()):
 
     for component in components:
         try:
-            component_vectors = [vectors[node2id.get(node, node)] for node in component]
+            component_vectors = []
+            for node in component:
+                node_relabeled = node2id.get(node, node)
+                vec = vectors[node_relabeled]
+                component_vectors.append(vec)
         except (IndexError, KeyError) as err:
             LOGGER.error(f"{err}")
-            LOGGER.debug(f"Component nodes: {component}")
-            LOGGER.debug(f"node2id: {node2id}")
-            LOGGER.debug(f"vectors: {vectors}")
+            LOGGER.debug(f"Component node: {node}")
+            LOGGER.debug(f"node_relabeled: {node_relabeled}")
+            # LOGGER.debug(f"vec: {vec}")
             raise err
         except Exception as err:
             LOGGER.critical(f"Previously unencountered error: {err}")

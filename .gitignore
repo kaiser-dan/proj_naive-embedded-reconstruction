@@ -169,6 +169,7 @@ cython_debug/
 
 # Data
 data/
+.tmp/
 
 # Scratch work
 scratch/

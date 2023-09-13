@@ -91,16 +91,13 @@ def main(EMBEDDING):
             "total": timer_emb + timer_features + timer_training + timer_eval
         }
 
-        print(N,times[N]["total"])
+        print(N,times[N]["total"],EMBEDDING, file=open("output.out"))
 
     return None
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        EMBEDDING = sys.argv[1]
-    else:
-        EMBEDDING = "N2V"
-
-    main(EMBEDDING)
+    print("N,time,method", file=open("output.out"))
+    for EMBEDDING in ["N2V", "LE", "Isomap", "HOPE"]:
+        main(EMBEDDING)
 

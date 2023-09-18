@@ -41,7 +41,8 @@ def embed_LE(graph, nodelist=None, **kwargs):
     return eigenvectors[:, 1:]
 
 def embed_multiplex_LE(multiplex, **kwargs):
-    nodelist = sorted(multiplex[1].nodes())
+    minidx = min(multiplex.keys())
+    nodelist = sorted(multiplex[minidx].nodes())
     vectors = {
         label: embed_LE(graph, nodelist=nodelist, **kwargs)
         for label, graph in multiplex.items()

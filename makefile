@@ -1,14 +1,5 @@
 .DEFAULT_GOAL: all
 
-# --- Help ---
-.PHONY: help
-help:
-	$(MAKE) --print -data-base --question | \
-	$(AWK) '/^[^.%][-A-Za-z0-9_]*:/	{ print substr($$1, 1, length($$1)-1) }' | \
-	sort | \
-	$(PR) --omit-pagination --width=80 --columns=4
-
-
 # --- Default target ---
 .PHONY: all
 all: build check

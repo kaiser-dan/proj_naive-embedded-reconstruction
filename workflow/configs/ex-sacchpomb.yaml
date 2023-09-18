@@ -1,0 +1,6 @@
+targets: [
+  "system-sacchpomb_embedding-N2V",
+  "system-sacchpomb_embedding-LE",
+  "system-sacchpomb_embedding-Isomap",
+  "system-sacchpomb_embedding-HOPE",
+]

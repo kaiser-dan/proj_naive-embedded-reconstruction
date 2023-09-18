@@ -1,0 +1,6 @@
+targets: [
+  "system-homo_embedding-N2V",
+  "system-homo_embedding-LE",
+  "system-homo_embedding-Isomap",
+  "system-homo_embedding-HOPE",
+]

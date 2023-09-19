@@ -12,6 +12,14 @@ from EMB import utils
 
 from EMB.remnants.observer import AGGREGATE_LABEL
 
+LOGGER = utils.logger.get_module_logger(
+    name="reconstruction",
+    filename=f".logs/reconstruction_{utils.logger.get_today(time=False)}.log",
+    mode="a",
+    file_level=30,
+    console_level=20,
+)
+
 
 def _parse_args(args):
     """Assumes input {input_rmnt} {input_emb} {output}.
@@ -49,33 +57,57 @@ def main(filepath_input_gt, filepath_input_rmnt, filepath_input_emb, filepath_ou
     training_edges = netsci.all_edges(*remnant_multiplex.values()) - set(testing_edges)
 
     # Retrieve edge's layers (class labels)
-    y_train = {edge: netsci.find_edge(edge, *gt_multiplex.values())[0] for edge in training_edges}
-    y_test = {edge: netsci.find_edge(edge, *gt_multiplex.values())[0] for edge in testing_edges}
+    y_train = classifiers.features.get_edge_to_layer(
+        training_edges, gt_multiplex.values()
+    )
+    y_test = classifiers.features.get_edge_to_layer(
+        testing_edges, gt_multiplex.values()
+    )
 
     # Calculate feature sets
-    ## Normalize embeddings
+    # Normalize embeddings
     remnant_multiplex = utils.cutkey(remnant_multiplex, AGGREGATE_LABEL)
     components = {
         label: sorted(nx.connected_components(graph))
         for label, graph in remnant_multiplex.items()
     }
     vectors = utils.cutkey(vectors, AGGREGATE_LABEL)
+
+    for layer in remnant_multiplex.keys():
+        LOGGER.debug(f"--- Layer: {layer} ---")
+        LOGGER.debug(f"|Components| = {[len(comp) for comp in components[layer]]}")
+        LOGGER.debug(f"|Vectors| = {len(vectors[layer])}")
+
     for label, vectorset in vectors.items():
         if "LE" in filepath_input_emb:
-            node2id = netsci.utils.reindex_nodes(remnant_multiplex[label])
+            LOGGER.debug("Reindexing for LE embedding method...")
+            # node2id = netsci.utils.reindex_nodes(remnant_multiplex[label])
+            node2id = dict()
         else:
             node2id = dict()
-        vectors[label] = embeddings.normalize_vectors(vectorset, components[label], node2id=node2id)
 
-    ## Distances
-    training_distances = classifiers.get_distances_feature(vectors.values(), training_edges, training=True)
-    testing_distances = classifiers.get_distances_feature(vectors.values(), testing_edges, training=False)
+        LOGGER.info(f"Normalizing layer {label}...")
+        vectors[label] = embeddings.normalize_vectors(
+            vectorset, components[label], node2id=node2id
+        )
 
-    ## Degrees
-    training_degrees = classifiers.get_degrees_feature(remnant_multiplex.values(), training_edges, training=True)
-    testing_degrees = classifiers.get_degrees_feature(remnant_multiplex.values(), testing_edges, training=False)
+    # Distances
+    training_distances = classifiers.get_distances_feature(
+        vectors.values(), training_edges, training=True
+    )
+    testing_distances = classifiers.get_distances_feature(
+        vectors.values(), testing_edges, training=False
+    )
 
-    ## Formatting as 2xM matrices
+    # Degrees
+    training_degrees = classifiers.get_degrees_feature(
+        remnant_multiplex.values(), training_edges, training=True
+    )
+    testing_degrees = classifiers.get_degrees_feature(
+        remnant_multiplex.values(), testing_edges, training=False
+    )
+
+    # Formatting as 2xM matrices
     X_train = np.array([training_distances, training_degrees]).transpose()
     X_test = np.array([testing_distances, testing_degrees]).transpose()
 
@@ -83,13 +115,15 @@ def main(filepath_input_gt, filepath_input_rmnt, filepath_input_emb, filepath_ou
     model = classifiers.train_model(X_train, list(y_train.values()))
 
     # Evaluate model
-    accuracy, auroc, pr = classifiers.evaluate_model(model, X_test, list(y_test.values()))
+    accuracy, auroc, pr = classifiers.evaluate_model(
+        model, X_test, list(y_test.values())
+    )
 
     # Retrieve identifying information from filename
     getval = lambda part: part.split("-")[1]
     parts = filepath_input_emb.split("_")
 
-    ## Indeitifiers shared by LFR or real
+    # Indeitifiers shared by LFR or real
     for part in parts:
         if "embedding" in part:
             embedding = getval(part)
@@ -101,7 +135,7 @@ def main(filepath_input_gt, filepath_input_rmnt, filepath_input_emb, filepath_ou
             else:
                 system = part.split("-")[1]
 
-    ## LFR identifiers
+    # LFR identifiers
     if "LFR" in filepath_input_emb:
         for part in parts:
             if "N" in part:
@@ -115,9 +149,15 @@ def main(filepath_input_gt, filepath_input_rmnt, filepath_input_emb, filepath_ou
             elif "prob" in part:
                 prob = getval(part).split(".")[0]
 
-        print(f"{system},{N},{theta},{embedding},{mu},{t1},{t2},{prob},{accuracy},{auroc},{pr},{model.intercept_[0]},{model.coef_[0][0]},{model.coef_[0][1]}")
+        record_str = ""
+        record_str += f"{system},{N},{theta},"
+        record_str += f"{embedding},{mu},{t1},{t2},{prob},"
+        record_str += f"{accuracy},{auroc},{pr},"
+        record_str += f"{model.intercept_[0]},"
+        record_str += f"{model.coef_[0][0]},{model.coef_[0][1]}"
+        print(record_str)
 
-    ## Real identifiers
+    # Real identifiers
     else:
         for part in parts:
             if "l1" in part:
@@ -125,7 +165,13 @@ def main(filepath_input_gt, filepath_input_rmnt, filepath_input_emb, filepath_ou
             elif "l2" in part:
                 l2 = getval(part).split(".")[0]
 
-        print(f"{system},{l1}-{l2},{theta},{embedding},{accuracy},{auroc},{pr},{model.intercept_[0]},{model.coef_[0][0]},{model.coef_[0][1]}")
+        record_str = ""
+        record_str += f"{system},{l1}-{l2},{theta},"
+        record_str += f"{embedding},"
+        record_str += f"{accuracy},{auroc},{pr},"
+        record_str += f"{model.intercept_[0]},"
+        record_str += f"{model.coef_[0][0]},{model.coef_[0][1]}"
+        print(record_str)
 
 
 if __name__ == "__main__":

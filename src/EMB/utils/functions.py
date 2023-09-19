@@ -16,11 +16,13 @@ def dict2list(dictionary):
 
     return array, relabeling
 
+
 def dict2arr(dictionary):
     array, relabeling = dict2list(dictionary)
     array = np.array(array)
 
     return array, relabeling
+
 
 def list2dict(list_, index_mapping):
     dictionary = dict()
@@ -29,9 +31,11 @@ def list2dict(list_, index_mapping):
 
     return dictionary
 
+
 def unpack_mappings(*mappings):
     raise NotImplementedError("Currently not implemented!")
     # return [dict2list(mapping) for mapping in mappings]
+
 
 def cutkey(dictionary, *keys):
     dictionary_adj = dictionary.copy()
@@ -41,6 +45,7 @@ def cutkey(dictionary, *keys):
             del dictionary_adj[key]
 
     return dictionary_adj
+
 
 def inverse_map(dictionary):
     inverse_mapping = dict()

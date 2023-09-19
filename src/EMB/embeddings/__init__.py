@@ -1,11 +1,13 @@
 # Setup module-shared objects
 from EMB.utils import logger
+
 LOGGER = logger.get_module_logger(
     name="embeddings",
     filename=f".logs/embeddings_{logger.get_today(time=False)}.log",
-    mode='a',
-    file_level=40,
-    console_level=20)
+    mode="a",
+    file_level=30,
+    console_level=20,
+)
 __all__ = ["LOGGER"]
 
 # Bring module source into scope

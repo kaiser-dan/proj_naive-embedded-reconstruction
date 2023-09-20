@@ -1,11 +1,13 @@
 """Feature calculations for multiplex reconstruction features.
 """
 # ============= SET-UP =================
-__all__ = ['get_distances_feature', 'get_degrees_feature']
+__all__ = ["get_distances_feature", "get_degrees_feature", "get_edge_to_layer"]
 
 # --- Imports ---
 import numpy as np
 from networkx.exception import NetworkXError
+
+from EMB import netsci
 
 from . import LOGGER
 
@@ -22,6 +24,7 @@ def get_distances_feature(vectorsets, edgeset, training=False):
 
     return _get_normalized_feature(distances)
 
+
 def get_degrees_feature(graphs, edgeset, training=True):
     degree_products = []
     for graph in graphs:
@@ -29,6 +32,7 @@ def get_degrees_feature(graphs, edgeset, training=True):
         degree_products.append(degprods_)
 
     return _get_normalized_feature(degree_products)
+
 
 def inverse_vector_distance(vectors, edge, training=True):
     try:
@@ -41,7 +45,9 @@ def inverse_vector_distance(vectors, edge, training=True):
         LOGGER.debug(f"Edge = {edge}")
         LOGGER.debug(f"Vectors keys = {vectors.keys()}")
         if training:
-            LOGGER.info("Function call flagged as training set, continuing with d = 1/epsilon")
+            LOGGER.info(
+                "Function call flagged as training set, continuing with d = 1/epsilon"
+            )
             return 1 / EPSILON
         else:
             LOGGER.error("Function call flagged as testing set, rethrowing error")
@@ -58,7 +64,7 @@ def inverse_vector_distance(vectors, edge, training=True):
         v_j = np.array(v_j)
 
     # Compute L2-norm
-    d = np.linalg.norm(v_i-v_j)
+    d = np.linalg.norm(v_i - v_j)
 
     # If vectors within specific distance, force distance to be system min
     # This avoids downstream ZeroDivisionErrors and OverflowErrors
@@ -66,6 +72,7 @@ def inverse_vector_distance(vectors, edge, training=True):
         d = EPSILON
 
     return 1 / d
+
 
 # ? Do we need exception catchers?
 def degree_product(graph, edge, training=True):
@@ -80,7 +87,9 @@ def degree_product(graph, edge, training=True):
         LOGGER.debug(f"src in G? {edge[0] in graph}")
         LOGGER.debug(f"tgt in G? {edge[1] in graph}")
         if training:
-            LOGGER.info("Function call flagged as training set, proceeding with null degree")
+            LOGGER.info(
+                "Function call flagged as training set, proceeding with null degree"
+            )
             return 0
         else:
             LOGGER.error("Function call flagged as testing set, rethrowing error")
@@ -90,11 +99,25 @@ def degree_product(graph, edge, training=True):
         LOGGER.critical(f"Previously unencountered error: {err}")
         raise err
 
-    return k_i*k_j
+    return k_i * k_j
+
+
+def get_edge_to_layer(edges, graphs):
+    edge_to_layer = dict()
+    for edge in edges:
+        layer = netsci.find_edge(edge, *graphs)
+        if len(layer) > 1:
+            LOGGER.info(
+                "Edge found in more than one layer; taking origin as lexigraphic minimum of layer ids"
+            )
+        layer = layer[0]
+        edge_to_layer[edge] = layer
+
+    return edge_to_layer
 
 
 # --- Helpers ---
-def _get_normalized_feature(feature_components, scaling = lambda x: 2*x-1):
+def _get_normalized_feature(feature_components, scaling=lambda x: 2 * x - 1):
     normalized_feature = []
     for idx in range(len(feature_components[0])):
         numerator = feature_components[0][idx]

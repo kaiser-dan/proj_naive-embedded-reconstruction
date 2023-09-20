@@ -1,7 +1,7 @@
 """Vector pre-processing utility.
 """
 # ============= SET-UP =================
-__all__ = ['normalize_vectors']
+__all__ = ["normalize_vectors"]
 
 # --- Imports ---
 import numpy as np
@@ -14,10 +14,13 @@ from . import LOGGER
 def normalize_vectors(vectors, components, node2id=dict()):
     vectors = align_vectors(vectors, components, node2id=node2id)
     assert len(vectors) > 0
-    vectors = scale_vectors(vectors, components)  # already reindexed, do not pass node2id!
+    vectors = scale_vectors(
+        vectors, components
+    )  # already reindexed, do not pass node2id!
     assert len(vectors) > 0
 
     return vectors
+
 
 def align_vectors(vectors, components, node2id=dict()):
     aligned_vectors = dict()
@@ -31,9 +34,11 @@ def align_vectors(vectors, components, node2id=dict()):
                 component_vectors.append(vec)
         except (IndexError, KeyError) as err:
             LOGGER.error(f"{err}")
-            LOGGER.debug(f"Component node: {node}")
+            LOGGER.debug(f"Component nodes (size = {len(component)}): {component}")
+            LOGGER.debug(f"Component node id: {node}")
             LOGGER.debug(f"node_relabeled: {node_relabeled}")
-            # LOGGER.debug(f"vec: {vec}")
+            LOGGER.debug(f"Vector set (size = {len(vectors)}): {vectors}")
+            LOGGER.debug(f"Vector for edge (size = {len(vec)}): {vec}")
             raise err
         except Exception as err:
             LOGGER.critical(f"Previously unencountered error: {err}")
@@ -45,6 +50,7 @@ def align_vectors(vectors, components, node2id=dict()):
             aligned_vectors[node] = vectors[node2id.get(node, node)] - center
 
     return aligned_vectors
+
 
 def scale_vectors(vectors, components, node2id=dict()):
     scaled_vectors = dict()
@@ -69,12 +75,17 @@ def scale_vectors(vectors, components, node2id=dict()):
         # Cast norm as nonzero to avoid ZDE and let the
         # 0's travel through.
         if component_norm == 0:
-            LOGGER.debug(f"Encountered zero total norm component (component = {component})")
+            LOGGER.debug(
+                f"Encountered zero total norm component (component = {component})"
+            )
             component_norm = 1
 
         for node in component:
             # ! DEBUG
-            normed_vector = [coordinate / component_norm for coordinate in vectors[node2id.get(node, node)]]
+            normed_vector = [
+                coordinate / component_norm
+                for coordinate in vectors[node2id.get(node, node)]
+            ]
             LOGGER.debug(f"node: {node} => normed_vector: {normed_vector}")
 
             scaled_vectors[node] = normed_vector
@@ -87,6 +98,7 @@ def scale_vectors(vectors, components, node2id=dict()):
 def _get_center_of_mass(vectors):
     # Assumes vectors is array-like of array-likes (e.g., a matrix)
     return np.mean(vectors, axis=0)
+
 
 def _get_component_norm(vectors):
     return np.sum([np.linalg.norm(vector) for vector in vectors])

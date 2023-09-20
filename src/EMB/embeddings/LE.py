@@ -36,16 +36,24 @@ def embed_LE(graph, nodelist=None, **kwargs):
 
     # Compute the eigenspectra of the normalized Laplacian matrix
     try:
-        _, eigenvectors = eigsh(
+        eigenvalues, eigenvectors = eigsh(
             L, which="SM", maxiter=100 * L.shape[0], tol=1e-4, **kwargs
         )
     except TypeError:
         LOGGER.info("Encountered type error, retrying with dense eigensolver...")
-        _, eigenvectors = eigh(L.toarray())
+        eigenvalues, eigenvectors = eigh(L.toarray())
     except Exception:
         LOGGER.critical("Previously unencountered error!")
 
-    return eigenvectors[:, 1:]
+    LOGGER.debug("Removing eigenvector component correlated with degrees")
+    eigenvectors = eigenvectors[:, 1:]
+
+    LOGGER.debug("Normalizing each eigenvector component by corresponding eigenvalue")
+    for vector in eigenvectors:
+        for idx, component in enumerate(vector):
+            vector[idx] = component / eigenvalues[idx]
+
+    return eigenvectors
 
 
 def embed_multiplex_LE(multiplex, **kwargs):

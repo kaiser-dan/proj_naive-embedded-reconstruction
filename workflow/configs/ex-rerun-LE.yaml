@@ -1,0 +1,17 @@
+targets: [
+  # Reals 
+  "system-arxiv_embedding-LE",
+  "system-celegans_embedding-LE",
+  "system-drosophila_embedding-LE",
+  "system-london_embedding-LE",
+  #"system-euair_embedding-LE",
+  #"system-homo_embedding-LE",
+  #"system-rattus_embedding-LE",
+  #"system-sacchpombe_embedding-LE",
+  # LFR
+  "system-LFR_mu-0.1_embedding-LE",
+  "system-LFR_mu-0.1_t1-4.0_embedding-LE",
+  "system-LFR_mu-0.3_t1-2.7_embedding-LE",
+  "system-LFR_mu-0.5_t1-2.1_embedding-LE",
+  "system-LFR_fixed-theta_varied-mu-gamma_embedding-LE",  # captures most of the behavior
+]

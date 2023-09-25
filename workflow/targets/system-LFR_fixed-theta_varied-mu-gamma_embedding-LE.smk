@@ -7,6 +7,7 @@ _MPLXS = [
     x.split("multiplex-")[1]
     for x in basenames(files_in(DIR_EDGELISTS))
     if "LFR" in x \
+      and "N-100_" not in x
 ]
 
 TARGETS_ = expand(

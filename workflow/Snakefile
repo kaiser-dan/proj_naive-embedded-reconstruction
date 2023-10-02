@@ -1,87 +1,25 @@
-# ========
-# Pathing
-# ========
-include: "configurations/pathing.smk"
-
-# =========================
-# Experiment configuration
-# =========================
+# ========== SETUP ===========
+# Expansion utilities
 include: "utils.smk"
 
+# Relative path aliases
+include: "pathing.smk"
 
-# =============
-# File targets
-# =============
-# Multiplex topologies
-TARGET_LFRS = expand(
-    DIR_EDGELISTS + "multiplex-LFR_N-{N}_T1-{t1}_T2-{t2}_kavg-{kavg}_kmax-{kmax}_mu-{mu}_prob-{prob}.pkl",
-    **config["LFR"])
+# Configure workflow
+configfile: "workflow/configs/.default.yaml"
 
-# Reals
-TARGET_REALS = [
-    # arxiv
-    DIR_EDGELISTS + "multiplex-arxiv_l1-2_l2-6.pkl",
-    DIR_EDGELISTS + "multiplex-arxiv_l1-2_l2-7.pkl",
-    DIR_EDGELISTS + "multiplex-arxiv_l1-6_l2-7.pkl",
-    # celegans
-    DIR_EDGELISTS + "multiplex-celegans_l1-1_l2-2.pkl",
-    DIR_EDGELISTS + "multiplex-celegans_l1-1_l2-3.pkl",
-    DIR_EDGELISTS + "multiplex-celegans_l1-2_l2-3.pkl",
-    # drosophila
-    DIR_EDGELISTS + "multiplex-drosophila_l1-1_l2-2.pkl",
-    DIR_EDGELISTS + "multiplex-drosophila_l1-1_l2-3.pkl",
-    DIR_EDGELISTS + "multiplex-drosophila_l1-2_l2-3.pkl",
-    # london
-    DIR_EDGELISTS + "multiplex-london_l1-1_l2-2.pkl",
-    DIR_EDGELISTS + "multiplex-london_l1-1_l2-3.pkl",
-    DIR_EDGELISTS + "multiplex-london_l1-2_l2-3.pkl",
-]
+# Extend configuration
+for tgt in config['targets']:
+    # Extend target list
+    include: f"targets/{tgt}.smk"  # Assumes configfile specified on command line
 
-TARGET_EDGELISTS = TARGET_LFRS # + TARGET_REALS
-
-# Remnant multiplexes
-TARGET_REMNANTS = expand(
-    DIR_REMNANTS + "remnants_strategy-{strategy}_theta-{theta}_remrep-{rep}_{basename}",
-    **config["remnants"],
-    basename=basenames(TARGET_EDGELISTS))
-TARGET_EMBEDDINGS = expand(
-    DIR_EMBEDDINGS + "embeddings_method-{method}_dim-{dim}_embrep-{rep}_{basename}",
-    **config["embeddings"],
-    basename=basenames(TARGET_REMNANTS))
-
-# Reconstruciton models
-TARGET_MODELS = expand(
-    DIR_MODELS + "model_normalized-{normalize}_{basename}",
-    **config["models"],
-    basename=basenames(TARGET_EMBEDDINGS))
-
-# =============
-# Target rules
-# =============
-include: "modules/synthetics.smk"
-include: "modules/remnants.smk"
+# ========== RULES ==========
+# Include computational modules
+# include: "modules/observations.smk"  # ! BROKEN, DO BY HAND
+include: "modules/models.smk"
 include: "modules/embeddings.smk"
-include: "modules/classifications.smk"
 
-# Main target rule - Gathers specified output data
+# --- Target ---
 rule all:
     input:
-        TARGET_EDGELISTS,
-        TARGET_REMNANTS,
-        TARGET_EMBEDDINGS,
-        TARGET_MODELS
-
-# Figure rule - Gathers some go-to plots
-# rule figures:
-#     input:
-#         Y
-
-# Report rule - Gathers some snakemake reports and diagnostic figures
-# rule reports:
-#     input:
-#         Z
-#     output:
-#         rulegraph,
-#         report,
-#     shell:
-#         "snakemake --report; snakemake --rulegraph | dot XXX"
+        TARGETS

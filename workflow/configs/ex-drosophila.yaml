@@ -1,0 +1,6 @@
+targets: [
+  "system-drosophila_embedding-N2V",
+  "system-drosophila_embedding-LE",
+  "system-drosophila_embedding-Isomap",
+  "system-drosophila_embedding-HOPE",
+]

@@ -168,13 +168,11 @@ cython_debug/
 .logs/
 
 # Data
-data/input/
-data/interim/
-data/.depr/
+data/
+.tmp/
 
 # Scratch work
-_scratch/
-workflow
+scratch/
 community.dat
 network.dat
 statistics.dat

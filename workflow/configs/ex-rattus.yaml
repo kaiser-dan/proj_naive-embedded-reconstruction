@@ -1,0 +1,6 @@
+targets: [
+  "system-rattus_embedding-N2V",
+  "system-rattus_embedding-LE",
+  "system-rattus_embedding-Isomap",
+  "system-rattus_embedding-HOPE",
+]

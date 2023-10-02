@@ -1,0 +1,6 @@
+targets: [
+  "system-celegans_embedding-N2V",
+  "system-celegans_embedding-LE",
+  "system-celegans_embedding-Isomap",
+  "system-celegans_embedding-HOPE",
+]

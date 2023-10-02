@@ -1,0 +1,6 @@
+targets: [
+  "system-euair_embedding-N2V",
+  # "system-euair_embedding-LE",
+  "system-euair_embedding-Isomap",
+  "system-euair_embedding-HOPE",
+]

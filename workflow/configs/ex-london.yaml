@@ -1,0 +1,6 @@
+targets: [
+  "system-london_embedding-N2V",
+  "system-london_embedding-LE",
+  "system-london_embedding-Isomap",
+  "system-london_embedding-HOPE",
+]

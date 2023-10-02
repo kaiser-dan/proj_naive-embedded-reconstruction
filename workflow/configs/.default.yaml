@@ -1,0 +1,10 @@
+# Target
+targets: [".default"]
+
+# Snakemake hyperparams
+logfile: ".logs/workflow.log"
+set-resources:
+  cores: 8
+  generate_synthetics:  # calls LFR binary
+    cores: 1
+    mem_mb: 10000

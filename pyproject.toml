@@ -9,9 +9,12 @@ requires = [
 [project]
 # Basic metadata
 name = 'EMB'
-version = '3.3.1'
+version = '3.4.0'
 authors = [
     {name='Daniel Kaiser', email='kaiserd@iu.edu'},
+    {name='Siddharth Patwardhan', email='sidpatwa@iu.edu'},
+    {name='Minsuk Kim', email='mk139@iu.edu'},
+    {name='Filippo Radicchi', email='filiradi@iu.edu'},
 ]
 readme = 'README.md'
 classifiers = ['License :: MIT License']

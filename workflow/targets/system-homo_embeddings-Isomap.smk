@@ -1,10 +1,7 @@
 import numpy as np
 
 _EMBEDDINGS = ["Isomap"]
-_THETAS = [
-    f"{theta:.2f}"
-    for theta in np.linspace(0.05, 0.95, 19)
-]
+_THETAS = ['0.30']
 _REPS = np.arange(1,5)
 _LAYERS = ["1-2", "1-3", "2-3"]
 

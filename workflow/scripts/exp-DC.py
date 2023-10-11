@@ -300,17 +300,18 @@ def main(filepath, l1, l2):
     results = perform_analysis(G, H, 0.05)
 
     for (pfi, pr, auc) in zip(*results):
-        print(f"{filepath},{l1}-{l2},{pfi},{auc},{pr}", file=open("dc-real.csv", "a"))
+        print(f"{filepath},{l1}-{l2},{pfi},{auc},{pr}", file=open("dc-extreal.csv", "a"))
 
 if __name__ == "__main__":
     FPS = [
         filepath for filepath in os.listdir(MPLX)
-        if ("arxiv" in filepath) \
-            or ("celegans" in filepath) \
-            or ("drosophila" in filepath) \
-            or ("london" in filepath) \
+        if (("rattus" in filepath) \
+            or ("euair" in filepath) \
+            or ("homo" in filepath) \
+            or ("pomb" in filepath)) \
+            and ('l1-1_l2-2' in filepath)
     ]
-    for filepath in tqdm(FPS, desc="Multiplexes", position=0, leave=True, colour="blue"):
+    for filepath in tqdm(FPS, desc="Extended Real Corpus", position=0, leave=True, colour="blue"):
         filepath = jn(MPLX, filepath)
         for _ in tqdm(range(5), desc="Reps", colour="green", position=1, leave=False):
             try:

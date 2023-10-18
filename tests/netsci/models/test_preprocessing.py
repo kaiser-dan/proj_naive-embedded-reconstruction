@@ -1,6 +1,6 @@
 import networkx as nx
 
-from EMB.netsci.models import preprocessing
+from emb.netsci.models import preprocessing
 # =========== TESTS ===========
 class TestNetsciPreprocessingUnit:
     def test_trim_inactive_nodes_empty(self):

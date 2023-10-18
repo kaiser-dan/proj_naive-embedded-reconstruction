@@ -1,6 +1,6 @@
 import numpy as np
 
-from EMB.embeddings import vectors
+from emb.embeddings import vectors
 
 
 # =========== TESTS ===========

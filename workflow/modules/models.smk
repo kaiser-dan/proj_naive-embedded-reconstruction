@@ -23,3 +23,15 @@ rule train_models_real:
         DIR_LOGS+"model_{embedding}_{theta}-{rep}_{system}_{l1}-{l2}.log"
     shell:
         "python workflow/scripts/reconstruct_multiplex.py {input.gt} {input.rmnt} {input.emb} {output} > {output}"
+
+rule train_models_real_imbalanced:
+    input:
+        gt=DIR_EDGELISTS+"clean-multiplex-{system}_l1-{l1}_l2-{l2}.mplx",
+        rmnt=DIR_REMNANTS+"remnants_theta-{theta}_rep-{rep}_clean-multiplex-{system}_l1-{l1}_l2-{l2}.rmnt",
+        emb=DIR_EMBEDDINGS+"embed-{embedding}_remnants_theta-{theta}_rep-{rep}_clean-multiplex-{system}_l1-{l1}_l2-{l2}.vecs"
+    output:
+        DIR_MODELS+"model-imbalanced_embed-{embedding}_remnants_theta-{theta}_rep-{rep}_clean-multiplex-{system}_{l1}-{l2}.model"
+    log:
+        DIR_LOGS+"model-imbalanced_{embedding}_{theta}-{rep}_{system}_{l1}-{l2}.log"
+    shell:
+        "python workflow/scripts/reconstruct_multiplex-imbalanced.py {input.gt} {input.rmnt} {input.emb} {output} > {output}"

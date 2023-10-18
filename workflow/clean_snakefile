@@ -1,0 +1,8 @@
+# Snakefile
+
+DIR_MODELS + \
+    "model_" + \
+    f"embed-{embedding}_" + \
+    f"remnants_theta-{theta}_" + \
+    f"rep-{rep}_" + \
+    f"multiplex-{mplx}.model"

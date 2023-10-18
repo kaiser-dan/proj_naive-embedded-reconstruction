@@ -1,8 +1,9 @@
 import sys
 import os
 
-from EMB import mplxio
-from EMB import embeddings
+from emb import mplxio
+from emb import embeddings
+
 
 def _parse_args(args):
     """Assumes input {input} {embedding} {output}.
@@ -18,7 +19,9 @@ def _parse_args(args):
 
     # Ensure embedding is supported
     if args[1] not in embeddings.ACCEPTED_EMBEDDINGS:
-        raise NotImplementedError(f"'{args[1]}' not an accepted embedding. Choices: {embeddings.ACCEPTED_EMBEDDINGS}")
+        raise NotImplementedError(
+            f"'{args[1]}' not an accepted embedding. Choices: {embeddings.ACCEPTED_EMBEDDINGS}"
+        )
 
     # Ensure directory path of output file exists
     if not os.path.exists(os.path.dirname(args[2])):
@@ -38,7 +41,9 @@ def main(filepath_input, embedding, filepath_output):
         case "LE":
             vectors = embeddings.embed_multiplex_LE(remnant_multiplex, k=128)
         case "Isomap":
-            vectors = embeddings.embed_multiplex_Isomap(remnant_multiplex, dimensions=128)
+            vectors = embeddings.embed_multiplex_Isomap(
+                remnant_multiplex, dimensions=128
+            )
         case "HOPE":
             vectors = embeddings.embed_multiplex_HOPE(remnant_multiplex, dimensions=128)
         case _:

@@ -3,7 +3,7 @@ from os.path import isfile
 
 import networkx as nx
 
-from EMB.mplxio import writers
+from emb.mplxio import writers
 # =========== TESTS ===========
 class TestWriters:
     G = nx.path_graph(10)

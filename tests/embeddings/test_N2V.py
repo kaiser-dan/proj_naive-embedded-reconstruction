@@ -2,7 +2,7 @@ import pytest
 
 import networkx as nx
 
-from EMB.embeddings import N2V
+from emb.embeddings import N2V
 
 # =========== TESTS ===========
 class TestN2VHelpers:

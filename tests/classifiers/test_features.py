@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 import networkx as nx
 
-from EMB.classifiers import features
+from emb.classifiers import features
 
 # =========== TESTS ===========
 class TestFeatureHelpers:

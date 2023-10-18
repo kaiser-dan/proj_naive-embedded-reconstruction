@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 
-from EMB import utils
+from emb import utils
 
 
 class TestFunctions:

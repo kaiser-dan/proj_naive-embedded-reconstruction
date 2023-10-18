@@ -2,16 +2,18 @@ import pytest
 
 import networkx as nx
 
-from EMB.remnants import observer
+from emb.remnants import observer
 
 # --- Fixtures ---
 from fixtures import simple_duplex
+
 
 # =========== TESTS ===========
 class TestObservationHelpers:
     G = nx.path_graph(10)
     A = nx.path_graph(101)
-    B = {(node, node+1) for node in range(10)}
+    B = {(node, node + 1) for node in range(10)}
+
     def test_adjust_theta(self):
         theta = 0.6
         expected = 0.5
@@ -20,17 +22,17 @@ class TestObservationHelpers:
         assert actual == expected
 
     def test_get_sample_space(self):
-        previous = {(0,1), (8,9)}
+        previous = {(0, 1), (8, 9)}
 
-        expected = {(node, node+1) for node in range(1,8)}
+        expected = {(node, node + 1) for node in range(1, 8)}
         actual = observer._get_sample_space(self.G, previous)
 
         assert actual == expected
 
     def test_get_sample_space_nonoverlappingprev(self):
-        previous = {(37,40)}
+        previous = {(37, 40)}
 
-        expected = {(node, node+1) for node in range(0,9)}
+        expected = {(node, node + 1) for node in range(0, 9)}
         actual = observer._get_sample_space(self.G, previous)
 
         assert actual == expected
@@ -38,22 +40,23 @@ class TestObservationHelpers:
     def test_get_sample_space_emptyprev(self):
         previous = set()
 
-        expected = {(node, node+1) for node in range(9)}
+        expected = {(node, node + 1) for node in range(9)}
         actual = observer._get_sample_space(self.G, previous)
 
         assert actual == expected
 
     def test_get_all_edges(self):
-        expected = {(node, node+1) for node in range(100)}
-        actual = observer._get_all_edges({1:self.G,2:self.A})
+        expected = {(node, node + 1) for node in range(100)}
+        actual = observer._get_all_edges({1: self.G, 2: self.A})
         assert actual == expected
+
 
 class TestObserver:
     G = nx.path_graph(11)
 
-    @pytest.mark.parametrize('theta', [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+    @pytest.mark.parametrize("theta", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
     def test_basic(self, theta):
-        expected = int(10*theta)
+        expected = int(10 * theta)
         actual = len(observer.random_observations(self.G, theta))
 
         assert actual == expected
@@ -70,11 +73,12 @@ class TestObserver:
 
         assert actual == expected
 
+
 class TestCumulativeObserver:
     G = nx.path_graph(11)
 
     def test_basic_cumulative(self):
-        observations = observer.random_observations(self.G, 0.6, {(0,1)})
+        observations = observer.random_observations(self.G, 0.6, {(0, 1)})
 
         expected = 6
         actual = len(observations)
@@ -82,9 +86,10 @@ class TestCumulativeObserver:
         assert actual == expected
 
     def test_monotonicity(self):
-        observations = observer.random_observations(self.G, 0.6, {(0,1)})
+        observations = observer.random_observations(self.G, 0.6, {(0, 1)})
 
-        assert {(0,1)}.issubset(observations)
+        assert {(0, 1)}.issubset(observations)
+
 
 class TestObserverMultiplex:
     def test_random_observations_multiplex_core(self, simple_duplex):
@@ -117,6 +122,7 @@ class TestObserverMultiplex:
         l2_inclusion = agg_edges.issubset(rmplx[2].edges())
 
         assert l1_inclusion and l2_inclusion
+
 
 class TestCumulativeObserverMultiplex:
     def test_random_observations_multiplex_monotonic(self, simple_duplex):

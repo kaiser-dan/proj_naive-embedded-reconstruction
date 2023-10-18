@@ -3,7 +3,7 @@ import numpy as np
 _EMBEDDINGS = ["LE"]
 _THETAS = ['0.30']
 _REPS = np.arange(1,5)
-_LAYERS = ["1-2", "1-3", "2-3"]
+_LAYERS = ["1-2"]
 
 TARGETS_ = expand(
         DIR_MODELS+"model_embed-LE_remnants_theta-{theta}_rep-{rep}_clean-multiplex-rattus_{layerpair}.model",

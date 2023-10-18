@@ -2,7 +2,7 @@ from os.path import join as jn
 
 import pytest
 
-from EMB.mplxio import readers
+from emb.mplxio import readers
 # =========== TESTS ===========
 class TestReaders:
     def test_from_edgelist(self):

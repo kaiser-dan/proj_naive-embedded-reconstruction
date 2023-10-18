@@ -17,10 +17,11 @@ MPLX = jn(ROOT, "data", "edgelists", "")
 OUT = jn(ROOT, "data", "")
 
 import warnings
+
 warnings.filterwarnings("ignore")
 
 # =========== FUNCTIONS ==========
-def duplex_network (G, l1, l2):
+def duplex_network(G, l1, l2):
     G1 = G[l1].copy()
     G2 = G[l2].copy()
 
@@ -40,14 +41,14 @@ def duplex_network (G, l1, l2):
     ##delete nodes with zero degree
     list_of_nodes = []
     for n in G1.nodes():
-        if G1.degree(n)==0:
+        if G1.degree(n) == 0:
             list_of_nodes.append(n)
     for n in list_of_nodes:
         G1.remove_node(n)
 
     list_of_nodes = []
     for n in G2.nodes():
-        if G2.degree(n)==0:
+        if G2.degree(n) == 0:
             list_of_nodes.append(n)
     for n in list_of_nodes:
         G2.remove_node(n)
@@ -64,7 +65,8 @@ def duplex_network (G, l1, l2):
 
     return G1, G2
 
-def partial_information (G1, G2, frac):
+
+def partial_information(G1, G2, frac):
     ##training/test sets
     Etest = {}
     Etrain = {}
@@ -103,7 +105,8 @@ def partial_information (G1, G2, frac):
 
     return rem_G1, rem_G2, Etest
 
-def community_finder (G):
+
+def community_finder(G):
     C = algorithms.louvain(G)
     sigma = {}
     c = 0
@@ -121,67 +124,56 @@ def community_finder (G):
 
     return sigma, mu, tot
 
-def classifier (rem_G1, rem_G2, Etest, TT = 0, show_log = False):
+
+def classifier(rem_G1, rem_G2, Etest, TT=0, show_log=False):
     ## degree/community
     if TT == 0:
         sigma1, mu1, tot1 = community_finder(rem_G1)
         sigma2, mu2, tot2 = community_finder(rem_G2)
 
-
         mu = 0.5
         if tot1 + tot2 > 0.0:
             mu = (mu1 + mu2) / (tot1 + tot2)
-
-
 
         classification, scores, ground_truth = [], [], []
 
         for e in Etest:
 
-
             n = e[0]
             m = e[1]
 
-            s1 = rem_G1.degree(n)*rem_G1.degree(m)
+            s1 = rem_G1.degree(n) * rem_G1.degree(m)
             if sigma1[n] == sigma1[m]:
                 s1 = s1 * mu
             else:
-                s1 = s1 * (1.0-mu)
+                s1 = s1 * (1.0 - mu)
 
-
-
-            s2 = rem_G2.degree(n)*rem_G2.degree(m)
+            s2 = rem_G2.degree(n) * rem_G2.degree(m)
             if sigma2[n] == sigma2[m]:
                 s2 = s2 * mu
             else:
-                s2 = s2 * (1.0-mu)
-
+                s2 = s2 * (1.0 - mu)
 
             t1 = t2 = 0.5
             if s1 + s2 > 0.0:
                 t1 = s1 / (s1 + s2)
                 t2 = s2 / (s1 + s2)
 
-
-            s = random.randint(0,1)
+            s = random.randint(0, 1)
             if t1 > t2:
                 s = 1
             if t2 > t1:
                 s = 0
 
             if show_log == True:
-                print (mu)
-                print (rem_G1.degree(n), rem_G1.degree(m), t1)
-                print (rem_G2.degree(n), rem_G2.degree(m), t2)
-                print (Etest[e], '\n')
-
-
+                print(mu)
+                print(rem_G1.degree(n), rem_G1.degree(m), t1)
+                print(rem_G2.degree(n), rem_G2.degree(m), t2)
+                print(Etest[e], "\n")
 
             scores.append(t1)
             classification.append(s)
             ground_truth.append(Etest[e])
-
-
 
         return classification, scores, ground_truth
 
@@ -192,21 +184,18 @@ def classifier (rem_G1, rem_G2, Etest, TT = 0, show_log = False):
 
         for e in Etest:
 
-
             n = e[0]
             m = e[1]
 
-            s1 = rem_G1.degree(n)*rem_G1.degree(m)
-            s2 = rem_G2.degree(n)*rem_G2.degree(m)
-
+            s1 = rem_G1.degree(n) * rem_G1.degree(m)
+            s2 = rem_G2.degree(n) * rem_G2.degree(m)
 
             t1 = t2 = 0.5
             if s1 + s2 > 0.0:
                 t1 = s1 / (s1 + s2)
                 t2 = s2 / (s1 + s2)
 
-
-            s = random.randint(0,1)
+            s = random.randint(0, 1)
             if t1 > t2:
                 s = 1
             if t2 > t1:
@@ -215,7 +204,6 @@ def classifier (rem_G1, rem_G2, Etest, TT = 0, show_log = False):
             scores.append(t1)
             classification.append(s)
             ground_truth.append(Etest[e])
-
 
         return classification, scores, ground_truth
 
@@ -228,11 +216,9 @@ def classifier (rem_G1, rem_G2, Etest, TT = 0, show_log = False):
         if tot1 + tot2 > 0.0:
             mu = (mu1 + mu2) / (tot1 + tot2)
 
-
         classification, scores, ground_truth = [], [], []
 
         for e in Etest:
-
 
             n = e[0]
             m = e[1]
@@ -241,45 +227,44 @@ def classifier (rem_G1, rem_G2, Etest, TT = 0, show_log = False):
             if sigma1[n] == sigma1[m]:
                 s1 = s1 * mu
             else:
-                s1 = s1 * (1.0-mu)
-
-
+                s1 = s1 * (1.0 - mu)
 
             s2 = 1.0
             if sigma2[n] == sigma2[m]:
                 s2 = s2 * mu
             else:
-                s2 = s2 * (1.0-mu)
-
+                s2 = s2 * (1.0 - mu)
 
             t1 = t2 = 0.5
             if s1 + s2 > 0.0:
                 t1 = s1 / (s1 + s2)
                 t2 = s2 / (s1 + s2)
 
-
-            s = random.randint(0,1)
+            s = random.randint(0, 1)
             if t1 > t2:
                 s = 1
             if t2 > t1:
                 s = 0
 
-
-
             scores.append(t1)
             classification.append(s)
             ground_truth.append(Etest[e])
 
-
-
         return classification, scores, ground_truth
 
-def perform_analysis (G1, G2, step, TT = 0):
-    x , y, z  = [], [], []
 
-    for frac in tqdm(np.linspace(0.0, 1-step, num=int((1)/step)), desc="PFIs", position=2, leave=False, colour="red"):
-        rem_G1, rem_G2, Etest  = partial_information(G1, G2, frac)
-        classification, scores, ground_truth = classifier (rem_G1, rem_G2, Etest, TT)
+def perform_analysis(G1, G2, step, TT=0):
+    x, y, z = [], [], []
+
+    for frac in tqdm(
+        np.linspace(0.0, 1 - step, num=int((1) / step)),
+        desc="PFIs",
+        position=2,
+        leave=False,
+        colour="red",
+    ):
+        rem_G1, rem_G2, Etest = partial_information(G1, G2, frac)
+        classification, scores, ground_truth = classifier(rem_G1, rem_G2, Etest, TT)
         acc = metrics.accuracy_score(ground_truth, classification)
         auc = metrics.roc_auc_score(ground_truth, scores)
         prec, rec, _ = metrics.precision_recall_curve(ground_truth, scores)
@@ -300,18 +285,26 @@ def main(filepath, l1, l2):
     results = perform_analysis(G, H, 0.05)
 
     for (pfi, pr, auc) in zip(*results):
-        print(f"{filepath},{l1}-{l2},{pfi},{auc},{pr}", file=open("dc-extreal.csv", "a"))
+        print(
+            f"{filepath},{l1}-{l2},{pfi},{auc},{pr}", file=open("dc-extreal.csv", "a")
+        )
+
 
 if __name__ == "__main__":
     FPS = [
-        filepath for filepath in os.listdir(MPLX)
-        if (("rattus" in filepath) \
-            or ("euair" in filepath) \
-            or ("homo" in filepath) \
-            or ("pomb" in filepath)) \
-            and ('l1-1_l2-2' in filepath)
+        filepath
+        for filepath in os.listdir(MPLX)
+        if (
+            ("rattus" in filepath)
+            or ("euair" in filepath)
+            or ("homo" in filepath)
+            or ("pomb" in filepath)
+        )
+        and ("l1-1_l2-2" in filepath)
     ]
-    for filepath in tqdm(FPS, desc="Extended Real Corpus", position=0, leave=True, colour="blue"):
+    for filepath in tqdm(
+        FPS, desc="Extended Real Corpus", position=0, leave=True, colour="blue"
+    ):
         filepath = jn(MPLX, filepath)
         for _ in tqdm(range(5), desc="Reps", colour="green", position=1, leave=False):
             try:

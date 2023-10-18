@@ -1,4 +1,4 @@
-from EMB.classifiers import logreg
+from emb.classifiers import logreg
 
 # =========== TESTS ===========
 # TODO: Figure out how to test my logreg wrappers

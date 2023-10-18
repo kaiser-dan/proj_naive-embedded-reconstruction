@@ -4,22 +4,15 @@ import os
 import numpy as np
 import networkx as nx
 
-from EMB import mplxio
-from EMB import netsci
-from EMB import embeddings
-from EMB import classifiers
-from EMB import utils
+from emb import mplxio
+from emb import netsci
+from emb import embeddings
+from emb import classifiers
+from emb import utils
 
-from EMB.remnants.observer import AGGREGATE_LABEL
+from emb.remnants.observer import AGGREGATE_LABEL
 
-LOGGER = utils.logger.get_module_logger(
-    name="reconstruction",
-    filename=f".logs/reconstruction_{utils.logger.get_today(time=False)}.log",
-    mode="a",
-    file_level=30,
-    console_level=20,
-)
-
+from emb import logger as LOGGER
 
 def _parse_args(args):
     """Assumes input {input_rmnt} {input_emb} {output}.
@@ -79,16 +72,23 @@ def main(filepath_input_gt, filepath_input_rmnt, filepath_input_emb, filepath_ou
         LOGGER.debug(f"|Vectors| = {len(vectors[layer])}")
 
     for label, vectorset in vectors.items():
-        if "LE" in filepath_input_emb:
-            LOGGER.debug("Reindexing for LE embedding method...")
-            # node2id = netsci.utils.reindex_nodes(remnant_multiplex[label])
-            node2id = dict()
-        else:
-            node2id = dict()
-
         LOGGER.info(f"Normalizing layer {label}...")
+
+        node2id = dict()  # ? is this necessary?
+
+        if "LE" in filepath_input_emb:
+            LOGGER.debug('LE method detected - checking for non-compatible prior formatting...')
+            if vectorset is not dict:
+                LOGGER.debug('Incompatible format detected! Attempting conversion...')
+                vectors[layer] = dict(enumerate(vectorset))
+                node2id = {
+                    node: new_node
+                    for new_node, node in enumerate(remnant_multiplex[label].nodes())
+                }
+                # LOGGER.debug(f"New vectors are: {vectors}")
+
         vectors[label] = embeddings.normalize_vectors(
-            vectorset, components[label], node2id=node2id
+            vectors[layer], components[label], node2id=node2id
         )
 
     # Distances

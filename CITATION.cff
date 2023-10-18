@@ -11,7 +11,7 @@ authors:
 - family-names: "Radicchi"
   given-names: "Filippo"
 title: "proj_naive-embedded-reconstruction"
-version: 2.0.0
+version: 4.0.0
 doi:
-date-released: 2023-08-06
+date-released: 2023-10-18
 url: "https://github.com/kaiser-dan/proj_naive-embedded-reconstruction"
